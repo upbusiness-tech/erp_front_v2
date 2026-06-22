@@ -1,14 +1,54 @@
 import type { Product, Customer, Employee, Sale, Invoice } from "./types";
 
 export const initialProducts: Product[] = [
-  { id: "1", name: "Camiseta Básica", sku: "CAM001", price: 49.9, stock: 32, category: "Vestuário" },
-  { id: "2", name: "Calça Jeans", sku: "CAL001", price: 159.9, stock: 18, category: "Vestuário" },
-  { id: "3", name: "Tênis Esportivo", sku: "TEN001", price: 299.9, stock: 7, category: "Calçados" },
+  {
+    id: "1",
+    name: "Camiseta Básica",
+    sku: "CAM001",
+    price: 49.9,
+    stock: 32,
+    category: "Vestuário",
+    variations: { sizes: ["P", "M", "G", "GG"], colors: ["Branco", "Preto", "Cinza"] },
+  },
+  {
+    id: "2",
+    name: "Calça Jeans",
+    sku: "CAL001",
+    price: 159.9,
+    stock: 18,
+    category: "Vestuário",
+    variations: { sizes: ["38", "40", "42", "44", "46"], colors: ["Azul", "Preto"] },
+  },
+  {
+    id: "3",
+    name: "Tênis Esportivo",
+    sku: "TEN001",
+    price: 299.9,
+    stock: 7,
+    category: "Calçados",
+    variations: { sizes: ["38", "39", "40", "41", "42", "43"], colors: ["Branco", "Preto", "Vermelho"] },
+  },
   { id: "4", name: "Boné Trucker", sku: "BON001", price: 39.9, stock: 0, category: "Acessórios" },
   { id: "5", name: "Mochila Casual", sku: "MOC001", price: 189.9, stock: 12, category: "Acessórios" },
   { id: "6", name: "Relógio Digital", sku: "REL001", price: 249.9, stock: 4, category: "Acessórios" },
-  { id: "7", name: "Camisa Polo", sku: "CAM002", price: 89.9, stock: 25, category: "Vestuário" },
-  { id: "8", name: "Bermuda Sarja", sku: "BER001", price: 79.9, stock: 14, category: "Vestuário" },
+  {
+    id: "7",
+    name: "Camisa Polo",
+    sku: "CAM002",
+    price: 89.9,
+    stock: 25,
+    category: "Vestuário",
+    variations: { sizes: ["P", "M", "G", "GG"], colors: ["Marinho", "Vinho", "Verde"] },
+  },
+  {
+    id: "8",
+    name: "Bermuda Sarja",
+    sku: "BER001",
+    price: 79.9,
+    stock: 14,
+    category: "Vestuário",
+    variations: { sizes: ["38", "40", "42", "44"] },
+  },
 ];
 
 export const initialCustomers: Customer[] = [
