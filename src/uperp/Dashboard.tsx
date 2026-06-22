@@ -11,6 +11,8 @@ import {
   CreditCard,
   LogOut,
   ChevronDown,
+  Wallet,
+  Settings,
 } from "lucide-react";
 import { VendaBalcao } from "./pages/VendaBalcao";
 import { VendaServico } from "./pages/VendaServico";
@@ -20,22 +22,28 @@ import { Clientes } from "./pages/Clientes";
 import { Funcionarios } from "./pages/Funcionarios";
 import { Empresa } from "./pages/Empresa";
 import { Planos } from "./pages/Planos";
+import { Caixa } from "./pages/Caixa";
+import { Configuracoes } from "./pages/Configuracoes";
+import { useStore } from "./store";
 
 const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
 
 type PageKey =
   | "balcao"
+  | "caixa"
   | "servico"
   | "estoque"
   | "financas"
   | "clientes"
   | "funcionarios"
   | "empresa"
-  | "planos";
+  | "planos"
+  | "configuracoes";
 
 const menu: { key: PageKey; label: string; icon: React.ReactNode }[] = [
   { key: "balcao", label: "Venda Balcão", icon: <Store size={16} /> },
+  { key: "caixa", label: "Caixa", icon: <Wallet size={16} /> },
   { key: "servico", label: "Venda Serviço", icon: <Briefcase size={16} /> },
   { key: "estoque", label: "Estoque", icon: <Boxes size={16} /> },
   { key: "financas", label: "Finanças & Relatórios", icon: <BarChart3 size={16} /> },
@@ -43,10 +51,12 @@ const menu: { key: PageKey; label: string; icon: React.ReactNode }[] = [
   { key: "funcionarios", label: "Funcionários", icon: <UserCog size={16} /> },
   { key: "empresa", label: "Empresa", icon: <Building2 size={16} /> },
   { key: "planos", label: "Planos & Mensalidades", icon: <CreditCard size={16} /> },
+  { key: "configuracoes", label: "Configurações", icon: <Settings size={16} /> },
 ];
 
 const titles: Record<PageKey, string> = {
   balcao: "Venda Balcão",
+  caixa: "Caixa",
   servico: "Venda Serviço",
   estoque: "Estoque",
   financas: "Finanças & Relatórios",
@@ -54,6 +64,7 @@ const titles: Record<PageKey, string> = {
   funcionarios: "Funcionários",
   empresa: "Empresa",
   planos: "Planos & Mensalidades",
+  configuracoes: "Configurações",
 };
 
 interface Props {
@@ -65,10 +76,12 @@ export function Dashboard({ userName, onLogout }: Props) {
   const [collapsed, setCollapsed] = useState(false);
   const [page, setPage] = useState<PageKey>("balcao");
   const { token } = antdTheme.useToken();
+  const { settings } = useStore();
 
   const renderPage = () => {
     switch (page) {
-      case "balcao": return <VendaBalcao />;
+      case "balcao": return <VendaBalcao onGoToCaixa={() => setPage("caixa")} />;
+      case "caixa": return <Caixa operatorName={userName} onBack={() => setPage("balcao")} />;
       case "servico": return <VendaServico />;
       case "estoque": return <Estoque />;
       case "financas": return <Financas />;
@@ -76,8 +89,11 @@ export function Dashboard({ userName, onLogout }: Props) {
       case "funcionarios": return <Funcionarios />;
       case "empresa": return <Empresa />;
       case "planos": return <Planos />;
+      case "configuracoes": return <Configuracoes />;
     }
   };
+
+  const dark = settings.darkSidebar;
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
@@ -85,7 +101,7 @@ export function Dashboard({ userName, onLogout }: Props) {
         collapsible
         collapsed={collapsed}
         onCollapse={setCollapsed}
-        theme="dark"
+        theme={dark ? "dark" : "light"}
         width={240}
       >
         <div
@@ -96,7 +112,7 @@ export function Dashboard({ userName, onLogout }: Props) {
             justifyContent: collapsed ? "center" : "flex-start",
             padding: collapsed ? 0 : "0 20px",
             gap: 10,
-            borderBottom: "1px solid #1f1f1f",
+            borderBottom: dark ? "1px solid #1f1f1f" : "1px solid #f0f0f0",
           }}
         >
           <div
@@ -114,13 +130,13 @@ export function Dashboard({ userName, onLogout }: Props) {
             <Store color="#fff" size={20} />
           </div>
           {!collapsed && (
-            <Title level={4} style={{ color: "#fff", margin: 0 }}>
+            <Title level={4} style={{ color: dark ? "#fff" : "#1f1f1f", margin: 0 }}>
               UpERP
             </Title>
           )}
         </div>
         <Menu
-          theme="dark"
+          theme={dark ? "dark" : "light"}
           mode="inline"
           selectedKeys={[page]}
           onClick={(e) => setPage(e.key as PageKey)}
@@ -145,6 +161,12 @@ export function Dashboard({ userName, onLogout }: Props) {
           <Dropdown
             menu={{
               items: [
+                {
+                  key: "settings",
+                  label: "Configurações",
+                  icon: <Settings size={14} />,
+                  onClick: () => setPage("configuracoes"),
+                },
                 {
                   key: "logout",
                   label: "Sair",
