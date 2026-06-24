@@ -10,7 +10,17 @@ export interface Product {
   price: number;
   stock: number;
   category: string;
+  unit?: string;
+  supplier?: string;
+  variantGroupId?: string;
+  size?: string;
+  color?: string;
   variations?: ProductVariations;
+}
+
+export interface Category {
+  id: string;
+  name: string;
 }
 
 export interface CartItem {
@@ -22,6 +32,8 @@ export interface CartItem {
   size?: string;
   color?: string;
   employeeId?: string;
+  kind?: "produto" | "servico";
+  description?: string;
 }
 
 export interface Customer {
@@ -41,6 +53,13 @@ export interface Employee {
   active: boolean;
 }
 
+export type PaymentMethod = "pix" | "debito" | "credito" | "dinheiro";
+
+export interface Payment {
+  method: PaymentMethod;
+  value: number;
+}
+
 export interface Sale {
   id: string;
   date: string;
@@ -48,6 +67,7 @@ export interface Sale {
   items: number;
   type: "balcao" | "servico";
   customerId?: string;
+  payments?: Payment[];
 }
 
 export interface Invoice {
@@ -83,3 +103,10 @@ export interface AppSettings {
   autoOpenCashOnLogin: boolean;
   darkSidebar: boolean;
 }
+
+export const PAYMENT_LABEL: Record<PaymentMethod, string> = {
+  pix: "PIX",
+  debito: "Débito",
+  credito: "Crédito",
+  dinheiro: "Dinheiro",
+};

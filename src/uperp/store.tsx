@@ -9,6 +9,7 @@ import type {
   CashSession,
   CashMovement,
   AppSettings,
+  Category,
 } from "./types";
 import {
   initialProducts,
@@ -16,6 +17,7 @@ import {
   initialEmployees,
   initialSales,
   initialInvoices,
+  initialCategories,
 } from "./mockData";
 
 interface Company {
