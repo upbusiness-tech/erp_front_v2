@@ -1,4 +1,10 @@
-import type { Product, Customer, Employee, Sale, Invoice } from "./types";
+import type { Product, Customer, Employee, Sale, Invoice, Category } from "./types";
+
+export const initialCategories: Category[] = [
+  { id: "c1", name: "Vestuário" },
+  { id: "c2", name: "Calçados" },
+  { id: "c3", name: "Acessórios" },
+];
 
 export const initialProducts: Product[] = [
   {
@@ -65,11 +71,11 @@ export const initialEmployees: Employee[] = [
 ];
 
 export const initialSales: Sale[] = [
-  { id: "V001", date: "2026-06-20", total: 459.7, items: 3, type: "balcao" },
-  { id: "V002", date: "2026-06-20", total: 289.9, items: 2, type: "balcao" },
-  { id: "V003", date: "2026-06-19", total: 150.0, items: 1, type: "servico" },
-  { id: "V004", date: "2026-06-19", total: 1200.0, items: 5, type: "balcao" },
-  { id: "V005", date: "2026-06-18", total: 89.9, items: 1, type: "balcao" },
+  { id: "V001", date: "2026-06-20", total: 459.7, items: 3, type: "balcao", payments: [{ method: "credito", value: 459.7 }] },
+  { id: "V002", date: "2026-06-20", total: 289.9, items: 2, type: "balcao", payments: [{ method: "pix", value: 289.9 }] },
+  { id: "V003", date: "2026-06-19", total: 150.0, items: 1, type: "servico", payments: [{ method: "dinheiro", value: 150 }] },
+  { id: "V004", date: "2026-06-19", total: 1200.0, items: 5, type: "balcao", payments: [{ method: "credito", value: 800 }, { method: "pix", value: 400 }] },
+  { id: "V005", date: "2026-06-18", total: 89.9, items: 1, type: "balcao", payments: [{ method: "debito", value: 89.9 }] },
 ];
 
 export const initialInvoices: Invoice[] = [

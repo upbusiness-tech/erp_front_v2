@@ -15,6 +15,10 @@ import {
   Popconfirm,
   Progress,
   Typography,
+  Select,
+  Switch,
+  Divider,
+  List,
   message,
 } from "antd";
 import {
@@ -28,17 +32,41 @@ import {
   TrendingDown,
   Boxes,
   Archive,
+  Tag as TagIcon,
 } from "lucide-react";
 import { useStore } from "../store";
-import type { Product } from "../types";
+import type { Product, Category } from "../types";
 
 const { Text } = Typography;
 
+interface VariantRow {
+  size?: string;
+  color?: string;
+  sku: string;
+  price: number;
+  stock: number;
+}
+
+interface ProductFormValues {
+  name: string;
+  unit?: string;
+  supplier?: string;
+  category: string;
+  hasVariants: boolean;
+  sku?: string;
+  price?: number;
+  stock?: number;
+  variants?: VariantRow[];
+}
+
 export function Estoque() {
-  const { products, setProducts } = useStore();
+  const { products, setProducts, categories, setCategories } = useStore();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<ProductFormValues>();
+  const [hasVariants, setHasVariants] = useState(false);
+  const [catModal, setCatModal] = useState(false);
+  const [newCat, setNewCat] = useState("");
 
   const totalItems = products.reduce((s, p) => s + p.stock, 0);
   const totalSkus = products.length;
@@ -47,7 +75,7 @@ export function Estoque() {
   const totalValue = products.reduce((s, p) => s + p.stock * p.price, 0);
   const avgPrice = totalSkus > 0 ? products.reduce((s, p) => s + p.price, 0) / totalSkus : 0;
 
-  const categories = Array.from(
+  const categoriesAgg = Array.from(
     products.reduce((map, p) => {
       const cur = map.get(p.category) || { items: 0, value: 0 };
       map.set(p.category, { items: cur.items + p.stock, value: cur.value + p.stock * p.price });
@@ -55,29 +83,101 @@ export function Estoque() {
     }, new Map<string, { items: number; value: number }>())
   );
 
-  const onSave = (v: Omit<Product, "id">) => {
+  const onSave = (v: ProductFormValues) => {
     if (editing) {
-      setProducts(products.map((p) => (p.id === editing.id ? { ...editing, ...v } : p)));
+      setProducts(
+        products.map((p) =>
+          p.id === editing.id
+            ? {
+                ...editing,
+                name: v.name,
+                unit: v.unit,
+                supplier: v.supplier,
+                category: v.category,
+                sku: v.sku || editing.sku,
+                price: v.price ?? editing.price,
+                stock: v.stock ?? editing.stock,
+              }
+            : p
+        )
+      );
       message.success("Produto atualizado");
+    } else if (v.hasVariants && v.variants?.length) {
+      const groupId = Math.random().toString(36).slice(2);
+      const newOnes: Product[] = v.variants.map((vr) => ({
+        id: Math.random().toString(36).slice(2),
+        name: v.name,
+        sku: vr.sku,
+        price: vr.price,
+        stock: vr.stock,
+        category: v.category,
+        unit: v.unit,
+        supplier: v.supplier,
+        variantGroupId: groupId,
+        size: vr.size,
+        color: vr.color,
+      }));
+      setProducts([...products, ...newOnes]);
+      message.success(`${newOnes.length} variações cadastradas`);
     } else {
-      setProducts([...products, { ...v, id: Math.random().toString(36).slice(2) }]);
+      setProducts([
+        ...products,
+        {
+          id: Math.random().toString(36).slice(2),
+          name: v.name,
+          sku: v.sku || "",
+          price: v.price || 0,
+          stock: v.stock || 0,
+          category: v.category,
+          unit: v.unit,
+          supplier: v.supplier,
+        },
+      ]);
       message.success("Produto cadastrado");
     }
     setOpen(false);
     setEditing(null);
+    setHasVariants(false);
     form.resetFields();
   };
 
   const openEdit = (p: Product) => {
     setEditing(p);
-    form.setFieldsValue(p);
+    setHasVariants(false);
+    form.setFieldsValue({
+      name: p.name,
+      unit: p.unit,
+      supplier: p.supplier,
+      category: p.category,
+      hasVariants: false,
+      sku: p.sku,
+      price: p.price,
+      stock: p.stock,
+    });
     setOpen(true);
   };
 
   const openNew = () => {
     setEditing(null);
+    setHasVariants(false);
     form.resetFields();
+    form.setFieldsValue({ hasVariants: false, variants: [{ sku: "", price: 0, stock: 0 }] });
     setOpen(true);
+  };
+
+  const addCategory = () => {
+    const name = newCat.trim();
+    if (!name) return;
+    if (categories.some((c) => c.name.toLowerCase() === name.toLowerCase()))
+      return message.warning("Categoria já existe");
+    setCategories([...categories, { id: Math.random().toString(36).slice(2), name }]);
+    setNewCat("");
+    message.success("Categoria adicionada");
+  };
+
+  const removeCategory = (c: Category) => {
+    setCategories(categories.filter((x) => x.id !== c.id));
+    message.success("Categoria removida");
   };
 
   const healthScore = totalSkus
@@ -87,65 +187,16 @@ export function Estoque() {
   return (
     <>
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
-        <Col xs={12} md={6}>
-          <Card>
-            <Statistic title="SKUs cadastrados" value={totalSkus} prefix={<Boxes size={18} />} />
-          </Card>
-        </Col>
-        <Col xs={12} md={6}>
-          <Card>
-            <Statistic title="Total de itens" value={totalItems} prefix={<Package size={18} />} />
-          </Card>
-        </Col>
-        <Col xs={12} md={6}>
-          <Card>
-            <Statistic
-              title="Itens em falta"
-              value={outOfStock}
-              valueStyle={{ color: outOfStock > 0 ? "#DC2626" : undefined }}
-              prefix={<AlertTriangle size={18} />}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} md={6}>
-          <Card>
-            <Statistic
-              title="Estoque baixo"
-              value={lowStock}
-              valueStyle={{ color: lowStock > 0 ? "#F26B1F" : undefined }}
-              prefix={<TrendingDown size={18} />}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} md={8}>
-          <Card>
-            <Statistic
-              title="Valor total em estoque"
-              value={totalValue}
-              precision={2}
-              prefix={<DollarSign size={18} />}
-              valueStyle={{ color: "#F26B1F" }}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} md={8}>
-          <Card>
-            <Statistic
-              title="Ticket médio (preço)"
-              value={avgPrice}
-              precision={2}
-              prefix="R$"
-            />
-          </Card>
-        </Col>
+        <Col xs={12} md={6}><Card><Statistic title="SKUs cadastrados" value={totalSkus} prefix={<Boxes size={18} />} /></Card></Col>
+        <Col xs={12} md={6}><Card><Statistic title="Total de itens" value={totalItems} prefix={<Package size={18} />} /></Card></Col>
+        <Col xs={12} md={6}><Card><Statistic title="Itens em falta" value={outOfStock} valueStyle={{ color: outOfStock > 0 ? "#DC2626" : undefined }} prefix={<AlertTriangle size={18} />} /></Card></Col>
+        <Col xs={12} md={6}><Card><Statistic title="Estoque baixo" value={lowStock} valueStyle={{ color: lowStock > 0 ? "#F26B1F" : undefined }} prefix={<TrendingDown size={18} />} /></Card></Col>
+        <Col xs={12} md={8}><Card><Statistic title="Valor total em estoque" value={totalValue} precision={2} prefix={<DollarSign size={18} />} valueStyle={{ color: "#F26B1F" }} /></Card></Col>
+        <Col xs={12} md={8}><Card><Statistic title="Ticket médio (preço)" value={avgPrice} precision={2} prefix="R$" /></Card></Col>
         <Col xs={24} md={8}>
           <Card>
             <Text type="secondary" style={{ fontSize: 13 }}>Saúde do estoque</Text>
-            <Progress
-              percent={healthScore}
-              strokeColor={healthScore > 70 ? "#16A34A" : healthScore > 40 ? "#F26B1F" : "#DC2626"}
-              style={{ marginTop: 4 }}
-            />
+            <Progress percent={healthScore} strokeColor={healthScore > 70 ? "#16A34A" : healthScore > 40 ? "#F26B1F" : "#DC2626"} style={{ marginTop: 4 }} />
             <Text type="secondary" style={{ fontSize: 11 }}>
               {totalSkus - outOfStock - lowStock} de {totalSkus} SKUs com estoque saudável
             </Text>
@@ -153,16 +204,9 @@ export function Estoque() {
         </Col>
       </Row>
 
-      <Card
-        title={
-          <Space>
-            <Layers size={16} /> Distribuição por categoria
-          </Space>
-        }
-        style={{ marginBottom: 16 }}
-      >
+      <Card title={<Space><Layers size={16} /> Distribuição por categoria</Space>} style={{ marginBottom: 16 }}>
         <Row gutter={[16, 16]}>
-          {categories.map(([name, info]) => {
+          {categoriesAgg.map(([name, info]) => {
             const pct = totalItems > 0 ? Math.round((info.items / totalItems) * 100) : 0;
             return (
               <Col key={name} xs={24} sm={12} md={8}>
@@ -181,15 +225,12 @@ export function Estoque() {
       </Card>
 
       <Card
-        title={
-          <Space>
-            <Archive size={16} /> Produtos
-          </Space>
-        }
+        title={<Space><Archive size={16} /> Produtos</Space>}
         extra={
-          <Button type="primary" icon={<Plus size={14} />} onClick={openNew}>
-            Novo Produto
-          </Button>
+          <Space>
+            <Button icon={<TagIcon size={14} />} onClick={() => setCatModal(true)}>Categorias</Button>
+            <Button type="primary" icon={<Plus size={14} />} onClick={openNew}>Novo Produto</Button>
+          </Space>
         }
       >
         <Table
@@ -197,34 +238,37 @@ export function Estoque() {
           dataSource={products}
           pagination={{ pageSize: 8 }}
           columns={[
-            { title: "SKU", dataIndex: "sku", width: 100 },
-            { title: "Produto", dataIndex: "name" },
-            { title: "Categoria", dataIndex: "category" },
+            { title: "SKU", dataIndex: "sku", width: 110 },
             {
-              title: "Preço",
-              dataIndex: "price",
-              render: (v: number) => `R$ ${v.toFixed(2)}`,
+              title: "Produto",
+              dataIndex: "name",
+              render: (n: string, p: Product) => (
+                <Space direction="vertical" size={0}>
+                  <Text strong>{n}</Text>
+                  {(p.size || p.color) && (
+                    <Space size={4}>
+                      {p.size && <Tag style={{ margin: 0 }} color="orange">{p.size}</Tag>}
+                      {p.color && <Tag style={{ margin: 0 }}>{p.color}</Tag>}
+                    </Space>
+                  )}
+                </Space>
+              ),
             },
-            {
-              title: "Estoque",
-              dataIndex: "stock",
-              render: (v: number) => (
+            { title: "Categoria", dataIndex: "category" },
+            { title: "Un.", dataIndex: "unit", width: 70, render: (u: string) => u || "—" },
+            { title: "Fornecedor", dataIndex: "supplier", render: (u: string) => u || "—" },
+            { title: "Preço", dataIndex: "price", render: (v: number) => `R$ ${v.toFixed(2)}` },
+            { title: "Estoque", dataIndex: "stock", render: (v: number) => (
                 <Tag color={v > 5 ? "green" : v > 0 ? "orange" : "red"}>{v} un.</Tag>
               ),
             },
             {
               title: "Ações",
-              width: 120,
+              width: 110,
               render: (_, p) => (
                 <Space>
                   <Button size="small" icon={<Pencil size={14} />} onClick={() => openEdit(p)} />
-                  <Popconfirm
-                    title="Remover produto?"
-                    onConfirm={() => {
-                      setProducts(products.filter((x) => x.id !== p.id));
-                      message.success("Produto removido");
-                    }}
-                  >
+                  <Popconfirm title="Remover produto?" onConfirm={() => { setProducts(products.filter((x) => x.id !== p.id)); message.success("Produto removido"); }}>
                     <Button size="small" danger icon={<Trash2 size={14} />} />
                   </Popconfirm>
                 </Space>
@@ -237,43 +281,155 @@ export function Estoque() {
       <Modal
         open={open}
         title={editing ? "Editar Produto" : "Novo Produto"}
-        onCancel={() => {
-          setOpen(false);
-          setEditing(null);
-        }}
+        onCancel={() => { setOpen(false); setEditing(null); setHasVariants(false); }}
         onOk={() => form.submit()}
         okText="Salvar"
         cancelText="Cancelar"
+        width={680}
+        destroyOnHidden
       >
         <Form layout="vertical" form={form} onFinish={onSave}>
-          <Form.Item name="name" label="Nome" rules={[{ required: true }]}>
-            <Input />
+          <Form.Item name="name" label="Nome do produto" rules={[{ required: true }]}>
+            <Input placeholder="Ex: Camiseta Básica" />
           </Form.Item>
           <Row gutter={12}>
-            <Col span={12}>
-              <Form.Item name="sku" label="SKU" rules={[{ required: true }]}>
-                <Input />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
+            <Col span={8}>
               <Form.Item name="category" label="Categoria" rules={[{ required: true }]}>
-                <Input />
+                <Select
+                  placeholder="Selecione"
+                  options={categories.map((c) => ({ value: c.name, label: c.name }))}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item name="unit" label="Unidade de medida">
+                <Select
+                  allowClear
+                  placeholder="UN, KG, M..."
+                  options={["UN", "KG", "G", "L", "ML", "M", "CM", "PC", "CX"].map((u) => ({ value: u, label: u }))}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item name="supplier" label="Fornecedor">
+                <Input placeholder="Nome do fornecedor" />
               </Form.Item>
             </Col>
           </Row>
-          <Row gutter={12}>
-            <Col span={12}>
-              <Form.Item name="price" label="Preço (R$)" rules={[{ required: true }]}>
-                <InputNumber min={0} step={0.5} style={{ width: "100%" }} />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item name="stock" label="Estoque" rules={[{ required: true }]}>
-                <InputNumber min={0} style={{ width: "100%" }} />
-              </Form.Item>
-            </Col>
-          </Row>
+
+          {!editing && (
+            <Form.Item name="hasVariants" label="Produto com variações" valuePropName="checked">
+              <Switch onChange={setHasVariants} />
+            </Form.Item>
+          )}
+
+          {!hasVariants ? (
+            <>
+              <Divider style={{ margin: "8px 0 16px" }} />
+              <Row gutter={12}>
+                <Col span={8}>
+                  <Form.Item name="sku" label="SKU" rules={[{ required: true }]}>
+                    <Input />
+                  </Form.Item>
+                </Col>
+                <Col span={8}>
+                  <Form.Item name="price" label="Preço (R$)" rules={[{ required: true }]}>
+                    <InputNumber min={0} step={0.5} style={{ width: "100%" }} />
+                  </Form.Item>
+                </Col>
+                <Col span={8}>
+                  <Form.Item name="stock" label="Estoque" rules={[{ required: true }]}>
+                    <InputNumber min={0} style={{ width: "100%" }} />
+                  </Form.Item>
+                </Col>
+              </Row>
+            </>
+          ) : (
+            <>
+              <Divider style={{ margin: "8px 0 16px" }} titlePlacement="start">
+                Variações
+              </Divider>
+              <Form.List name="variants">
+                {(fields, { add, remove }) => (
+                  <>
+                    {fields.map((field) => (
+                      <Row key={field.key} gutter={8} align="middle" style={{ marginBottom: 8 }}>
+                        <Col span={4}>
+                          <Form.Item name={[field.name, "size"]} style={{ marginBottom: 0 }}>
+                            <Input placeholder="Tamanho" />
+                          </Form.Item>
+                        </Col>
+                        <Col span={5}>
+                          <Form.Item name={[field.name, "color"]} style={{ marginBottom: 0 }}>
+                            <Input placeholder="Cor" />
+                          </Form.Item>
+                        </Col>
+                        <Col span={5}>
+                          <Form.Item name={[field.name, "sku"]} rules={[{ required: true, message: "SKU" }]} style={{ marginBottom: 0 }}>
+                            <Input placeholder="SKU" />
+                          </Form.Item>
+                        </Col>
+                        <Col span={4}>
+                          <Form.Item name={[field.name, "price"]} rules={[{ required: true, message: "Preço" }]} style={{ marginBottom: 0 }}>
+                            <InputNumber min={0} step={0.5} placeholder="Preço" style={{ width: "100%" }} />
+                          </Form.Item>
+                        </Col>
+                        <Col span={4}>
+                          <Form.Item name={[field.name, "stock"]} rules={[{ required: true, message: "Estoque" }]} style={{ marginBottom: 0 }}>
+                            <InputNumber min={0} placeholder="Estoque" style={{ width: "100%" }} />
+                          </Form.Item>
+                        </Col>
+                        <Col span={2}>
+                          <Button danger type="text" icon={<Trash2 size={14} />} onClick={() => remove(field.name)} />
+                        </Col>
+                      </Row>
+                    ))}
+                    <Button block type="dashed" icon={<Plus size={14} />} onClick={() => add({ sku: "", price: 0, stock: 0 })}>
+                      Adicionar variação
+                    </Button>
+                  </>
+                )}
+              </Form.List>
+              <Text type="secondary" style={{ fontSize: 11, display: "block", marginTop: 8 }}>
+                Cada variação possui SKU, preço e estoque próprios. Nome, unidade e fornecedor são compartilhados.
+              </Text>
+            </>
+          )}
         </Form>
+      </Modal>
+
+      <Modal
+        open={catModal}
+        onCancel={() => setCatModal(false)}
+        title="Categorias de Produtos"
+        footer={null}
+      >
+        <Space.Compact style={{ width: "100%", marginBottom: 12 }}>
+          <Input
+            placeholder="Nova categoria"
+            value={newCat}
+            onChange={(e) => setNewCat(e.target.value)}
+            onPressEnter={addCategory}
+          />
+          <Button type="primary" icon={<Plus size={14} />} onClick={addCategory}>
+            Adicionar
+          </Button>
+        </Space.Compact>
+        <List
+          dataSource={categories}
+          locale={{ emptyText: "Nenhuma categoria" }}
+          renderItem={(c) => (
+            <List.Item
+              actions={[
+                <Popconfirm key="del" title="Remover categoria?" onConfirm={() => removeCategory(c)}>
+                  <Button size="small" danger type="text" icon={<Trash2 size={14} />} />
+                </Popconfirm>,
+              ]}
+            >
+              <Space><TagIcon size={14} color="#F26B1F" />{c.name}</Space>
+            </List.Item>
+          )}
+        />
       </Modal>
     </>
   );
