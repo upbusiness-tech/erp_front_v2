@@ -39,6 +39,8 @@ export interface AddToCartOptions {
 interface StoreCtx {
   products: Product[];
   setProducts: (p: Product[]) => void;
+  categories: Category[];
+  setCategories: (c: Category[]) => void;
   customers: Customer[];
   setCustomers: (c: Customer[]) => void;
   employees: Employee[];
@@ -83,6 +85,7 @@ const defaultSettings: AppSettings = {
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
   const [employees, setEmployees] = useState<Employee[]>(initialEmployees);
   const [sales, setSales] = useState<Sale[]>(initialSales);
@@ -168,6 +171,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       value={{
         products,
         setProducts,
+        categories,
+        setCategories,
         customers,
         setCustomers,
         employees,
