@@ -17,6 +17,10 @@ import {
   Form,
   Radio,
   Avatar,
+  Pagination,
+  Segmented,
+  Table,
+  Steps,
   message,
 } from "antd";
 import {
@@ -27,10 +31,16 @@ import {
   Search,
   User,
   ArrowRight,
+  ArrowLeft,
   Star,
+  LayoutGrid,
+  List as ListIcon,
+  CreditCard,
+  Plus,
+  CheckCircle2,
 } from "lucide-react";
 import { useStore } from "../store";
-import type { Sale, Product } from "../types";
+import { PAYMENT_LABEL, type PaymentMethod, type Payment, type Sale, type Product } from "../types";
 
 const { Title, Text } = Typography;
 
@@ -66,6 +76,13 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
   const [discountReason, setDiscountReason] = useState("");
   const [modalProduct, setModalProduct] = useState<Product | null>(null);
   const [addForm] = Form.useForm<AddForm>();
+  const [view, setView] = useState<"cards" | "table">("cards");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(8);
+  const [step, setStep] = useState<"items" | "payment">("items");
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [pMethod, setPMethod] = useState<PaymentMethod>("pix");
+  const [pValue, setPValue] = useState<number>(0);
 
   const filtered = useMemo(
     () =>
@@ -77,9 +94,16 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
     [products, search]
   );
 
+  const pageData = useMemo(
+    () => filtered.slice((page - 1) * pageSize, page * pageSize),
+    [filtered, page, pageSize]
+  );
+
   const subtotal = cart.reduce((s, i) => s + i.product.price * i.qty, 0);
   const discountValue = discountType === "percent" ? (subtotal * discount) / 100 : discount;
   const total = Math.max(0, subtotal - discountValue);
+  const paid = payments.reduce((s, p) => s + p.value, 0);
+  const remaining = Math.max(0, total - paid);
 
   const openProductModal = (p: Product) => {
     if (p.stock <= 0) return message.error("Produto sem estoque");
@@ -105,7 +129,7 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
     setModalProduct(null);
   };
 
-  const finalize = () => {
+  const goToPayment = () => {
     if (!cashOpen) {
       message.warning("Abra o caixa antes de finalizar uma venda.");
       onGoToCaixa?.();
@@ -116,7 +140,20 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
       return message.warning("Selecione um cliente para esta venda.");
     if (settings.askDiscountReason && discountValue > 0 && !discountReason.trim())
       return message.warning("Informe o motivo do desconto.");
+    setPValue(total);
+    setStep("payment");
+  };
 
+  const addPayment = () => {
+    if (pValue <= 0) return message.warning("Informe um valor válido.");
+    setPayments((arr) => [...arr, { method: pMethod, value: pValue }]);
+    setPValue(Math.max(0, remaining - pValue));
+  };
+  const removePayment = (idx: number) =>
+    setPayments((arr) => arr.filter((_, i) => i !== idx));
+
+  const finalize = () => {
+    if (paid < total - 0.001) return message.warning("Pagamento incompleto.");
     const sale: Sale = {
       id: `V${Math.floor(Math.random() * 9000 + 1000)}`,
       date: new Date().toISOString().slice(0, 10),
@@ -124,11 +161,14 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
       items: cart.reduce((s, i) => s + i.qty, 0),
       type: "balcao",
       customerId: selectedCustomerId || undefined,
+      payments,
     };
     addSale(sale);
     clearCart();
     setDiscount(0);
     setDiscountReason("");
+    setPayments([]);
+    setStep("items");
     message.success(
       `Venda ${sale.id} finalizada! Total R$ ${total.toFixed(2)}${
         settings.printReceipt ? " — Cupom enviado para impressão." : ""
@@ -137,6 +177,39 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
   };
 
   const selectedCustomer = customers.find((c) => c.id === selectedCustomerId);
+
+  const renderProductCard = (p: Product) => (
+    <Card
+      hoverable={p.stock > 0}
+      styles={{ body: { padding: 12 } }}
+      onClick={() => openProductModal(p)}
+      style={{ opacity: p.stock > 0 ? 1 : 0.5 }}
+    >
+      <div
+        style={{
+          height: 60,
+          borderRadius: 6,
+          background: "linear-gradient(135deg, #fff3e8, #ffe0c2)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          marginBottom: 8,
+          fontWeight: 700,
+          color: "#F26B1F",
+        }}
+      >
+        {p.name.charAt(0)}
+      </div>
+      <Text strong style={{ display: "block", fontSize: 13 }}>{p.name}</Text>
+      <Text type="secondary" style={{ fontSize: 11 }}>{p.sku}</Text>
+      <div style={{ marginTop: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Text strong style={{ color: "#F26B1F" }}>R$ {p.price.toFixed(2)}</Text>
+        <Tag color={p.stock > 5 ? "green" : p.stock > 0 ? "orange" : "red"} style={{ margin: 0 }}>
+          {p.stock}
+        </Tag>
+      </div>
+    </Card>
+  );
 
   return (
     <Row gutter={16}>
@@ -152,9 +225,7 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
               <Space>
                 {cashOpen ? <LockOpen color="#16A34A" /> : <Lock color="#DC2626" />}
                 <div>
-                  <Text type="secondary" style={{ fontSize: 12 }}>
-                    Status do Caixa
-                  </Text>
+                  <Text type="secondary" style={{ fontSize: 12 }}>Status do Caixa</Text>
                   <Title level={4} style={{ margin: 0 }}>
                     {cashOpen ? "Caixa Aberto" : "Caixa Fechado"}
                   </Title>
@@ -179,62 +250,77 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
         </Card>
 
         <Card>
-          <Input
-            size="large"
-            placeholder="Buscar produto por nome ou SKU..."
-            prefix={<Search size={16} />}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{ marginBottom: 16 }}
-          />
-          <Row gutter={[12, 12]}>
-            {filtered.map((p) => (
-              <Col key={p.id} xs={12} sm={8} md={6}>
-                <Card
-                  hoverable={p.stock > 0}
-                  styles={{ body: { padding: 12 } }}
-                  onClick={() => openProductModal(p)}
-                  style={{ opacity: p.stock > 0 ? 1 : 0.5 }}
-                >
-                  <div
-                    style={{
-                      height: 60,
-                      borderRadius: 6,
-                      background: "linear-gradient(135deg, #fff3e8, #ffe0c2)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginBottom: 8,
-                      fontWeight: 700,
-                      color: "#F26B1F",
-                    }}
-                  >
-                    {p.name.charAt(0)}
-                  </div>
-                  <Text strong style={{ display: "block", fontSize: 13 }}>
-                    {p.name}
-                  </Text>
-                  <Text type="secondary" style={{ fontSize: 11 }}>
-                    {p.sku}
-                  </Text>
-                  <div style={{ marginTop: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <Text strong style={{ color: "#F26B1F" }}>
-                      R$ {p.price.toFixed(2)}
-                    </Text>
-                    <Tag color={p.stock > 5 ? "green" : p.stock > 0 ? "orange" : "red"} style={{ margin: 0 }}>
-                      {p.stock}
-                    </Tag>
-                  </div>
-                  {(p.variations?.sizes?.length || p.variations?.colors?.length) ? (
-                    <Tag color="orange" style={{ marginTop: 6, fontSize: 10 }}>
-                      variações
-                    </Tag>
-                  ) : null}
-                </Card>
-              </Col>
-            ))}
-            {filtered.length === 0 && <Empty style={{ width: "100%", padding: 32 }} />}
+          <Row gutter={12} style={{ marginBottom: 16 }} align="middle">
+            <Col flex="auto">
+              <Input
+                size="large"
+                placeholder="Buscar produto por nome ou SKU..."
+                prefix={<Search size={16} />}
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </Col>
+            <Col>
+              <Segmented
+                value={view}
+                onChange={(v) => setView(v as "cards" | "table")}
+                options={[
+                  { value: "cards", icon: <LayoutGrid size={14} /> },
+                  { value: "table", icon: <ListIcon size={14} /> },
+                ]}
+              />
+            </Col>
           </Row>
+
+          {view === "cards" ? (
+            <>
+              <Row gutter={[12, 12]}>
+                {pageData.map((p) => (
+                  <Col key={p.id} xs={12} sm={8} md={6}>
+                    {renderProductCard(p)}
+                  </Col>
+                ))}
+                {pageData.length === 0 && <Empty style={{ width: "100%", padding: 32 }} />}
+              </Row>
+              <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
+                <Pagination
+                  current={page}
+                  pageSize={pageSize}
+                  total={filtered.length}
+                  showSizeChanger
+                  pageSizeOptions={[8, 12, 16, 24]}
+                  onChange={(p, ps) => {
+                    setPage(p);
+                    setPageSize(ps);
+                  }}
+                />
+              </div>
+            </>
+          ) : (
+            <Table
+              rowKey="id"
+              size="small"
+              dataSource={filtered}
+              pagination={{ pageSize, current: page, onChange: (p, ps) => { setPage(p); setPageSize(ps); }, pageSizeOptions: [8, 12, 16, 24], showSizeChanger: true }}
+              onRow={(r) => ({ onClick: () => openProductModal(r), style: { cursor: "pointer" } })}
+              columns={[
+                { title: "SKU", dataIndex: "sku", width: 100 },
+                { title: "Produto", dataIndex: "name" },
+                { title: "Categoria", dataIndex: "category" },
+                { title: "Preço", dataIndex: "price", render: (v: number) => `R$ ${v.toFixed(2)}` },
+                {
+                  title: "Estoque",
+                  dataIndex: "stock",
+                  render: (v: number) => (
+                    <Tag color={v > 5 ? "green" : v > 0 ? "orange" : "red"}>{v}</Tag>
+                  ),
+                },
+              ]}
+            />
+          )}
         </Card>
       </Col>
 
@@ -245,159 +331,191 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
               <ShoppingCart size={18} /> Comanda
             </Space>
           }
-          extra={cart.length > 0 && <Button size="small" type="link" onClick={clearCart}>Limpar</Button>}
+          extra={cart.length > 0 && step === "items" && (
+            <Button size="small" type="link" onClick={clearCart}>Limpar</Button>
+          )}
         >
-          <div style={{ marginBottom: 12 }}>
-            <Text type="secondary" style={{ fontSize: 12 }}>
-              Cliente {settings.requireCustomerOnSale && <Text type="danger">*</Text>}
-            </Text>
-            <Select
-              showSearch
-              allowClear
-              placeholder="Selecionar cliente (opcional)"
-              value={selectedCustomerId || undefined}
-              onChange={(v) => setSelectedCustomerId(v || null)}
-              style={{ width: "100%", marginTop: 4 }}
-              optionFilterProp="label"
-              suffixIcon={<User size={14} />}
-              options={customers.map((c) => ({
-                value: c.id,
-                label: c.name,
-              }))}
-            />
-            {selectedCustomer && (
-              <div
-                style={{
-                  marginTop: 8,
-                  padding: 8,
-                  borderRadius: 6,
-                  background: "#FFF7ED",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                }}
-              >
-                <Avatar size="small" style={{ background: "#F26B1F" }}>
-                  {selectedCustomer.name.charAt(0)}
-                </Avatar>
-                <div style={{ flex: 1, lineHeight: 1.2 }}>
-                  <Text strong style={{ fontSize: 12, display: "block" }}>
-                    {selectedCustomer.name}
-                  </Text>
-                  <Text type="secondary" style={{ fontSize: 11 }}>
-                    {selectedCustomer.phone}
-                  </Text>
-                </div>
-                {selectedCustomer.loyalty && (
-                  <Tag color="gold" icon={<Star size={10} />} style={{ margin: 0 }}>
-                    Fidelidade
-                  </Tag>
+          <Steps
+            size="small"
+            current={step === "items" ? 0 : 1}
+            items={[{ title: "Itens" }, { title: "Pagamento" }]}
+            style={{ marginBottom: 12 }}
+          />
+
+          {step === "items" ? (
+            <>
+              <div style={{ marginBottom: 12 }}>
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  Cliente {settings.requireCustomerOnSale && <Text type="danger">*</Text>}
+                </Text>
+                <Select
+                  showSearch
+                  allowClear
+                  placeholder="Selecionar cliente (opcional)"
+                  value={selectedCustomerId || undefined}
+                  onChange={(v) => setSelectedCustomerId(v || null)}
+                  style={{ width: "100%", marginTop: 4 }}
+                  optionFilterProp="label"
+                  suffixIcon={<User size={14} />}
+                  options={customers.map((c) => ({ value: c.id, label: c.name }))}
+                />
+                {selectedCustomer && (
+                  <div style={{ marginTop: 8, padding: 8, borderRadius: 6, background: "#FFF7ED", display: "flex", alignItems: "center", gap: 8 }}>
+                    <Avatar size="small" style={{ background: "#F26B1F" }}>
+                      {selectedCustomer.name.charAt(0)}
+                    </Avatar>
+                    <div style={{ flex: 1, lineHeight: 1.2 }}>
+                      <Text strong style={{ fontSize: 12, display: "block" }}>{selectedCustomer.name}</Text>
+                      <Text type="secondary" style={{ fontSize: 11 }}>{selectedCustomer.phone}</Text>
+                    </div>
+                    {selectedCustomer.loyalty && (
+                      <Tag color="gold" icon={<Star size={10} />} style={{ margin: 0 }}>Fidelidade</Tag>
+                    )}
+                  </div>
                 )}
               </div>
-            )}
-          </div>
 
-          <Divider style={{ margin: "8px 0 12px" }} />
+              <Divider style={{ margin: "8px 0 12px" }} />
 
-          {cart.length === 0 ? (
-            <Empty description="Carrinho vazio" />
-          ) : (
-            <List
-              dataSource={cart}
-              renderItem={(item) => (
-                <List.Item
-                  actions={[
-                    <Button
-                      key="r"
-                      size="small"
-                      type="text"
-                      danger
-                      icon={<Trash2 size={14} />}
-                      onClick={() => removeFromCart(item.id)}
-                    />,
-                  ]}
-                >
-                  <List.Item.Meta
-                    title={item.product.name}
-                    description={
-                      <Space direction="vertical" size={2} style={{ width: "100%" }}>
-                        {(item.size || item.color) && (
-                          <Space size={4} wrap>
-                            {item.size && <Tag color="orange" style={{ margin: 0 }}>Tam. {item.size}</Tag>}
-                            {item.color && <Tag color="default" style={{ margin: 0 }}>{item.color}</Tag>}
+              {cart.length === 0 ? (
+                <Empty description="Carrinho vazio" />
+              ) : (
+                <List
+                  dataSource={cart}
+                  renderItem={(item) => (
+                    <List.Item
+                      actions={[
+                        <Button key="r" size="small" type="text" danger icon={<Trash2 size={14} />} onClick={() => removeFromCart(item.id)} />,
+                      ]}
+                    >
+                      <List.Item.Meta
+                        title={item.product.name}
+                        description={
+                          <Space direction="vertical" size={2} style={{ width: "100%" }}>
+                            {(item.size || item.color) && (
+                              <Space size={4} wrap>
+                                {item.size && <Tag color="orange" style={{ margin: 0 }}>Tam. {item.size}</Tag>}
+                                {item.color && <Tag color="default" style={{ margin: 0 }}>{item.color}</Tag>}
+                              </Space>
+                            )}
+                            {item.observation && (
+                              <Text type="secondary" italic style={{ fontSize: 11 }}>"{item.observation}"</Text>
+                            )}
+                            <Space>
+                              <InputNumber size="small" min={1} value={item.qty} onChange={(v) => updateCartQty(item.id, v || 1)} style={{ width: 60 }} />
+                              <Text type="secondary">R$ {(item.product.price * item.qty).toFixed(2)}</Text>
+                            </Space>
                           </Space>
-                        )}
-                        {item.observation && (
-                          <Text type="secondary" italic style={{ fontSize: 11 }}>
-                            "{item.observation}"
-                          </Text>
-                        )}
-                        <Space>
-                          <InputNumber
-                            size="small"
-                            min={1}
-                            value={item.qty}
-                            onChange={(v) => updateCartQty(item.id, v || 1)}
-                            style={{ width: 60 }}
-                          />
-                          <Text type="secondary">
-                            R$ {(item.product.price * item.qty).toFixed(2)}
-                          </Text>
-                        </Space>
-                      </Space>
-                    }
-                  />
-                </List.Item>
+                        }
+                      />
+                    </List.Item>
+                  )}
+                />
               )}
-            />
+
+              <Divider style={{ margin: "12px 0" }} />
+              <Text type="secondary">Desconto</Text>
+              <Space.Compact style={{ width: "100%", marginTop: 4, marginBottom: 8 }}>
+                <Select
+                  value={discountType}
+                  onChange={setDiscountType}
+                  options={[{ value: "percent", label: "%" }, { value: "value", label: "R$" }]}
+                  style={{ width: 80 }}
+                />
+                <InputNumber min={0} value={discount} onChange={(v) => setDiscount(v || 0)} style={{ width: "100%" }} />
+              </Space.Compact>
+              {settings.askDiscountReason && discountValue > 0 && (
+                <Input placeholder="Motivo do desconto" value={discountReason} onChange={(e) => setDiscountReason(e.target.value)} style={{ marginBottom: 12 }} />
+              )}
+
+              <Row justify="space-between"><Text>Subtotal</Text><Text>R$ {subtotal.toFixed(2)}</Text></Row>
+              <Row justify="space-between"><Text type="secondary">Desconto</Text><Text type="secondary">- R$ {discountValue.toFixed(2)}</Text></Row>
+              <Row justify="space-between" style={{ marginTop: 8 }}>
+                <Title level={4} style={{ margin: 0 }}>Total</Title>
+                <Title level={4} style={{ margin: 0, color: "#F26B1F" }}>R$ {total.toFixed(2)}</Title>
+              </Row>
+
+              <Button type="primary" block size="large" style={{ marginTop: 12 }} icon={<ArrowRight size={14} />} iconPosition="end" onClick={goToPayment}>
+                Ir para pagamento
+              </Button>
+            </>
+          ) : (
+            <>
+              <div style={{ background: "#FFF7ED", padding: 12, borderRadius: 8, marginBottom: 12 }}>
+                <Row justify="space-between">
+                  <Text>Total da venda</Text>
+                  <Text strong>R$ {total.toFixed(2)}</Text>
+                </Row>
+                <Row justify="space-between">
+                  <Text type="secondary">Pago</Text>
+                  <Text type="secondary">R$ {paid.toFixed(2)}</Text>
+                </Row>
+                <Row justify="space-between">
+                  <Text strong style={{ color: remaining > 0 ? "#DC2626" : "#16A34A" }}>Restante</Text>
+                  <Text strong style={{ color: remaining > 0 ? "#DC2626" : "#16A34A" }}>R$ {remaining.toFixed(2)}</Text>
+                </Row>
+              </div>
+
+              <Text type="secondary" style={{ fontSize: 12 }}>Adicionar pagamento</Text>
+              <Space.Compact style={{ width: "100%", marginTop: 4 }}>
+                <Select
+                  value={pMethod}
+                  onChange={setPMethod}
+                  style={{ width: 130 }}
+                  options={(Object.keys(PAYMENT_LABEL) as PaymentMethod[]).map((m) => ({
+                    value: m,
+                    label: PAYMENT_LABEL[m],
+                  }))}
+                />
+                <InputNumber
+                  min={0}
+                  step={0.5}
+                  value={pValue}
+                  onChange={(v) => setPValue(v || 0)}
+                  prefix="R$"
+                  style={{ width: "100%" }}
+                />
+                <Button type="primary" icon={<Plus size={14} />} onClick={addPayment}>Add</Button>
+              </Space.Compact>
+
+              {payments.length > 0 && (
+                <List
+                  size="small"
+                  style={{ marginTop: 12 }}
+                  dataSource={payments}
+                  renderItem={(p, idx) => (
+                    <List.Item
+                      actions={[
+                        <Button key="x" size="small" type="text" danger icon={<Trash2 size={14} />} onClick={() => removePayment(idx)} />,
+                      ]}
+                    >
+                      <Space>
+                        <CreditCard size={14} color="#F26B1F" />
+                        <Text>{PAYMENT_LABEL[p.method]}</Text>
+                      </Space>
+                      <Text strong>R$ {p.value.toFixed(2)}</Text>
+                    </List.Item>
+                  )}
+                />
+              )}
+
+              <Space style={{ width: "100%", marginTop: 16 }} direction="vertical">
+                <Button
+                  type="primary"
+                  block
+                  size="large"
+                  icon={<CheckCircle2 size={16} />}
+                  disabled={paid < total - 0.001}
+                  onClick={finalize}
+                >
+                  Finalizar Venda
+                </Button>
+                <Button block icon={<ArrowLeft size={14} />} onClick={() => setStep("items")}>
+                  Voltar para itens
+                </Button>
+              </Space>
+            </>
           )}
-
-          <Divider style={{ margin: "12px 0" }} />
-          <Text type="secondary">Desconto</Text>
-          <Space.Compact style={{ width: "100%", marginTop: 4, marginBottom: 8 }}>
-            <Select
-              value={discountType}
-              onChange={setDiscountType}
-              options={[
-                { value: "percent", label: "%" },
-                { value: "value", label: "R$" },
-              ]}
-              style={{ width: 80 }}
-            />
-            <InputNumber
-              min={0}
-              value={discount}
-              onChange={(v) => setDiscount(v || 0)}
-              style={{ width: "100%" }}
-            />
-          </Space.Compact>
-          {settings.askDiscountReason && discountValue > 0 && (
-            <Input
-              placeholder="Motivo do desconto"
-              value={discountReason}
-              onChange={(e) => setDiscountReason(e.target.value)}
-              style={{ marginBottom: 12 }}
-            />
-          )}
-
-          <Row justify="space-between">
-            <Text>Subtotal</Text>
-            <Text>R$ {subtotal.toFixed(2)}</Text>
-          </Row>
-          <Row justify="space-between">
-            <Text type="secondary">Desconto</Text>
-            <Text type="secondary">- R$ {discountValue.toFixed(2)}</Text>
-          </Row>
-          <Row justify="space-between" style={{ marginTop: 8 }}>
-            <Title level={4} style={{ margin: 0 }}>Total</Title>
-            <Title level={4} style={{ margin: 0, color: "#F26B1F" }}>
-              R$ {total.toFixed(2)}
-            </Title>
-          </Row>
-
-          <Button type="primary" block size="large" style={{ marginTop: 12 }} onClick={finalize}>
-            Finalizar Venda
-          </Button>
         </Card>
       </Col>
 
@@ -414,20 +532,7 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
           <>
             <Row gutter={12} style={{ marginBottom: 16 }}>
               <Col>
-                <div
-                  style={{
-                    width: 64,
-                    height: 64,
-                    borderRadius: 8,
-                    background: "linear-gradient(135deg, #fff3e8, #ffe0c2)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontWeight: 700,
-                    color: "#F26B1F",
-                    fontSize: 24,
-                  }}
-                >
+                <div style={{ width: 64, height: 64, borderRadius: 8, background: "linear-gradient(135deg, #fff3e8, #ffe0c2)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, color: "#F26B1F", fontSize: 24 }}>
                   {modalProduct.name.charAt(0)}
                 </div>
               </Col>
@@ -435,9 +540,7 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
                 <Text strong style={{ display: "block" }}>{modalProduct.name}</Text>
                 <Text type="secondary" style={{ fontSize: 12 }}>{modalProduct.sku} · {modalProduct.category}</Text>
                 <div style={{ marginTop: 4 }}>
-                  <Text strong style={{ color: "#F26B1F", fontSize: 18 }}>
-                    R$ {modalProduct.price.toFixed(2)}
-                  </Text>
+                  <Text strong style={{ color: "#F26B1F", fontSize: 18 }}>R$ {modalProduct.price.toFixed(2)}</Text>
                   <Tag style={{ marginLeft: 8 }} color={modalProduct.stock > 5 ? "green" : "orange"}>
                     {modalProduct.stock} em estoque
                   </Tag>
@@ -462,10 +565,7 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
 
               {modalProduct.variations?.colors?.length ? (
                 <Form.Item label="Cor" name="color" rules={[{ required: true, message: "Selecione a cor" }]}>
-                  <Select
-                    placeholder="Selecione a cor"
-                    options={modalProduct.variations.colors.map((c) => ({ value: c, label: c }))}
-                  />
+                  <Select placeholder="Selecione a cor" options={modalProduct.variations.colors.map((c) => ({ value: c, label: c }))} />
                 </Form.Item>
               ) : null}
 
