@@ -346,7 +346,7 @@ export function Estoque() {
             </>
           ) : (
             <>
-              <Divider style={{ margin: "8px 0 16px" }} orientation="start">
+              <Divider style={{ margin: "8px 0 16px" }} titlePlacement="start">
                 Variações
               </Divider>
               <Form.List name="variants">
