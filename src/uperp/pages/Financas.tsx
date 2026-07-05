@@ -9,7 +9,7 @@ const { Text, Title } = Typography;
 const { RangePicker } = DatePicker;
 
 export function Financas() {
-  const { sales, products, customers } = useStore();
+  const { sales, products, customers, cashHistory } = useStore();
 
   const totalRevenue = sales.reduce((s, x) => s + x.total, 0);
   const totalSales = sales.length;
