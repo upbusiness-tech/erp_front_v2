@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, useContext, useRef, useState, type ReactNode } from "react";
 import type {
   Product,
   CartItem,
@@ -8,6 +8,7 @@ import type {
   Invoice,
   CashSession,
   CashMovement,
+  ClosedCashSession,
   AppSettings,
   Category,
 } from "./types";
@@ -34,6 +35,7 @@ export interface AddToCartOptions {
   size?: string;
   color?: string;
   observation?: string;
+  customPrice?: number;
 }
 
 interface StoreCtx {
@@ -52,8 +54,9 @@ interface StoreCtx {
   cashOpen: boolean;
   cashSession: CashSession | null;
   cashMovements: CashMovement[];
+  cashHistory: ClosedCashSession[];
   openCash: (initialValue: number, operatorName: string) => void;
-  closeCash: () => void;
+  closeCash: (declaredValue?: number) => void;
   addCashMovement: (m: Omit<CashMovement, "id" | "at">) => void;
 
   cart: CartItem[];
@@ -83,6 +86,38 @@ const defaultSettings: AppSettings = {
   darkSidebar: true,
 };
 
+const seedClosedSessions: ClosedCashSession[] = [
+  {
+    id: "CX-001",
+    openedAt: "2026-06-19T08:00:00",
+    closedAt: "2026-06-19T18:10:00",
+    operatorName: "Marcos Silva",
+    initialValue: 200,
+    declaredValue: 1548.9,
+    saleIds: ["V003", "V004"],
+    movements: [
+      { id: "m1", type: "venda", value: 150, note: "Venda V003", at: "2026-06-19T10:22:00" },
+      { id: "m2", type: "venda", value: 1200, note: "Venda V004", at: "2026-06-19T14:45:00" },
+      { id: "m3", type: "sangria", value: 300, note: "Depósito bancário", at: "2026-06-19T16:00:00" },
+      { id: "m4", type: "entrada", value: 50, note: "Ajuste de troco", at: "2026-06-19T17:30:00" },
+    ],
+    totals: { vendas: 1350, entradas: 50, reposicoes: 0, sangrias: 300, saldo: 1300 },
+  },
+  {
+    id: "CX-002",
+    openedAt: "2026-06-18T08:15:00",
+    closedAt: "2026-06-18T18:00:00",
+    operatorName: "Juliana Costa",
+    initialValue: 150,
+    declaredValue: 239.9,
+    saleIds: ["V005"],
+    movements: [
+      { id: "m5", type: "venda", value: 89.9, note: "Venda V005", at: "2026-06-18T11:00:00" },
+    ],
+    totals: { vendas: 89.9, entradas: 0, reposicoes: 0, sangrias: 0, saldo: 239.9 },
+  },
+];
+
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [categories, setCategories] = useState<Category[]>(initialCategories);
@@ -92,6 +127,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [invoices] = useState<Invoice[]>(initialInvoices);
   const [cashSession, setCashSession] = useState<CashSession | null>(null);
   const [cashMovements, setCashMovements] = useState<CashMovement[]>([]);
+  const [cashHistory, setCashHistory] = useState<ClosedCashSession[]>(seedClosedSessions);
+  const currentSaleIdsRef = useRef<string[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [settings, setSettings] = useState<AppSettings>(defaultSettings);
@@ -113,11 +150,33 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       operatorName,
     });
     setCashMovements([]);
+    currentSaleIdsRef.current = [];
   };
 
-  const closeCash = () => {
+  const closeCash = (declaredValue?: number) => {
+    if (!cashSession) return;
+    const sum = (t: CashMovement["type"]) =>
+      cashMovements.filter((m) => m.type === t).reduce((s, m) => s + m.value, 0);
+    const vendas = sum("venda");
+    const entradas = sum("entrada");
+    const reposicoes = sum("reposicao");
+    const sangrias = sum("sangria");
+    const saldo = cashSession.initialValue + vendas + entradas + reposicoes - sangrias;
+    const closed: ClosedCashSession = {
+      id: `CX-${String(Math.floor(Math.random() * 900 + 100))}`,
+      openedAt: cashSession.openedAt,
+      closedAt: new Date().toISOString(),
+      operatorName: cashSession.operatorName,
+      initialValue: cashSession.initialValue,
+      declaredValue,
+      movements: cashMovements,
+      saleIds: [...currentSaleIdsRef.current],
+      totals: { vendas, entradas, reposicoes, sangrias, saldo },
+    };
+    setCashHistory((h) => [closed, ...h]);
     setCashSession(null);
     setCashMovements([]);
+    currentSaleIdsRef.current = [];
   };
 
   const addCashMovement = (m: Omit<CashMovement, "id" | "at">) => {
@@ -128,7 +187,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   };
 
   const cartKey = (p: Product, opts?: AddToCartOptions) =>
-    `${p.id}__${opts?.size || ""}__${opts?.color || ""}__${opts?.observation || ""}`;
+    `${p.id}__${opts?.size || ""}__${opts?.color || ""}__${opts?.observation || ""}__${opts?.customPrice ?? ""}`;
 
   const addToCart = (p: Product, opts?: AddToCartOptions) => {
     const qty = opts?.qty ?? 1;
@@ -145,6 +204,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           size: opts?.size,
           color: opts?.color,
           observation: opts?.observation,
+          customPrice: opts?.customPrice,
         },
       ];
     });
@@ -159,6 +219,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const addSale = (s: Sale) => {
     setSales((arr) => [s, ...arr]);
     if (cashSession) {
+      currentSaleIdsRef.current = [...currentSaleIdsRef.current, s.id];
       addCashMovement({ type: "venda", value: s.total, note: `Venda ${s.id}` });
     }
   };
@@ -183,6 +244,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         cashOpen,
         cashSession,
         cashMovements,
+        cashHistory,
         openCash,
         closeCash,
         addCashMovement,

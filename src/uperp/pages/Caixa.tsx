@@ -70,13 +70,29 @@ export function Caixa({ operatorName, onBack }: Props) {
   };
 
   const handleClose = () => {
+    let declared = stats.saldo;
     Modal.confirm({
       title: "Fechar caixa?",
-      content: `Saldo final estimado: R$ ${stats.saldo.toFixed(2)}`,
+      content: (
+        <div>
+          <Text type="secondary">Saldo estimado: R$ {stats.saldo.toFixed(2)}</Text>
+          <div style={{ marginTop: 8 }}>
+            <Text style={{ fontSize: 12 }}>Valor conferido em caixa (R$)</Text>
+            <InputNumber
+              defaultValue={stats.saldo}
+              min={0}
+              step={1}
+              style={{ width: "100%", marginTop: 4 }}
+              prefix="R$"
+              onChange={(v) => { declared = v || 0; }}
+            />
+          </div>
+        </div>
+      ),
       okText: "Fechar caixa",
       cancelText: "Cancelar",
       onOk: () => {
-        closeCash();
+        closeCash(declared);
         message.success("Caixa fechado.");
       },
     });

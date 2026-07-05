@@ -15,11 +15,22 @@ import {
   Tag,
   Steps,
   Space,
+  Table,
   message,
 } from "antd";
-import { Briefcase, Trash2, Package, Plus, ArrowRight, ArrowLeft, CreditCard, CheckCircle2 } from "lucide-react";
+import {
+  Briefcase,
+  Trash2,
+  Package,
+  Plus,
+  ArrowRight,
+  ArrowLeft,
+  CreditCard,
+  CheckCircle2,
+  Search,
+} from "lucide-react";
 import { useStore } from "../store";
-import { PAYMENT_LABEL, type Payment, type PaymentMethod, type Sale } from "../types";
+import { PAYMENT_LABEL, type Payment, type PaymentMethod, type Product, type Sale } from "../types";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -38,16 +49,28 @@ export function VendaServico() {
   const { employees, products, addSale, customers } = useStore();
   const [items, setItems] = useState<ServiceLine[]>([]);
   const [form] = Form.useForm();
-  const [productForm] = Form.useForm<{ productId: string; qty: number }>();
   const [customerId, setCustomerId] = useState<string | null>(null);
   const [step, setStep] = useState<"items" | "payment">("items");
   const [payments, setPayments] = useState<Payment[]>([]);
   const [pMethod, setPMethod] = useState<PaymentMethod>("pix");
   const [pValue, setPValue] = useState<number>(0);
 
+  const [productSearch, setProductSearch] = useState("");
+  const [selectedProductIds, setSelectedProductIds] = useState<React.Key[]>([]);
+  const [productQtys, setProductQtys] = useState<Record<string, number>>({});
+
   const total = useMemo(() => items.reduce((s, i) => s + i.price * i.qty, 0), [items]);
   const paid = payments.reduce((s, p) => s + p.value, 0);
   const remaining = Math.max(0, total - paid);
+
+  const filteredProducts = useMemo(() => {
+    const q = productSearch.toLowerCase().trim();
+    return products.filter((p) => {
+      if (p.stock <= 0) return false;
+      if (!q) return true;
+      return p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q);
+    });
+  }, [products, productSearch]);
 
   const onAddService = (v: { description: string; employeeId: string; price: number }) => {
     const emp = employees.find((e) => e.id === v.employeeId);
@@ -66,24 +89,30 @@ export function VendaServico() {
     message.success("Serviço adicionado");
   };
 
-  const onAddProduct = (v: { productId: string; qty: number }) => {
-    const p = products.find((x) => x.id === v.productId);
-    if (!p) return;
-    if (p.stock < v.qty) return message.error("Estoque insuficiente");
-    setItems((arr) => [
-      ...arr,
-      {
+  const confirmSelectedProducts = () => {
+    if (selectedProductIds.length === 0) return message.warning("Selecione ao menos um produto.");
+    const additions: ServiceLine[] = [];
+    for (const key of selectedProductIds) {
+      const p = products.find((x) => x.id === String(key));
+      if (!p) continue;
+      const qty = productQtys[p.id] || 1;
+      if (p.stock < qty) {
+        message.error(`Estoque insuficiente para ${p.name}`);
+        return;
+      }
+      additions.push({
         id: Math.random().toString(36).slice(2),
         kind: "produto",
         description: p.name,
         productId: p.id,
-        qty: v.qty,
+        qty,
         price: p.price,
-      },
-    ]);
-    productForm.resetFields();
-    productForm.setFieldsValue({ qty: 1 });
-    message.success("Produto adicionado");
+      });
+    }
+    setItems((arr) => [...arr, ...additions]);
+    setSelectedProductIds([]);
+    setProductQtys({});
+    message.success(`${additions.length} produto(s) adicionado(s) à OS`);
   };
 
   const goToPayment = () => {
@@ -147,34 +176,67 @@ export function VendaServico() {
           </Form>
         </Card>
 
-        <Card title={<Space><Package size={18} /> Adicionar Produto do Estoque</Space>}>
-          <Form layout="vertical" form={productForm} onFinish={onAddProduct} initialValues={{ qty: 1 }}>
-            <Row gutter={12}>
-              <Col span={16}>
-                <Form.Item name="productId" label="Produto" rules={[{ required: true }]}>
-                  <Select
-                    showSearch
-                    placeholder="Buscar produto..."
-                    optionFilterProp="label"
-                    options={products
-                      .filter((p) => p.stock > 0)
-                      .map((p) => ({
-                        value: p.id,
-                        label: `${p.name} — R$ ${p.price.toFixed(2)} (${p.stock} un.)`,
-                      }))}
-                  />
-                </Form.Item>
-              </Col>
-              <Col span={8}>
-                <Form.Item name="qty" label="Qtd." rules={[{ required: true }]}>
-                  <InputNumber min={1} style={{ width: "100%" }} />
-                </Form.Item>
-              </Col>
-            </Row>
-            <Button htmlType="submit" block icon={<Plus size={14} />}>
-              Adicionar Produto à OS
+        <Card
+          title={<Space><Package size={18} /> Produtos do Estoque</Space>}
+          extra={
+            <Button
+              type="primary"
+              icon={<Plus size={14} />}
+              onClick={confirmSelectedProducts}
+              disabled={selectedProductIds.length === 0}
+            >
+              Confirmar {selectedProductIds.length > 0 ? `(${selectedProductIds.length})` : ""}
             </Button>
-          </Form>
+          }
+        >
+          <Input
+            placeholder="Buscar produto por nome ou SKU..."
+            prefix={<Search size={14} />}
+            value={productSearch}
+            onChange={(e) => setProductSearch(e.target.value)}
+            allowClear
+            style={{ marginBottom: 12 }}
+          />
+          <Table
+            rowKey="id"
+            size="small"
+            dataSource={filteredProducts}
+            pagination={{ pageSize: 6, size: "small" }}
+            rowSelection={{
+              selectedRowKeys: selectedProductIds,
+              onChange: setSelectedProductIds,
+            }}
+            columns={[
+              { title: "Produto", dataIndex: "name" },
+              { title: "SKU", dataIndex: "sku", width: 90 },
+              {
+                title: "Preço",
+                dataIndex: "price",
+                width: 100,
+                render: (v: number) => `R$ ${v.toFixed(2)}`,
+              },
+              {
+                title: "Estoque",
+                dataIndex: "stock",
+                width: 90,
+                render: (v: number) => <Tag color={v > 5 ? "green" : "orange"}>{v} un.</Tag>,
+              },
+              {
+                title: "Qtd.",
+                width: 100,
+                render: (_, p: Product) => (
+                  <InputNumber
+                    size="small"
+                    min={1}
+                    max={p.stock}
+                    value={productQtys[p.id] || 1}
+                    onChange={(v) => setProductQtys((q) => ({ ...q, [p.id]: v || 1 }))}
+                    style={{ width: "100%" }}
+                  />
+                ),
+              },
+            ]}
+          />
         </Card>
       </Col>
 
