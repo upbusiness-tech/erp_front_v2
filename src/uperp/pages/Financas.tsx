@@ -84,6 +84,7 @@ export function Financas() {
       items={[
         { key: "stats", label: "Estatísticas", children: Estatisticas },
         { key: "history", label: "Histórico de Vendas", children: <SalesHistory sales={sales} customers={customers} /> },
+        { key: "cash", label: "Histórico de Caixas", children: <CashHistory history={cashHistory} sales={sales} /> },
       ]}
     />
   );
