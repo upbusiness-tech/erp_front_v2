@@ -36,13 +36,19 @@ export interface CartItem {
   description?: string;
 }
 
+export interface CustomerSpecialPrice {
+  productId: string;
+  price: number;
+}
+
 export interface Customer {
   id: string;
   name: string;
   email: string;
   phone: string;
   document: string;
-  loyalty: boolean;
+  loyalty?: boolean;
+  specialPrices?: CustomerSpecialPrice[];
 }
 
 export interface Employee {
@@ -92,6 +98,24 @@ export interface CashSession {
   openedAt: string;
   initialValue: number;
   operatorName: string;
+}
+
+export interface ClosedCashSession {
+  id: string;
+  openedAt: string;
+  closedAt: string;
+  operatorName: string;
+  initialValue: number;
+  declaredValue?: number;
+  movements: CashMovement[];
+  saleIds: string[];
+  totals: {
+    vendas: number;
+    entradas: number;
+    reposicoes: number;
+    sangrias: number;
+    saldo: number;
+  };
 }
 
 export interface AppSettings {
