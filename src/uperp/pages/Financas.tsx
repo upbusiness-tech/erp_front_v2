@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
-import { Card, Row, Col, Statistic, Table, Typography, Progress, Tabs, Tag, Space, Select, DatePicker, Input, Button } from "antd";
-import { TrendingUp, DollarSign, ShoppingBag, Award, Search, Download } from "lucide-react";
+import { Card, Row, Col, Statistic, Table, Typography, Progress, Tabs, Tag, Space, Select, DatePicker, Input, Button, Empty } from "antd";
+import { TrendingUp, DollarSign, ShoppingBag, Award, Search, Download, Wallet, LockOpen, Lock } from "lucide-react";
 import { useStore } from "../store";
-import { PAYMENT_LABEL, type PaymentMethod, type Sale } from "../types";
+import { PAYMENT_LABEL, type CashMovementType, type ClosedCashSession, type PaymentMethod, type Sale } from "../types";
 import dayjs, { type Dayjs } from "dayjs";
 
-const { Text } = Typography;
+const { Text, Title } = Typography;
 const { RangePicker } = DatePicker;
 
 export function Financas() {
