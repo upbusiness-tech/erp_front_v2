@@ -10,7 +10,7 @@ interface Props {
 }
 
 export function EmployeeLogin({ onSuccess, onBack }: Props) {
-  const [loading, setLoading] = useState(false);
+  const { message } = App.useApp();
 
   const onFinish = (values: { name: string; password: string }) => {
     setLoading(true);
