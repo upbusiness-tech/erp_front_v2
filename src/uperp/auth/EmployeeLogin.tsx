@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form, Input, Button, Card, Typography, Select, message } from "antd";
+import { Form, Input, Button, Card, Typography, Select, App } from "antd";
 import { UserCircle2, ArrowLeft } from "lucide-react";
 
 const { Title, Text } = Typography;
@@ -10,6 +10,7 @@ interface Props {
 }
 
 export function EmployeeLogin({ onSuccess, onBack }: Props) {
+  const { message } = App.useApp();
   const [loading, setLoading] = useState(false);
 
   const onFinish = (values: { name: string; password: string }) => {

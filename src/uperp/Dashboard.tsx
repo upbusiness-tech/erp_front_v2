@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Layout, Menu, Avatar, Dropdown, Typography, Space, theme as antdTheme } from "antd";
+import { Layout, Menu, Avatar, Dropdown, Typography, Space, Drawer, Button, Grid, theme as antdTheme } from "antd";
 import {
   Store,
   Briefcase,
@@ -13,6 +13,7 @@ import {
   ChevronDown,
   Wallet,
   Settings,
+  Menu as MenuIcon,
 } from "lucide-react";
 import { VendaBalcao } from "./pages/VendaBalcao";
 import { VendaServico } from "./pages/VendaServico";
@@ -28,6 +29,7 @@ import { useStore } from "./store";
 
 const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
+const { useBreakpoint } = Grid;
 
 type PageKey =
   | "balcao"
@@ -72,11 +74,50 @@ interface Props {
   onLogout: () => void;
 }
 
+function BrandHeader({ dark, collapsed }: { dark: boolean; collapsed?: boolean }) {
+  return (
+    <div
+      style={{
+        height: 64,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: collapsed ? "center" : "flex-start",
+        padding: collapsed ? 0 : "0 20px",
+        gap: 10,
+        borderBottom: dark ? "1px solid #1f1f1f" : "1px solid #f0f0f0",
+      }}
+    >
+      <div
+        style={{
+          width: 36,
+          height: 36,
+          borderRadius: 8,
+          background: "#F26B1F",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+        }}
+      >
+        <Store color="#fff" size={20} />
+      </div>
+      {!collapsed && (
+        <Title level={4} style={{ color: dark ? "#fff" : "#1f1f1f", margin: 0 }}>
+          UpERP
+        </Title>
+      )}
+    </div>
+  );
+}
+
 export function Dashboard({ userName, onLogout }: Props) {
   const [collapsed, setCollapsed] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [page, setPage] = useState<PageKey>("balcao");
   const { token } = antdTheme.useToken();
   const { settings } = useStore();
+  const screens = useBreakpoint();
+  const isMobile = !screens.lg;
 
   const renderPage = () => {
     switch (page) {
@@ -95,69 +136,90 @@ export function Dashboard({ userName, onLogout }: Props) {
 
   const dark = settings.darkSidebar;
 
+  const handleMenuClick = (k: PageKey) => {
+    setPage(k);
+    if (isMobile) setDrawerOpen(false);
+  };
+
+  const menuItems = menu.map((m) => ({ key: m.key, label: m.label, icon: m.icon }));
+
   return (
     <Layout style={{ minHeight: "100vh" }}>
-      <Sider
-        collapsible
-        collapsed={collapsed}
-        onCollapse={setCollapsed}
-        theme={dark ? "dark" : "light"}
-        width={240}
-      >
-        <div
-          style={{
-            height: 64,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: collapsed ? "center" : "flex-start",
-            padding: collapsed ? 0 : "0 20px",
-            gap: 10,
-            borderBottom: dark ? "1px solid #1f1f1f" : "1px solid #f0f0f0",
+      {!isMobile && (
+        <Sider
+          collapsible
+          collapsed={collapsed}
+          onCollapse={setCollapsed}
+          theme={dark ? "dark" : "light"}
+          width={240}
+        >
+          <BrandHeader dark={dark} collapsed={collapsed} />
+          <Menu
+            theme={dark ? "dark" : "light"}
+            mode="inline"
+            selectedKeys={[page]}
+            onClick={(e) => handleMenuClick(e.key as PageKey)}
+            items={menuItems}
+            style={{ borderRight: 0, paddingTop: 8 }}
+          />
+        </Sider>
+      )}
+
+      {isMobile && (
+        <Drawer
+          placement="left"
+          open={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          width={260}
+          styles={{
+            body: { padding: 0, background: dark ? "#111" : "#fff" },
+            header: { display: "none" },
           }}
         >
-          <div
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 8,
-              background: "#F26B1F",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <Store color="#fff" size={20} />
-          </div>
-          {!collapsed && (
-            <Title level={4} style={{ color: dark ? "#fff" : "#1f1f1f", margin: 0 }}>
-              UpERP
-            </Title>
-          )}
-        </div>
-        <Menu
-          theme={dark ? "dark" : "light"}
-          mode="inline"
-          selectedKeys={[page]}
-          onClick={(e) => setPage(e.key as PageKey)}
-          items={menu.map((m) => ({ key: m.key, label: m.label, icon: m.icon }))}
-          style={{ borderRight: 0, paddingTop: 8 }}
-        />
-      </Sider>
+          <BrandHeader dark={dark} />
+          <Menu
+            theme={dark ? "dark" : "light"}
+            mode="inline"
+            selectedKeys={[page]}
+            onClick={(e) => handleMenuClick(e.key as PageKey)}
+            items={menuItems}
+            style={{ borderRight: 0, paddingTop: 8 }}
+          />
+        </Drawer>
+      )}
+
       <Layout>
         <Header
           style={{
             background: "#fff",
-            padding: "0 24px",
+            padding: isMobile ? "0 12px" : "0 24px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             borderBottom: "1px solid #f0f0f0",
+            gap: 8,
           }}
         >
-          <Title level={4} style={{ margin: 0 }}>
-            {titles[page]}
-          </Title>
+          <Space size={8} style={{ minWidth: 0, flex: 1 }}>
+            {isMobile && (
+              <Button
+                type="text"
+                icon={<MenuIcon size={20} />}
+                onClick={() => setDrawerOpen(true)}
+              />
+            )}
+            <Title
+              level={isMobile ? 5 : 4}
+              style={{
+                margin: 0,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {titles[page]}
+            </Title>
+          </Space>
           <Dropdown
             menu={{
               items: [
@@ -176,17 +238,27 @@ export function Dashboard({ userName, onLogout }: Props) {
               ],
             }}
           >
-            <Space style={{ cursor: "pointer" }}>
-              <Avatar style={{ background: "#F26B1F" }}>{userName.charAt(0)}</Avatar>
-              <div style={{ lineHeight: 1.2 }}>
-                <Text strong style={{ display: "block" }}>{userName}</Text>
-                <Text type="secondary" style={{ fontSize: 11 }}>Funcionário</Text>
-              </div>
+            <Space style={{ cursor: "pointer" }} size={6}>
+              <Avatar size={isMobile ? "small" : "default"} style={{ background: "#F26B1F" }}>
+                {userName.charAt(0)}
+              </Avatar>
+              {!isMobile && (
+                <div style={{ lineHeight: 1.2 }}>
+                  <Text strong style={{ display: "block" }}>{userName}</Text>
+                  <Text type="secondary" style={{ fontSize: 11 }}>Funcionário</Text>
+                </div>
+              )}
               <ChevronDown size={14} />
             </Space>
           </Dropdown>
         </Header>
-        <Content style={{ padding: 24, background: token.colorBgLayout }}>
+        <Content
+          style={{
+            padding: isMobile ? 12 : 24,
+            background: token.colorBgLayout,
+            minWidth: 0,
+          }}
+        >
           {renderPage()}
         </Content>
       </Layout>

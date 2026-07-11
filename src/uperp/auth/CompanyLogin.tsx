@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form, Input, Button, Card, Typography, Modal, message, Divider } from "antd";
+import { Form, Input, Button, Card, Typography, Modal, Divider, App } from "antd";
 import { Store, Building2 } from "lucide-react";
 
 const { Title, Text } = Typography;
@@ -9,6 +9,7 @@ interface Props {
 }
 
 export function CompanyLogin({ onSuccess }: Props) {
+  const { message } = App.useApp();
   const [loading, setLoading] = useState(false);
   const [registerOpen, setRegisterOpen] = useState(false);
 
