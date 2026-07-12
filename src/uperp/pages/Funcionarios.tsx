@@ -216,7 +216,7 @@ export function Funcionarios() {
                       <Checkbox.Group style={{ width: "100%" }}>
                         {permissionGroups.map(([group, perms]) => (
                           <div key={group} style={{ marginBottom: 8 }}>
-                            <Divider orientation="left" style={{ margin: "8px 0", fontSize: 13 }}>
+                            <Divider orientation="start" style={{ margin: "8px 0", fontSize: 13 }}>
 
                               {group}
                             </Divider>
