@@ -64,10 +64,10 @@ export const initialCustomers: Customer[] = [
 ];
 
 export const initialEmployees: Employee[] = [
-  { id: "1", name: "Pedro Almeida", role: "Gerente", email: "pedro@uperp.com", active: true },
-  { id: "2", name: "Juliana Costa", role: "Vendedor(a)", email: "juliana@uperp.com", active: true },
-  { id: "3", name: "Marcos Silva", role: "Caixa", email: "marcos@uperp.com", active: true },
-  { id: "4", name: "Renata Dias", role: "Estoquista", email: "renata@uperp.com", active: false },
+  { id: "1", name: "Pedro Almeida", role: "Gerente", email: "pedro@uperp.com", active: true, permissions: ["vendas.balcao","vendas.servico","caixa.gerenciar","estoque.gerenciar","clientes.gerenciar","funcionarios.gerenciar","financas.visualizar","empresa.editar","planos.gerenciar","configuracoes.gerenciar"] },
+  { id: "2", name: "Juliana Costa", role: "Vendedor(a)", email: "juliana@uperp.com", active: true, permissions: ["vendas.balcao","vendas.servico","clientes.gerenciar"] },
+  { id: "3", name: "Marcos Silva", role: "Caixa", email: "marcos@uperp.com", active: true, permissions: ["vendas.balcao","caixa.gerenciar"] },
+  { id: "4", name: "Renata Dias", role: "Estoquista", email: "renata@uperp.com", active: false, permissions: ["estoque.gerenciar"] },
 ];
 
 export const initialSales: Sale[] = [
