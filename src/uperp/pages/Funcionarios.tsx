@@ -217,6 +217,7 @@ export function Funcionarios() {
                         {permissionGroups.map(([group, perms]) => (
                           <div key={group} style={{ marginBottom: 8 }}>
                             <Divider orientation="left" style={{ margin: "8px 0", fontSize: 13 }}>
+
                               {group}
                             </Divider>
                             <Row gutter={[8, 8]}>
