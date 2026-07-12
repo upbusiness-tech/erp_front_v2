@@ -216,10 +216,10 @@ export function Funcionarios() {
                       <Checkbox.Group style={{ width: "100%" }}>
                         {permissionGroups.map(([group, perms]) => (
                           <div key={group} style={{ marginBottom: 8 }}>
-                            <Divider orientation="start" style={{ margin: "8px 0", fontSize: 13 }}>
-
+                            <Divider style={{ margin: "8px 0", fontSize: 13 }}>
                               {group}
                             </Divider>
+
                             <Row gutter={[8, 8]}>
                               {perms.map((p) => (
                                 <Col xs={24} sm={12} key={p.key}>
