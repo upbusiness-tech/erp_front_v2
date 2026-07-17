@@ -97,6 +97,8 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
   const [pValue, setPValue] = useState<number>(0);
   const [recentOpen, setRecentOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [receiptSale, setReceiptSale] = useState<Sale | null>(null);
+
 
   const filtered = useMemo(
     () =>
