@@ -306,6 +306,9 @@ export function Estoque() {
   const [editing, setEditing] = useState<Product | null>(null);
   const [editingGroup, setEditingGroup] = useState<Product[]>([]);
   const [newCat, setNewCat] = useState("");
+  const [editingCat, setEditingCat] = useState<Category | null>(null);
+  const [catForm] = Form.useForm<{ name: string }>();
+
 
   const totalItems = products.reduce((s, p) => s + p.stock, 0);
   const totalSkus = products.length;
