@@ -99,6 +99,16 @@ export interface Payment {
   value: number;
 }
 
+export interface SaleLine {
+  name: string;
+  sku?: string;
+  qty: number;
+  unitPrice: number;
+  size?: string;
+  color?: string;
+  observation?: string;
+}
+
 export interface Sale {
   id: string;
   date: string;
@@ -107,7 +117,10 @@ export interface Sale {
   type: "balcao" | "servico";
   customerId?: string;
   payments?: Payment[];
+  lines?: SaleLine[];
+  discount?: number;
 }
+
 
 export interface Invoice {
   id: string;

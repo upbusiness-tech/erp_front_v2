@@ -42,9 +42,12 @@ import {
   Plus,
   CheckCircle2,
   History,
+  Printer,
+  Receipt,
 } from "lucide-react";
 import { useStore } from "../store";
-import { PAYMENT_LABEL, type PaymentMethod, type Payment, type Sale, type Product } from "../types";
+import { PAYMENT_LABEL, type PaymentMethod, type Payment, type Sale, type Product, type SaleLine } from "../types";
+
 
 const { Title, Text } = Typography;
 const { useBreakpoint } = Grid;
@@ -94,6 +97,8 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
   const [pValue, setPValue] = useState<number>(0);
   const [recentOpen, setRecentOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [receiptSale, setReceiptSale] = useState<Sale | null>(null);
+
 
   const filtered = useMemo(
     () =>
@@ -166,6 +171,15 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
 
   const finalize = () => {
     if (paid < total - 0.001) return message.warning("Pagamento incompleto.");
+    const lines: SaleLine[] = cart.map((i) => ({
+      name: i.product.name,
+      sku: i.product.sku,
+      qty: i.qty,
+      unitPrice: i.customPrice ?? i.product.price,
+      size: i.size,
+      color: i.color,
+      observation: i.observation,
+    }));
     const sale: Sale = {
       id: `V${Math.floor(Math.random() * 9000 + 1000)}`,
       date: new Date().toISOString().slice(0, 10),
@@ -174,6 +188,8 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
       type: "balcao",
       customerId: selectedCustomerId || undefined,
       payments,
+      lines,
+      discount: discountValue,
     };
     addSale(sale);
     clearCart();
@@ -182,12 +198,10 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
     setPayments([]);
     setStep("items");
     setCartOpen(false);
-    message.success(
-      `Venda ${sale.id} finalizada! Total R$ ${total.toFixed(2)}${
-        settings.printReceipt ? " — Cupom enviado para impressão." : ""
-      }`
-    );
+    setReceiptSale(sale);
+    message.success(`Venda ${sale.id} finalizada!`);
   };
+
 
   const selectedCustomer = customers.find((c) => c.id === selectedCustomerId);
 
@@ -600,13 +614,14 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
         title="Vendas recentes"
         onCancel={() => setRecentOpen(false)}
         footer={null}
-        width={720}
+        width={860}
       >
         <Table
           rowKey="id"
           size="small"
           dataSource={recentSales}
           pagination={{ pageSize: 8 }}
+          scroll={{ x: 720 }}
           locale={{ emptyText: "Nenhuma venda registrada" }}
           columns={[
             { title: "Código", dataIndex: "id", width: 90 },
@@ -632,9 +647,153 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
               align: "right" as const,
               render: (v: number) => <Text strong style={{ color: "#F26B1F" }}>R$ {v.toFixed(2)}</Text>,
             },
+            {
+              title: "Ações",
+              width: 130,
+              render: (_, s: Sale) => (
+                <Space>
+                  <Button
+                    size="small"
+                    icon={<Receipt size={14} />}
+                    onClick={() => {
+                      setRecentOpen(false);
+                      setReceiptSale(s);
+                    }}
+                  >
+                    Ver
+                  </Button>
+                </Space>
+              ),
+            },
           ]}
         />
       </Modal>
+
+      <Modal
+        open={receiptSale !== null}
+        title={
+          receiptSale ? (
+            <Space>
+              <CheckCircle2 size={18} color="#16A34A" />
+              Venda {receiptSale.id}
+            </Space>
+          ) : (
+            ""
+          )
+        }
+        onCancel={() => setReceiptSale(null)}
+        footer={
+          receiptSale && (
+            <Space>
+              <Button onClick={() => setReceiptSale(null)}>Fechar</Button>
+              <Button
+                type="primary"
+                icon={<Printer size={14} />}
+                onClick={() => {
+                  message.success(`Cupom da venda ${receiptSale.id} enviado para impressão`);
+                }}
+              >
+                Reimprimir cupom
+              </Button>
+            </Space>
+          )
+        }
+        width={560}
+        destroyOnHidden
+      >
+        {receiptSale && (
+          <div>
+            <Row justify="space-between" style={{ marginBottom: 4 }}>
+              <Text type="secondary">Data</Text>
+              <Text>{receiptSale.date}</Text>
+            </Row>
+            <Row justify="space-between" style={{ marginBottom: 4 }}>
+              <Text type="secondary">Tipo</Text>
+              <Tag color={receiptSale.type === "balcao" ? "orange" : "blue"} style={{ margin: 0 }}>
+                {receiptSale.type === "balcao" ? "Balcão" : "Serviço"}
+              </Tag>
+            </Row>
+            <Row justify="space-between" style={{ marginBottom: 4 }}>
+              <Text type="secondary">Cliente</Text>
+              <Text>
+                {customers.find((c) => c.id === receiptSale.customerId)?.name || "Consumidor"}
+              </Text>
+            </Row>
+
+            <Divider style={{ margin: "12px 0" }}>Itens</Divider>
+            {receiptSale.lines?.length ? (
+              <List
+                size="small"
+                dataSource={receiptSale.lines}
+                renderItem={(l) => (
+                  <List.Item>
+                    <List.Item.Meta
+                      title={
+                        <Space>
+                          <Text strong>{l.name}</Text>
+                          {l.size && <Tag color="orange" style={{ margin: 0 }}>Tam. {l.size}</Tag>}
+                          {l.color && <Tag style={{ margin: 0 }}>{l.color}</Tag>}
+                        </Space>
+                      }
+                      description={
+                        <Space direction="vertical" size={0}>
+                          <Text type="secondary" style={{ fontSize: 12 }}>
+                            {l.qty} × R$ {l.unitPrice.toFixed(2)}
+                            {l.sku ? ` · ${l.sku}` : ""}
+                          </Text>
+                          {l.observation && (
+                            <Text italic type="secondary" style={{ fontSize: 11 }}>
+                              "{l.observation}"
+                            </Text>
+                          )}
+                        </Space>
+                      }
+                    />
+                    <Text strong>R$ {(l.qty * l.unitPrice).toFixed(2)}</Text>
+                  </List.Item>
+                )}
+              />
+            ) : (
+              <Text type="secondary">
+                {receiptSale.items} item(ns) — detalhamento não disponível
+              </Text>
+            )}
+
+            <Divider style={{ margin: "12px 0" }}>Pagamento</Divider>
+            {receiptSale.payments?.length ? (
+              <List
+                size="small"
+                dataSource={receiptSale.payments}
+                renderItem={(p) => (
+                  <List.Item>
+                    <Space>
+                      <CreditCard size={14} color="#F26B1F" />
+                      <Text>{PAYMENT_LABEL[p.method]}</Text>
+                    </Space>
+                    <Text strong>R$ {p.value.toFixed(2)}</Text>
+                  </List.Item>
+                )}
+              />
+            ) : (
+              <Text type="secondary">Sem detalhamento de pagamento</Text>
+            )}
+
+            {receiptSale.discount ? (
+              <Row justify="space-between" style={{ marginTop: 8 }}>
+                <Text type="secondary">Desconto</Text>
+                <Text type="secondary">- R$ {receiptSale.discount.toFixed(2)}</Text>
+              </Row>
+            ) : null}
+            <Row justify="space-between" style={{ marginTop: 8 }}>
+              <Title level={4} style={{ margin: 0 }}>Total</Title>
+              <Title level={4} style={{ margin: 0, color: "#F26B1F" }}>
+                R$ {receiptSale.total.toFixed(2)}
+              </Title>
+            </Row>
+          </div>
+        )}
+      </Modal>
+
 
       <Modal
         open={modalProduct !== null}
