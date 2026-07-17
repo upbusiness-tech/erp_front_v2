@@ -368,6 +368,32 @@ export function Estoque() {
     message.success("Categoria removida");
   };
 
+  const openEditCat = (c: Category) => {
+    setEditingCat(c);
+    catForm.setFieldsValue({ name: c.name });
+  };
+
+  const renameCategory = ({ name }: { name: string }) => {
+    if (!editingCat) return;
+    const trimmed = name.trim();
+    if (!trimmed) return message.warning("Informe um nome");
+    if (
+      categories.some(
+        (c) => c.id !== editingCat.id && c.name.toLowerCase() === trimmed.toLowerCase()
+      )
+    ) {
+      return message.warning("Já existe uma categoria com esse nome");
+    }
+    const oldName = editingCat.name;
+    setCategories(categories.map((c) => (c.id === editingCat.id ? { ...c, name: trimmed } : c)));
+    if (trimmed !== oldName) {
+      setProducts(products.map((p) => (p.category === oldName ? { ...p, category: trimmed } : p)));
+    }
+    message.success("Categoria atualizada");
+    setEditingCat(null);
+  };
+
+
   const healthScore = totalSkus
     ? Math.round(((totalSkus - outOfStock - lowStock) / totalSkus) * 100)
     : 100;
