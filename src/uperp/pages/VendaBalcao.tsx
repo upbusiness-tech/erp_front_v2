@@ -42,9 +42,12 @@ import {
   Plus,
   CheckCircle2,
   History,
+  Printer,
+  Receipt,
 } from "lucide-react";
 import { useStore } from "../store";
-import { PAYMENT_LABEL, type PaymentMethod, type Payment, type Sale, type Product } from "../types";
+import { PAYMENT_LABEL, type PaymentMethod, type Payment, type Sale, type Product, type SaleLine } from "../types";
+
 
 const { Title, Text } = Typography;
 const { useBreakpoint } = Grid;
