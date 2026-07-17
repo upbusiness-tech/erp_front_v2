@@ -171,6 +171,15 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
 
   const finalize = () => {
     if (paid < total - 0.001) return message.warning("Pagamento incompleto.");
+    const lines: SaleLine[] = cart.map((i) => ({
+      name: i.product.name,
+      sku: i.product.sku,
+      qty: i.qty,
+      unitPrice: i.customPrice ?? i.product.price,
+      size: i.size,
+      color: i.color,
+      observation: i.observation,
+    }));
     const sale: Sale = {
       id: `V${Math.floor(Math.random() * 9000 + 1000)}`,
       date: new Date().toISOString().slice(0, 10),
@@ -179,6 +188,8 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
       type: "balcao",
       customerId: selectedCustomerId || undefined,
       payments,
+      lines,
+      discount: discountValue,
     };
     addSale(sale);
     clearCart();
@@ -187,12 +198,10 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
     setPayments([]);
     setStep("items");
     setCartOpen(false);
-    message.success(
-      `Venda ${sale.id} finalizada! Total R$ ${total.toFixed(2)}${
-        settings.printReceipt ? " — Cupom enviado para impressão." : ""
-      }`
-    );
+    setReceiptSale(sale);
+    message.success(`Venda ${sale.id} finalizada!`);
   };
+
 
   const selectedCustomer = customers.find((c) => c.id === selectedCustomerId);
 
