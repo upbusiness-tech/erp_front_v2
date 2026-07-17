@@ -542,31 +542,55 @@ export function Estoque() {
                       Adicionar
                     </Button>
                   </Space.Compact>
-                  <List
+                  <Table
+                    rowKey="id"
                     dataSource={categories}
+                    pagination={{ pageSize: 8 }}
+                    scroll={{ x: 480 }}
                     locale={{ emptyText: "Nenhuma categoria cadastrada" }}
-                    renderItem={(c) => {
-                      const count = productCountByCategory(c.name);
-                      return (
-                        <List.Item
-                          actions={[
-                            <Tag key="c" color="orange">{count} produto{count === 1 ? "" : "s"}</Tag>,
+                    columns={[
+                      {
+                        title: "Categoria",
+                        dataIndex: "name",
+                        render: (n: string) => (
+                          <Space>
+                            <TagIcon size={14} color="#F26B1F" />
+                            <Text strong>{n}</Text>
+                          </Space>
+                        ),
+                      },
+                      {
+                        title: "Produtos vinculados",
+                        width: 180,
+                        render: (_, c: Category) => {
+                          const count = productCountByCategory(c.name);
+                          return (
+                            <Tag color={count > 0 ? "orange" : "default"}>
+                              {count} produto{count === 1 ? "" : "s"}
+                            </Tag>
+                          );
+                        },
+                      },
+                      {
+                        title: "Ações",
+                        width: 130,
+                        render: (_, c: Category) => (
+                          <Space>
+                            <Button
+                              size="small"
+                              icon={<Pencil size={14} />}
+                              onClick={() => openEditCat(c)}
+                            />
                             <Popconfirm
-                              key="del"
                               title="Remover categoria?"
                               onConfirm={() => removeCategory(c)}
                             >
-                              <Button size="small" danger type="text" icon={<Trash2 size={14} />} />
-                            </Popconfirm>,
-                          ]}
-                        >
-                          <Space>
-                            <TagIcon size={14} color="#F26B1F" />
-                            {c.name}
+                              <Button size="small" danger icon={<Trash2 size={14} />} />
+                            </Popconfirm>
                           </Space>
-                        </List.Item>
-                      );
-                    }}
+                        ),
+                      },
+                    ]}
                   />
                 </>
               ),
@@ -574,6 +598,79 @@ export function Estoque() {
           ]}
         />
       </Card>
+
+      <Modal
+        open={editingCat !== null}
+        title={
+          editingCat ? (
+            <Space>
+              <TagIcon size={16} color="#F26B1F" />
+              Categoria: {editingCat.name}
+            </Space>
+          ) : (
+            ""
+          )
+        }
+        onCancel={() => setEditingCat(null)}
+        onOk={() => catForm.submit()}
+        okText="Salvar"
+        cancelText="Fechar"
+        width={720}
+        destroyOnHidden
+      >
+        {editingCat && (
+          <>
+            <Form form={catForm} layout="vertical" onFinish={renameCategory}>
+              <Form.Item label="Nome da categoria" name="name" rules={[{ required: true }]}>
+                <Input />
+              </Form.Item>
+            </Form>
+
+            <Text strong style={{ display: "block", marginBottom: 8 }}>
+              Produtos vinculados
+            </Text>
+            {(() => {
+              const linked = products.filter((p) => p.category === editingCat.name);
+              if (linked.length === 0) {
+                return (
+                  <Empty
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    description="Nenhum produto nesta categoria"
+                  />
+                );
+              }
+              return (
+                <Table
+                  rowKey="id"
+                  size="small"
+                  dataSource={linked}
+                  pagination={{ pageSize: 5 }}
+                  scroll={{ x: 500 }}
+                  columns={[
+                    { title: "SKU", dataIndex: "sku", width: 110 },
+                    { title: "Produto", dataIndex: "name" },
+                    {
+                      title: "Preço",
+                      dataIndex: "price",
+                      width: 100,
+                      render: (v: number) => `R$ ${v.toFixed(2)}`,
+                    },
+                    {
+                      title: "Estoque",
+                      dataIndex: "stock",
+                      width: 90,
+                      render: (v: number) => (
+                        <Tag color={v > 5 ? "green" : v > 0 ? "orange" : "red"}>{v}</Tag>
+                      ),
+                    },
+                  ]}
+                />
+              );
+            })()}
+          </>
+        )}
+      </Modal>
     </>
   );
 }
+
