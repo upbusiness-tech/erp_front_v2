@@ -279,6 +279,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         updateCartQty,
         removeFromCart,
         clearCart,
+        applySpecialPricesToCart,
+        resetCartPrices,
         company,
         setCompany,
         settings,
