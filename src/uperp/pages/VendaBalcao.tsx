@@ -76,6 +76,8 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
     customers,
     selectedCustomerId,
     setSelectedCustomerId,
+    applySpecialPricesToCart,
+    resetCartPrices,
     settings,
     sales,
   } = useStore();
