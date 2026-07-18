@@ -299,39 +299,95 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
 
           <Divider style={{ margin: "8px 0 12px" }} />
 
+          {eligibleSpecialPrices.length > 0 && (
+            <div
+              style={{
+                background: "#FEF3C7",
+                border: "1px solid #FCD34D",
+                padding: 10,
+                borderRadius: 8,
+                marginBottom: 12,
+              }}
+            >
+              <Space align="start" style={{ width: "100%", justifyContent: "space-between" }}>
+                <div style={{ flex: 1 }}>
+                  <Text strong style={{ fontSize: 12, display: "block" }}>
+                    <Star size={12} style={{ verticalAlign: -2, marginRight: 4 }} />
+                    {eligibleSpecialPrices.length} produto(s) com preço especial
+                  </Text>
+                  <Text type="secondary" style={{ fontSize: 11 }}>
+                    Este cliente tem preço diferenciado para itens da comanda.
+                  </Text>
+                </div>
+                <Space direction="vertical" size={4}>
+                  <Button
+                    size="small"
+                    type="primary"
+                    onClick={() => {
+                      const n = applySpecialPricesToCart(selectedCustomerId);
+                      message.success(`${n} item(ns) atualizado(s) com preço especial`);
+                    }}
+                  >
+                    Aplicar
+                  </Button>
+                  {cart.some((i) => i.customPrice != null) && (
+                    <Button size="small" type="link" onClick={resetCartPrices}>
+                      Restaurar
+                    </Button>
+                  )}
+                </Space>
+              </Space>
+            </div>
+          )}
+
           {cart.length === 0 ? (
             <Empty description="Carrinho vazio" />
           ) : (
             <List
               dataSource={cart}
-              renderItem={(item) => (
-                <List.Item
-                  actions={[
-                    <Button key="r" size="small" type="text" danger icon={<Trash2 size={14} />} onClick={() => removeFromCart(item.id)} />,
-                  ]}
-                >
-                  <List.Item.Meta
-                    title={item.product.name}
-                    description={
-                      <Space direction="vertical" size={2} style={{ width: "100%" }}>
-                        {(item.size || item.color) && (
-                          <Space size={4} wrap>
-                            {item.size && <Tag color="orange" style={{ margin: 0 }}>Tam. {item.size}</Tag>}
-                            {item.color && <Tag color="default" style={{ margin: 0 }}>{item.color}</Tag>}
-                          </Space>
-                        )}
-                        {item.observation && (
-                          <Text type="secondary" italic style={{ fontSize: 11 }}>"{item.observation}"</Text>
-                        )}
+              renderItem={(item) => {
+                const effective = item.customPrice ?? item.product.price;
+                const hasSpecial = item.customPrice != null && item.customPrice !== item.product.price;
+                return (
+                  <List.Item
+                    actions={[
+                      <Button key="r" size="small" type="text" danger icon={<Trash2 size={14} />} onClick={() => removeFromCart(item.id)} />,
+                    ]}
+                  >
+                    <List.Item.Meta
+                      title={
                         <Space>
-                          <InputNumber size="small" min={1} value={item.qty} onChange={(v) => updateCartQty(item.id, v || 1)} style={{ width: 60 }} />
-                          <Text type="secondary">R$ {(item.product.price * item.qty).toFixed(2)}</Text>
+                          {item.product.name}
+                          {hasSpecial && <Tag color="gold" style={{ margin: 0 }} icon={<Star size={10} />}>Especial</Tag>}
                         </Space>
-                      </Space>
-                    }
-                  />
-                </List.Item>
-              )}
+                      }
+                      description={
+                        <Space direction="vertical" size={2} style={{ width: "100%" }}>
+                          {(item.size || item.color) && (
+                            <Space size={4} wrap>
+                              {item.size && <Tag color="orange" style={{ margin: 0 }}>Tam. {item.size}</Tag>}
+                              {item.color && <Tag color="default" style={{ margin: 0 }}>{item.color}</Tag>}
+                            </Space>
+                          )}
+                          {item.observation && (
+                            <Text type="secondary" italic style={{ fontSize: 11 }}>"{item.observation}"</Text>
+                          )}
+                          {hasSpecial && (
+                            <Text type="secondary" style={{ fontSize: 11 }}>
+                              De <Text delete style={{ fontSize: 11 }}>R$ {item.product.price.toFixed(2)}</Text>{" "}
+                              por <Text strong style={{ color: "#F26B1F", fontSize: 11 }}>R$ {effective.toFixed(2)}</Text>
+                            </Text>
+                          )}
+                          <Space>
+                            <InputNumber size="small" min={1} value={item.qty} onChange={(v) => updateCartQty(item.id, v || 1)} style={{ width: 60 }} />
+                            <Text type="secondary">R$ {(effective * item.qty).toFixed(2)}</Text>
+                          </Space>
+                        </Space>
+                      }
+                    />
+                  </List.Item>
+                );
+              }}
             />
           )}
 
@@ -349,6 +405,7 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
           {settings.askDiscountReason && discountValue > 0 && (
             <Input placeholder="Motivo do desconto" value={discountReason} onChange={(e) => setDiscountReason(e.target.value)} style={{ marginBottom: 12 }} />
           )}
+
 
           <Row justify="space-between"><Text>Subtotal</Text><Text>R$ {subtotal.toFixed(2)}</Text></Row>
           <Row justify="space-between"><Text type="secondary">Desconto</Text><Text type="secondary">- R$ {discountValue.toFixed(2)}</Text></Row>
