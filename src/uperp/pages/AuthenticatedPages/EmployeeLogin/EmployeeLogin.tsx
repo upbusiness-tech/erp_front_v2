@@ -1,26 +1,14 @@
-import { App, Button, Card, Form, Input, Select, Typography } from "antd";
+import { Button, Card, Form, Input, Select, Typography } from "antd";
 import { ArrowLeft, UserCircle2 } from "lucide-react";
-import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useEmployeeLoginController } from "./useEmployeeLogin.controller";
 
 const { Title, Text } = Typography;
 
-interface Props {
-  onSuccess: (name: string) => void;
-  onBack: () => void;
-}
-
 export function EmployeeLogin() {
-  const { message } = App.useApp();
-  const [loading, setLoading] = useState(false);
-
-  const onFinish = (values: { name: string; password: string }) => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      message.success(`Bem-vindo(a), ${values.name}!`);
-      // onSuccess(values.name);
-    }, 500);
-  };
+  const navigate = useNavigate();
+  const { avaliableEmployees, isLoading, handleLoginWithEmployee, isSubmitting } =
+    useEmployeeLoginController();
 
   return (
     <div
@@ -55,25 +43,23 @@ export function EmployeeLogin() {
           <Text type="secondary">Minha Loja Demo Ltda</Text>
         </div>
 
-        <Form
-          layout="vertical"
-          onFinish={onFinish}
-          initialValues={{ name: "Pedro Almeida", password: "demo" }}
-        >
-          <Form.Item name="name" label="Funcionário" rules={[{ required: true }]}>
+        <Form layout="vertical" onFinish={handleLoginWithEmployee}>
+          <Form.Item name="username" label="Funcionário" rules={[{ required: true }]}>
             <Select
+              loading={isLoading}
               size="large"
-              options={[
-                { value: "Pedro Almeida", label: "Pedro Almeida (Gerente)" },
-                { value: "Juliana Costa", label: "Juliana Costa (Vendedor)" },
-                { value: "Marcos Silva", label: "Marcos Silva (Caixa)" },
-              ]}
+              options={avaliableEmployees.map((ae) => {
+                return {
+                  value: ae.username,
+                  label: `${ae.employee.name} (${ae.employee.type})`,
+                };
+              })}
             />
           </Form.Item>
           <Form.Item name="password" label="Senha" rules={[{ required: true }]}>
             <Input.Password placeholder="••••••" size="large" />
           </Form.Item>
-          <Button type="primary" htmlType="submit" block size="large" loading={loading}>
+          <Button type="primary" htmlType="submit" block size="large" loading={isSubmitting}>
             Entrar no Sistema
           </Button>
         </Form>
@@ -81,7 +67,7 @@ export function EmployeeLogin() {
         <Button
           type="link"
           icon={<ArrowLeft size={14} />}
-          // onClick={onBack}
+          onClick={() => navigate("/")}
           style={{ marginTop: 8, padding: 0 }}
         >
           Trocar empresa

@@ -1,4 +1,5 @@
 import { useStore } from "@/uperp/store";
+import { useAuthStore } from "@/stores/auth.store";
 import {
   Avatar,
   Button,
@@ -138,16 +139,19 @@ const pathToPageKey: Record<string, PageKey> = {
   "/configuracoes": "configuracoes",
 };
 
-export function SideBar({ userName = "Sofia", onLogout = () => console.log("") }: Props) {
+export function SideBar({ userName: _userName, onLogout: _onLogout }: Props) {
   const [collapsed, setCollapsed] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { token } = antdTheme.useToken();
   const { settings } = useStore();
+  const { employeeName, logout } = useAuthStore();
   const screens = useBreakpoint();
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = !screens.lg;
   const currentPage = pathToPageKey[location.pathname] || "balcao";
+  const userName = _userName ?? employeeName ?? "Sofia";
+  const onLogout = _onLogout ?? (() => { logout(); navigate("/"); });
 
   const dark = settings.darkSidebar;
 

@@ -1,26 +1,15 @@
 import { App, Button, Card, Divider, Form, Input, Modal, Typography } from "antd";
 import { Building2, Store } from "lucide-react";
 import { useState } from "react";
+import { useCompanyLoginController } from "./useCompanyLogin.controller";
 
 const { Title, Text } = Typography;
 
-interface Props {
-  onSuccess: () => void;
-}
-
 export function CompanyLogin() {
   const { message } = App.useApp();
-  const [loading, setLoading] = useState(false);
   const [registerOpen, setRegisterOpen] = useState(false);
 
-  const onFinish = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      message.success("Empresa autenticada com sucesso!");
-      // onSuccess();
-    }, 600);
-  };
+  const { handleLoginWithCompany, isSubmitting } = useCompanyLoginController();
 
   return (
     <div
@@ -55,18 +44,14 @@ export function CompanyLogin() {
           <Text type="secondary">Acesso da Empresa</Text>
         </div>
 
-        <Form
-          layout="vertical"
-          onFinish={onFinish}
-          initialValues={{ cnpj: "12.345.678/0001-90", password: "demo" }}
-        >
-          <Form.Item name="cnpj" label="CNPJ" rules={[{ required: true }]}>
-            <Input placeholder="00.000.000/0000-00" size="large" />
+        <Form layout="vertical" onFinish={handleLoginWithCompany}>
+          <Form.Item name="email" label="E-mail" rules={[{ required: true }]}>
+            <Input placeholder="suaempresa@email.com" size="large" />
           </Form.Item>
           <Form.Item name="password" label="Senha" rules={[{ required: true }]}>
             <Input.Password placeholder="••••••" size="large" />
           </Form.Item>
-          <Button type="primary" htmlType="submit" block size="large" loading={loading}>
+          <Button type="primary" htmlType="submit" block size="large" loading={isSubmitting}>
             Entrar
           </Button>
         </Form>
