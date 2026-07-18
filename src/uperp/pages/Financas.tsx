@@ -542,3 +542,119 @@ function CashHistory({ history, sales }: { history: ClosedCashSession[]; sales: 
   );
 }
 
+interface ReportEntry {
+  id: string;
+  title: string;
+  period: string;
+  generatedAt: string;
+  frequency: "semanal" | "mensal" | "anual";
+  totalRevenue: number;
+  totalSales: number;
+}
+
+const initialReports: ReportEntry[] = [
+  { id: "R-2026-W28", title: "Relatório Semanal", period: "13/07 a 19/07/2026", generatedAt: "2026-07-19", frequency: "semanal", totalRevenue: 15420.5, totalSales: 84 },
+  { id: "R-2026-W27", title: "Relatório Semanal", period: "06/07 a 12/07/2026", generatedAt: "2026-07-12", frequency: "semanal", totalRevenue: 12980.3, totalSales: 71 },
+  { id: "R-2026-06", title: "Relatório Mensal", period: "Junho/2026", generatedAt: "2026-07-01", frequency: "mensal", totalRevenue: 58200.9, totalSales: 312 },
+  { id: "R-2026-05", title: "Relatório Mensal", period: "Maio/2026", generatedAt: "2026-06-01", frequency: "mensal", totalRevenue: 51840.2, totalSales: 287 },
+  { id: "R-2025-ANUAL", title: "Relatório Anual", period: "2025", generatedAt: "2026-01-05", frequency: "anual", totalRevenue: 612300, totalSales: 3450 },
+];
+
+function Reports() {
+  const [reports, setReports] = useState<ReportEntry[]>(initialReports);
+  const [filter, setFilter] = useState<"all" | "semanal" | "mensal" | "anual">("all");
+
+  const filtered = reports.filter((r) => filter === "all" || r.frequency === filter);
+  const groups = {
+    semanal: reports.filter((r) => r.frequency === "semanal").length,
+    mensal: reports.filter((r) => r.frequency === "mensal").length,
+    anual: reports.filter((r) => r.frequency === "anual").length,
+  };
+
+  const generateNew = (freq: ReportEntry["frequency"]) => {
+    const id = `R-${Date.now().toString().slice(-6)}`;
+    const entry: ReportEntry = {
+      id,
+      title: freq === "semanal" ? "Relatório Semanal" : freq === "mensal" ? "Relatório Mensal" : "Relatório Anual",
+      period: freq === "semanal" ? "Semana atual" : freq === "mensal" ? "Mês atual" : "Ano atual",
+      generatedAt: new Date().toISOString().slice(0, 10),
+      frequency: freq,
+      totalRevenue: Math.floor(Math.random() * 20000 + 5000),
+      totalSales: Math.floor(Math.random() * 100 + 20),
+    };
+    setReports((r) => [entry, ...r]);
+  };
+
+  return (
+    <>
+      <Row gutter={16} style={{ marginBottom: 16 }}>
+        <Col xs={12} md={6}><Card><Statistic title="Relatórios semanais" value={groups.semanal} prefix={<Calendar size={16} />} /></Card></Col>
+        <Col xs={12} md={6}><Card><Statistic title="Relatórios mensais" value={groups.mensal} prefix={<Calendar size={16} />} /></Card></Col>
+        <Col xs={12} md={6}><Card><Statistic title="Relatórios anuais" value={groups.anual} prefix={<Calendar size={16} />} /></Card></Col>
+        <Col xs={12} md={6}>
+          <Card>
+            <Text type="secondary" style={{ fontSize: 12 }}>Gerar novo</Text>
+            <Space wrap style={{ marginTop: 6 }}>
+              <Button size="small" icon={<Plus size={12} />} onClick={() => generateNew("semanal")}>Semanal</Button>
+              <Button size="small" icon={<Plus size={12} />} onClick={() => generateNew("mensal")}>Mensal</Button>
+            </Space>
+          </Card>
+        </Col>
+      </Row>
+
+      <Card
+        title="Histórico de Relatórios"
+        extra={
+          <Select
+            value={filter}
+            onChange={setFilter}
+            style={{ width: 160 }}
+            options={[
+              { value: "all", label: "Todas frequências" },
+              { value: "semanal", label: "Semanais" },
+              { value: "mensal", label: "Mensais" },
+              { value: "anual", label: "Anuais" },
+            ]}
+          />
+        }
+      >
+        {filtered.length === 0 ? (
+          <Empty description="Nenhum relatório encontrado" />
+        ) : (
+          <List
+            dataSource={filtered}
+            renderItem={(r) => (
+              <List.Item
+                actions={[
+                  <Button key="d" size="small" icon={<Download size={12} />}>Baixar</Button>,
+                  <Button key="v" size="small" type="link">Visualizar</Button>,
+                ]}
+              >
+                <List.Item.Meta
+                  avatar={<FileText size={22} color="#F26B1F" />}
+                  title={
+                    <Space>
+                      <Text strong>{r.title}</Text>
+                      <Tag color={r.frequency === "semanal" ? "blue" : r.frequency === "mensal" ? "orange" : "purple"}>
+                        {r.frequency}
+                      </Tag>
+                    </Space>
+                  }
+                  description={
+                    <Space direction="vertical" size={0}>
+                      <Text style={{ fontSize: 12 }}>Período: {r.period}</Text>
+                      <Text type="secondary" style={{ fontSize: 11 }}>
+                        Gerado em {r.generatedAt} · {r.totalSales} vendas · R$ {r.totalRevenue.toFixed(2)}
+                      </Text>
+                    </Space>
+                  }
+                />
+              </List.Item>
+            )}
+          />
+        )}
+      </Card>
+    </>
+  );
+}
+
