@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { Card, Row, Col, Statistic, Table, Typography, Progress, Tabs, Tag, Space, Select, DatePicker, Input, Button, Empty } from "antd";
-import { TrendingUp, DollarSign, ShoppingBag, Award, Search, Download, Wallet, LockOpen, Lock } from "lucide-react";
+import { Card, Row, Col, Statistic, Table, Typography, Progress, Tabs, Tag, Space, Select, DatePicker, Input, Button, Empty, List } from "antd";
+import { TrendingUp, DollarSign, ShoppingBag, Award, Search, Download, Wallet, LockOpen, Lock, FileText, Calendar, Plus } from "lucide-react";
 import { useStore } from "../store";
 import { PAYMENT_LABEL, type CashMovementType, type ClosedCashSession, type PaymentMethod, type Sale } from "../types";
 import dayjs, { type Dayjs } from "dayjs";
@@ -8,12 +8,29 @@ import dayjs, { type Dayjs } from "dayjs";
 const { Text, Title } = Typography;
 const { RangePicker } = DatePicker;
 
+const PAYMENT_COLORS: Record<PaymentMethod, string> = {
+  pix: "#16A34A",
+  debito: "#2563EB",
+  credito: "#F26B1F",
+  dinheiro: "#7C3AED",
+};
+
 export function Financas() {
   const { sales, products, customers, cashHistory } = useStore();
 
+  const today = new Date().toISOString().slice(0, 10);
+  const todaySales = sales.filter((s) => s.date === today);
+  const todayRevenue = todaySales.reduce((s, x) => s + x.total, 0);
+  const todayCount = todaySales.length;
+  const todayAvg = todayCount > 0 ? todayRevenue / todayCount : 0;
+
   const totalRevenue = sales.reduce((s, x) => s + x.total, 0);
-  const totalSales = sales.length;
-  const avgTicket = totalSales > 0 ? totalRevenue / totalSales : 0;
+
+  const paymentTotals = useMemo(() => {
+    const acc: Record<PaymentMethod, number> = { pix: 0, debito: 0, credito: 0, dinheiro: 0 };
+    sales.forEach((s) => s.payments?.forEach((p) => (acc[p.method] += p.value)));
+    return acc;
+  }, [sales]);
 
   const topProducts = products
     .slice(0, 5)
@@ -32,13 +49,73 @@ export function Financas() {
   ];
   const maxV = Math.max(...weekData.map((d) => d.v));
 
+  const PaymentBadges = (
+    <Card style={{ marginBottom: 16 }} styles={{ body: { padding: 12 } }}>
+      <Row gutter={[8, 8]} align="middle">
+        <Col xs={24} md={4}>
+          <Text type="secondary" style={{ fontSize: 12 }}>
+            Recebido por método (geral)
+          </Text>
+        </Col>
+        {(Object.keys(PAYMENT_LABEL) as PaymentMethod[]).map((m) => (
+          <Col xs={12} md={5} key={m}>
+            <div
+              style={{
+                padding: "8px 12px",
+                borderRadius: 8,
+                border: `1px solid ${PAYMENT_COLORS[m]}22`,
+                background: `${PAYMENT_COLORS[m]}0d`,
+              }}
+            >
+              <Text style={{ fontSize: 11, color: PAYMENT_COLORS[m], fontWeight: 600 }}>
+                {PAYMENT_LABEL[m]}
+              </Text>
+              <div style={{ fontWeight: 700, fontSize: 15 }}>
+                R$ {paymentTotals[m].toFixed(2)}
+              </div>
+            </div>
+          </Col>
+        ))}
+      </Row>
+    </Card>
+  );
+
+  const StatCard = ({
+    title, value, prefix, color, precision = 2,
+  }: { title: string; value: number; prefix?: React.ReactNode; color?: string; precision?: number }) => (
+    <Card>
+      <Space size={4} style={{ marginBottom: 4 }}>
+        <Tag color="orange" style={{ margin: 0, fontSize: 10 }}>HOJE</Tag>
+      </Space>
+      <Statistic title={title} value={value} precision={precision} prefix={prefix} valueStyle={color ? { color } : undefined} />
+    </Card>
+  );
+
   const Estatisticas = (
     <>
+      {PaymentBadges}
       <Row gutter={16} style={{ marginBottom: 16 }}>
-        <Col xs={12} md={6}><Card><Statistic title="Receita total" value={totalRevenue} precision={2} prefix={<DollarSign size={18} />} valueStyle={{ color: "#16A34A" }} /></Card></Col>
-        <Col xs={12} md={6}><Card><Statistic title="Vendas" value={totalSales} prefix={<ShoppingBag size={18} />} /></Card></Col>
-        <Col xs={12} md={6}><Card><Statistic title="Ticket médio" value={avgTicket} precision={2} prefix={<TrendingUp size={18} />} valueStyle={{ color: "#F26B1F" }} /></Card></Col>
-        <Col xs={12} md={6}><Card><Statistic title="Lucro estimado" value={totalRevenue * 0.32} precision={2} prefix={<Award size={18} />} /></Card></Col>
+        <Col xs={12} md={6}><StatCard title="Receita" value={todayRevenue} prefix={<DollarSign size={18} />} color="#16A34A" /></Col>
+        <Col xs={12} md={6}><StatCard title="Vendas" value={todayCount} precision={0} prefix={<ShoppingBag size={18} />} /></Col>
+        <Col xs={12} md={6}><StatCard title="Ticket médio" value={todayAvg} prefix={<TrendingUp size={18} />} color="#F26B1F" /></Col>
+        <Col xs={12} md={6}><StatCard title="Lucro estimado" value={todayRevenue * 0.32} prefix={<Award size={18} />} /></Col>
+      </Row>
+      <Row gutter={16} style={{ marginBottom: 16 }}>
+        <Col xs={24} md={8}>
+          <Card>
+            <Statistic title="Receita acumulada (total)" value={totalRevenue} precision={2} prefix="R$" valueStyle={{ color: "#0F172A" }} />
+          </Card>
+        </Col>
+        <Col xs={24} md={8}>
+          <Card>
+            <Statistic title="Total de vendas" value={sales.length} prefix={<ShoppingBag size={16} />} />
+          </Card>
+        </Col>
+        <Col xs={24} md={8}>
+          <Card>
+            <Statistic title="Clientes atendidos" value={new Set(sales.map((s) => s.customerId).filter(Boolean)).size} />
+          </Card>
+        </Col>
       </Row>
       <Row gutter={16}>
         <Col xs={24} lg={14}>
@@ -85,10 +162,12 @@ export function Financas() {
         { key: "stats", label: "Estatísticas", children: Estatisticas },
         { key: "history", label: "Histórico de Vendas", children: <SalesHistory sales={sales} customers={customers} /> },
         { key: "cash", label: "Histórico de Caixas", children: <CashHistory history={cashHistory} sales={sales} /> },
+        { key: "reports", label: "Relatórios", children: <Reports /> },
       ]}
     />
   );
 }
+
 
 function SalesHistory({ sales, customers }: { sales: Sale[]; customers: ReturnType<typeof useStore>["customers"] }) {
   const [search, setSearch] = useState("");
@@ -459,6 +538,122 @@ function CashHistory({ history, sales }: { history: ClosedCashSession[]; sales: 
           )}
         </Col>
       </Row>
+    </>
+  );
+}
+
+interface ReportEntry {
+  id: string;
+  title: string;
+  period: string;
+  generatedAt: string;
+  frequency: "semanal" | "mensal" | "anual";
+  totalRevenue: number;
+  totalSales: number;
+}
+
+const initialReports: ReportEntry[] = [
+  { id: "R-2026-W28", title: "Relatório Semanal", period: "13/07 a 19/07/2026", generatedAt: "2026-07-19", frequency: "semanal", totalRevenue: 15420.5, totalSales: 84 },
+  { id: "R-2026-W27", title: "Relatório Semanal", period: "06/07 a 12/07/2026", generatedAt: "2026-07-12", frequency: "semanal", totalRevenue: 12980.3, totalSales: 71 },
+  { id: "R-2026-06", title: "Relatório Mensal", period: "Junho/2026", generatedAt: "2026-07-01", frequency: "mensal", totalRevenue: 58200.9, totalSales: 312 },
+  { id: "R-2026-05", title: "Relatório Mensal", period: "Maio/2026", generatedAt: "2026-06-01", frequency: "mensal", totalRevenue: 51840.2, totalSales: 287 },
+  { id: "R-2025-ANUAL", title: "Relatório Anual", period: "2025", generatedAt: "2026-01-05", frequency: "anual", totalRevenue: 612300, totalSales: 3450 },
+];
+
+function Reports() {
+  const [reports, setReports] = useState<ReportEntry[]>(initialReports);
+  const [filter, setFilter] = useState<"all" | "semanal" | "mensal" | "anual">("all");
+
+  const filtered = reports.filter((r) => filter === "all" || r.frequency === filter);
+  const groups = {
+    semanal: reports.filter((r) => r.frequency === "semanal").length,
+    mensal: reports.filter((r) => r.frequency === "mensal").length,
+    anual: reports.filter((r) => r.frequency === "anual").length,
+  };
+
+  const generateNew = (freq: ReportEntry["frequency"]) => {
+    const id = `R-${Date.now().toString().slice(-6)}`;
+    const entry: ReportEntry = {
+      id,
+      title: freq === "semanal" ? "Relatório Semanal" : freq === "mensal" ? "Relatório Mensal" : "Relatório Anual",
+      period: freq === "semanal" ? "Semana atual" : freq === "mensal" ? "Mês atual" : "Ano atual",
+      generatedAt: new Date().toISOString().slice(0, 10),
+      frequency: freq,
+      totalRevenue: Math.floor(Math.random() * 20000 + 5000),
+      totalSales: Math.floor(Math.random() * 100 + 20),
+    };
+    setReports((r) => [entry, ...r]);
+  };
+
+  return (
+    <>
+      <Row gutter={16} style={{ marginBottom: 16 }}>
+        <Col xs={12} md={6}><Card><Statistic title="Relatórios semanais" value={groups.semanal} prefix={<Calendar size={16} />} /></Card></Col>
+        <Col xs={12} md={6}><Card><Statistic title="Relatórios mensais" value={groups.mensal} prefix={<Calendar size={16} />} /></Card></Col>
+        <Col xs={12} md={6}><Card><Statistic title="Relatórios anuais" value={groups.anual} prefix={<Calendar size={16} />} /></Card></Col>
+        <Col xs={12} md={6}>
+          <Card>
+            <Text type="secondary" style={{ fontSize: 12 }}>Gerar novo</Text>
+            <Space wrap style={{ marginTop: 6 }}>
+              <Button size="small" icon={<Plus size={12} />} onClick={() => generateNew("semanal")}>Semanal</Button>
+              <Button size="small" icon={<Plus size={12} />} onClick={() => generateNew("mensal")}>Mensal</Button>
+            </Space>
+          </Card>
+        </Col>
+      </Row>
+
+      <Card
+        title="Histórico de Relatórios"
+        extra={
+          <Select
+            value={filter}
+            onChange={setFilter}
+            style={{ width: 160 }}
+            options={[
+              { value: "all", label: "Todas frequências" },
+              { value: "semanal", label: "Semanais" },
+              { value: "mensal", label: "Mensais" },
+              { value: "anual", label: "Anuais" },
+            ]}
+          />
+        }
+      >
+        {filtered.length === 0 ? (
+          <Empty description="Nenhum relatório encontrado" />
+        ) : (
+          <List
+            dataSource={filtered}
+            renderItem={(r) => (
+              <List.Item
+                actions={[
+                  <Button key="d" size="small" icon={<Download size={12} />}>Baixar</Button>,
+                  <Button key="v" size="small" type="link">Visualizar</Button>,
+                ]}
+              >
+                <List.Item.Meta
+                  avatar={<FileText size={22} color="#F26B1F" />}
+                  title={
+                    <Space>
+                      <Text strong>{r.title}</Text>
+                      <Tag color={r.frequency === "semanal" ? "blue" : r.frequency === "mensal" ? "orange" : "purple"}>
+                        {r.frequency}
+                      </Tag>
+                    </Space>
+                  }
+                  description={
+                    <Space direction="vertical" size={0}>
+                      <Text style={{ fontSize: 12 }}>Período: {r.period}</Text>
+                      <Text type="secondary" style={{ fontSize: 11 }}>
+                        Gerado em {r.generatedAt} · {r.totalSales} vendas · R$ {r.totalRevenue.toFixed(2)}
+                      </Text>
+                    </Space>
+                  }
+                />
+              </List.Item>
+            )}
+          />
+        )}
+      </Card>
     </>
   );
 }
