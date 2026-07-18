@@ -1,53 +1,59 @@
-import { useMemo, useState } from "react";
 import {
-  Card,
-  Row,
-  Col,
-  Input,
-  Button,
-  Tag,
-  List,
-  InputNumber,
-  Select,
-  Empty,
-  Typography,
-  Space,
-  Divider,
-  Modal,
-  Form,
-  Radio,
   Avatar,
-  Pagination,
-  Segmented,
-  Table,
-  Steps,
-  Drawer,
   Badge,
+  Button,
+  Card,
+  Col,
+  Divider,
+  Drawer,
+  Empty,
+  Form,
   Grid,
+  Input,
+  InputNumber,
+  List,
   message,
+  Modal,
+  Pagination,
+  Radio,
+  Row,
+  Segmented,
+  Select,
+  Space,
+  Steps,
+  Table,
+  Tag,
+  Typography,
 } from "antd";
 import {
-  Lock,
-  LockOpen,
-  ShoppingCart,
-  Trash2,
-  Search,
-  User,
-  ArrowRight,
   ArrowLeft,
-  Star,
+  ArrowRight,
+  CheckCircle2,
+  CreditCard,
+  History,
   LayoutGrid,
   List as ListIcon,
-  CreditCard,
+  Lock,
+  LockOpen,
   Plus,
-  CheckCircle2,
-  History,
   Printer,
   Receipt,
+  Search,
+  ShoppingCart,
+  Star,
+  Trash2,
+  User,
 } from "lucide-react";
-import { useStore } from "../store";
-import { PAYMENT_LABEL, type PaymentMethod, type Payment, type Sale, type Product, type SaleLine } from "../types";
-
+import { useMemo, useState } from "react";
+import { useStore } from "../../store";
+import {
+  PAYMENT_LABEL,
+  type Payment,
+  type PaymentMethod,
+  type Product,
+  type Sale,
+  type SaleLine,
+} from "../../types";
 
 const { Title, Text } = Typography;
 const { useBreakpoint } = Grid;
@@ -63,7 +69,7 @@ interface AddForm {
   observation?: string;
 }
 
-export function VendaBalcao({ onGoToCaixa }: Props) {
+export function CommonSale({ onGoToCaixa = () => console.log() }: Props) {
   const {
     products,
     cashOpen,
@@ -101,20 +107,19 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
   const [cartOpen, setCartOpen] = useState(false);
   const [receiptSale, setReceiptSale] = useState<Sale | null>(null);
 
-
   const filtered = useMemo(
     () =>
       products.filter(
         (p) =>
           p.name.toLowerCase().includes(search.toLowerCase()) ||
-          p.sku.toLowerCase().includes(search.toLowerCase())
+          p.sku.toLowerCase().includes(search.toLowerCase()),
       ),
-    [products, search]
+    [products, search],
   );
 
   const pageData = useMemo(
     () => filtered.slice((page - 1) * pageSize, page * pageSize),
-    [filtered, page, pageSize]
+    [filtered, page, pageSize],
   );
 
   const subtotal = cart.reduce((s, i) => s + (i.customPrice ?? i.product.price) * i.qty, 0);
@@ -168,8 +173,7 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
     setPayments((arr) => [...arr, { method: pMethod, value: pValue }]);
     setPValue(Math.max(0, remaining - pValue));
   };
-  const removePayment = (idx: number) =>
-    setPayments((arr) => arr.filter((_, i) => i !== idx));
+  const removePayment = (idx: number) => setPayments((arr) => arr.filter((_, i) => i !== idx));
 
   const finalize = () => {
     if (paid < total - 0.001) return message.warning("Pagamento incompleto.");
@@ -204,11 +208,11 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
     message.success(`Venda ${sale.id} finalizada!`);
   };
 
-
   const selectedCustomer = customers.find((c) => c.id === selectedCustomerId);
 
   const eligibleSpecialPrices = useMemo(() => {
-    if (!selectedCustomer?.specialPrices?.length) return [] as { name: string; original: number; special: number }[];
+    if (!selectedCustomer?.specialPrices?.length)
+      return [] as { name: string; original: number; special: number }[];
     const map = new Map(selectedCustomer.specialPrices.map((s) => [s.productId, s.price]));
     return cart
       .filter((i) => map.has(i.product.id) && i.customPrice !== map.get(i.product.id))
@@ -218,7 +222,6 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
         special: map.get(i.product.id)!,
       }));
   }, [cart, selectedCustomer]);
-
 
   const renderProductCard = (p: Product) => (
     <Card
@@ -244,10 +247,23 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
       >
         {p.name.charAt(0)}
       </div>
-      <Text strong style={{ display: "block", fontSize: 13 }}>{p.name}</Text>
-      <Text type="secondary" style={{ fontSize: 11 }}>{p.sku}</Text>
-      <div style={{ marginTop: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Text strong style={{ color: "#F26B1F" }}>R$ {p.price.toFixed(2)}</Text>
+      <Text strong style={{ display: "block", fontSize: 13 }}>
+        {p.name}
+      </Text>
+      <Text type="secondary" style={{ fontSize: 11 }}>
+        {p.sku}
+      </Text>
+      <div
+        style={{
+          marginTop: 4,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Text strong style={{ color: "#F26B1F" }}>
+          R$ {p.price.toFixed(2)}
+        </Text>
         <Tag color={p.stock > 5 ? "green" : p.stock > 0 ? "orange" : "red"} style={{ margin: 0 }}>
           {p.stock}
         </Tag>
@@ -282,16 +298,32 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
               options={customers.map((c) => ({ value: c.id, label: c.name }))}
             />
             {selectedCustomer && (
-              <div style={{ marginTop: 8, padding: 8, borderRadius: 6, background: "#FFF7ED", display: "flex", alignItems: "center", gap: 8 }}>
+              <div
+                style={{
+                  marginTop: 8,
+                  padding: 8,
+                  borderRadius: 6,
+                  background: "#FFF7ED",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+              >
                 <Avatar size="small" style={{ background: "#F26B1F" }}>
                   {selectedCustomer.name.charAt(0)}
                 </Avatar>
                 <div style={{ flex: 1, lineHeight: 1.2 }}>
-                  <Text strong style={{ fontSize: 12, display: "block" }}>{selectedCustomer.name}</Text>
-                  <Text type="secondary" style={{ fontSize: 11 }}>{selectedCustomer.phone}</Text>
+                  <Text strong style={{ fontSize: 12, display: "block" }}>
+                    {selectedCustomer.name}
+                  </Text>
+                  <Text type="secondary" style={{ fontSize: 11 }}>
+                    {selectedCustomer.phone}
+                  </Text>
                 </div>
                 {selectedCustomer.loyalty && (
-                  <Tag color="gold" icon={<Star size={10} />} style={{ margin: 0 }}>Fidelidade</Tag>
+                  <Tag color="gold" icon={<Star size={10} />} style={{ margin: 0 }}>
+                    Fidelidade
+                  </Tag>
                 )}
               </div>
             )}
@@ -347,39 +379,73 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
               dataSource={cart}
               renderItem={(item) => {
                 const effective = item.customPrice ?? item.product.price;
-                const hasSpecial = item.customPrice != null && item.customPrice !== item.product.price;
+                const hasSpecial =
+                  item.customPrice != null && item.customPrice !== item.product.price;
                 return (
                   <List.Item
                     actions={[
-                      <Button key="r" size="small" type="text" danger icon={<Trash2 size={14} />} onClick={() => removeFromCart(item.id)} />,
+                      <Button
+                        key="r"
+                        size="small"
+                        type="text"
+                        danger
+                        icon={<Trash2 size={14} />}
+                        onClick={() => removeFromCart(item.id)}
+                      />,
                     ]}
                   >
                     <List.Item.Meta
                       title={
                         <Space>
                           {item.product.name}
-                          {hasSpecial && <Tag color="gold" style={{ margin: 0 }} icon={<Star size={10} />}>Especial</Tag>}
+                          {hasSpecial && (
+                            <Tag color="gold" style={{ margin: 0 }} icon={<Star size={10} />}>
+                              Especial
+                            </Tag>
+                          )}
                         </Space>
                       }
                       description={
                         <Space direction="vertical" size={2} style={{ width: "100%" }}>
                           {(item.size || item.color) && (
                             <Space size={4} wrap>
-                              {item.size && <Tag color="orange" style={{ margin: 0 }}>Tam. {item.size}</Tag>}
-                              {item.color && <Tag color="default" style={{ margin: 0 }}>{item.color}</Tag>}
+                              {item.size && (
+                                <Tag color="orange" style={{ margin: 0 }}>
+                                  Tam. {item.size}
+                                </Tag>
+                              )}
+                              {item.color && (
+                                <Tag color="default" style={{ margin: 0 }}>
+                                  {item.color}
+                                </Tag>
+                              )}
                             </Space>
                           )}
                           {item.observation && (
-                            <Text type="secondary" italic style={{ fontSize: 11 }}>"{item.observation}"</Text>
+                            <Text type="secondary" italic style={{ fontSize: 11 }}>
+                              "{item.observation}"
+                            </Text>
                           )}
                           {hasSpecial && (
                             <Text type="secondary" style={{ fontSize: 11 }}>
-                              De <Text delete style={{ fontSize: 11 }}>R$ {item.product.price.toFixed(2)}</Text>{" "}
-                              por <Text strong style={{ color: "#F26B1F", fontSize: 11 }}>R$ {effective.toFixed(2)}</Text>
+                              De{" "}
+                              <Text delete style={{ fontSize: 11 }}>
+                                R$ {item.product.price.toFixed(2)}
+                              </Text>{" "}
+                              por{" "}
+                              <Text strong style={{ color: "#F26B1F", fontSize: 11 }}>
+                                R$ {effective.toFixed(2)}
+                              </Text>
                             </Text>
                           )}
                           <Space>
-                            <InputNumber size="small" min={1} value={item.qty} onChange={(v) => updateCartQty(item.id, v || 1)} style={{ width: 60 }} />
+                            <InputNumber
+                              size="small"
+                              min={1}
+                              value={item.qty}
+                              onChange={(v) => updateCartQty(item.id, v || 1)}
+                              style={{ width: 60 }}
+                            />
                             <Text type="secondary">R$ {(effective * item.qty).toFixed(2)}</Text>
                           </Space>
                         </Space>
@@ -397,24 +463,54 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
             <Select
               value={discountType}
               onChange={setDiscountType}
-              options={[{ value: "percent", label: "%" }, { value: "value", label: "R$" }]}
+              options={[
+                { value: "percent", label: "%" },
+                { value: "value", label: "R$" },
+              ]}
               style={{ width: 80 }}
             />
-            <InputNumber min={0} value={discount} onChange={(v) => setDiscount(v || 0)} style={{ width: "100%" }} />
+            <InputNumber
+              min={0}
+              value={discount}
+              onChange={(v) => setDiscount(v || 0)}
+              style={{ width: "100%" }}
+            />
           </Space.Compact>
           {settings.askDiscountReason && discountValue > 0 && (
-            <Input placeholder="Motivo do desconto" value={discountReason} onChange={(e) => setDiscountReason(e.target.value)} style={{ marginBottom: 12 }} />
+            <Input
+              placeholder="Motivo do desconto"
+              value={discountReason}
+              onChange={(e) => setDiscountReason(e.target.value)}
+              style={{ marginBottom: 12 }}
+            />
           )}
 
-
-          <Row justify="space-between"><Text>Subtotal</Text><Text>R$ {subtotal.toFixed(2)}</Text></Row>
-          <Row justify="space-between"><Text type="secondary">Desconto</Text><Text type="secondary">- R$ {discountValue.toFixed(2)}</Text></Row>
+          <Row justify="space-between">
+            <Text>Subtotal</Text>
+            <Text>R$ {subtotal.toFixed(2)}</Text>
+          </Row>
+          <Row justify="space-between">
+            <Text type="secondary">Desconto</Text>
+            <Text type="secondary">- R$ {discountValue.toFixed(2)}</Text>
+          </Row>
           <Row justify="space-between" style={{ marginTop: 8 }}>
-            <Title level={4} style={{ margin: 0 }}>Total</Title>
-            <Title level={4} style={{ margin: 0, color: "#F26B1F" }}>R$ {total.toFixed(2)}</Title>
+            <Title level={4} style={{ margin: 0 }}>
+              Total
+            </Title>
+            <Title level={4} style={{ margin: 0, color: "#F26B1F" }}>
+              R$ {total.toFixed(2)}
+            </Title>
           </Row>
 
-          <Button type="primary" block size="large" style={{ marginTop: 12 }} icon={<ArrowRight size={14} />} iconPosition="end" onClick={goToPayment}>
+          <Button
+            type="primary"
+            block
+            size="large"
+            style={{ marginTop: 12 }}
+            icon={<ArrowRight size={14} />}
+            iconPosition="end"
+            onClick={goToPayment}
+          >
             Ir para pagamento
           </Button>
         </>
@@ -430,12 +526,18 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
               <Text type="secondary">R$ {paid.toFixed(2)}</Text>
             </Row>
             <Row justify="space-between">
-              <Text strong style={{ color: remaining > 0 ? "#DC2626" : "#16A34A" }}>Restante</Text>
-              <Text strong style={{ color: remaining > 0 ? "#DC2626" : "#16A34A" }}>R$ {remaining.toFixed(2)}</Text>
+              <Text strong style={{ color: remaining > 0 ? "#DC2626" : "#16A34A" }}>
+                Restante
+              </Text>
+              <Text strong style={{ color: remaining > 0 ? "#DC2626" : "#16A34A" }}>
+                R$ {remaining.toFixed(2)}
+              </Text>
             </Row>
           </div>
 
-          <Text type="secondary" style={{ fontSize: 12 }}>Adicionar pagamento</Text>
+          <Text type="secondary" style={{ fontSize: 12 }}>
+            Adicionar pagamento
+          </Text>
           <Space.Compact style={{ width: "100%", marginTop: 4 }}>
             <Select
               value={pMethod}
@@ -454,7 +556,9 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
               prefix="R$"
               style={{ width: "100%" }}
             />
-            <Button type="primary" icon={<Plus size={14} />} onClick={addPayment}>Add</Button>
+            <Button type="primary" icon={<Plus size={14} />} onClick={addPayment}>
+              Add
+            </Button>
           </Space.Compact>
 
           {payments.length > 0 && (
@@ -465,7 +569,14 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
               renderItem={(p, idx) => (
                 <List.Item
                   actions={[
-                    <Button key="x" size="small" type="text" danger icon={<Trash2 size={14} />} onClick={() => removePayment(idx)} />,
+                    <Button
+                      key="x"
+                      size="small"
+                      type="text"
+                      danger
+                      icon={<Trash2 size={14} />}
+                      onClick={() => removePayment(idx)}
+                    />,
                   ]}
                 >
                   <Space>
@@ -505,7 +616,10 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
       <Row gutter={16} style={{ minHeight: "calc(100vh - 112px)" }} align="stretch">
         <Col xs={24} lg={16} style={{ display: "flex", flexDirection: "column" }}>
           <Card
-            style={{ marginBottom: 16, borderLeft: `4px solid ${cashOpen ? "#16A34A" : "#DC2626"}` }}
+            style={{
+              marginBottom: 16,
+              borderLeft: `4px solid ${cashOpen ? "#16A34A" : "#DC2626"}`,
+            }}
             styles={{ body: { padding: 16 } }}
           >
             <Row align="middle" justify="space-between" gutter={[12, 12]}>
@@ -513,7 +627,9 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
                 <Space>
                   {cashOpen ? <LockOpen color="#16A34A" /> : <Lock color="#DC2626" />}
                   <div>
-                    <Text type="secondary" style={{ fontSize: 12 }}>Status do Caixa</Text>
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                      Status do Caixa
+                    </Text>
                     <Title level={4} style={{ margin: 0 }}>
                       {cashOpen ? "Caixa Aberto" : "Caixa Fechado"}
                     </Title>
@@ -539,7 +655,10 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
             </Row>
           </Card>
 
-          <Card style={{ flex: 1, display: "flex", flexDirection: "column" }} styles={{ body: { flex: 1, display: "flex", flexDirection: "column" } }}>
+          <Card
+            style={{ flex: 1, display: "flex", flexDirection: "column" }}
+            styles={{ body: { flex: 1, display: "flex", flexDirection: "column" } }}
+          >
             <Row gutter={12} style={{ marginBottom: 16 }} align="middle">
               <Col flex="auto">
                 <Input
@@ -597,13 +716,29 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
                 size="small"
                 style={{ flex: 1 }}
                 dataSource={filtered}
-                pagination={{ pageSize, current: page, onChange: (p, ps) => { setPage(p); setPageSize(ps); }, pageSizeOptions: [8, 12, 16, 24], showSizeChanger: true }}
-                onRow={(r) => ({ onClick: () => openProductModal(r), style: { cursor: "pointer" } })}
+                pagination={{
+                  pageSize,
+                  current: page,
+                  onChange: (p, ps) => {
+                    setPage(p);
+                    setPageSize(ps);
+                  },
+                  pageSizeOptions: [8, 12, 16, 24],
+                  showSizeChanger: true,
+                }}
+                onRow={(r) => ({
+                  onClick: () => openProductModal(r),
+                  style: { cursor: "pointer" },
+                })}
                 columns={[
                   { title: "SKU", dataIndex: "sku", width: 100 },
                   { title: "Produto", dataIndex: "name" },
                   { title: "Categoria", dataIndex: "category" },
-                  { title: "Preço", dataIndex: "price", render: (v: number) => `R$ ${v.toFixed(2)}` },
+                  {
+                    title: "Preço",
+                    dataIndex: "price",
+                    render: (v: number) => `R$ ${v.toFixed(2)}`,
+                  },
                   {
                     title: "Estoque",
                     dataIndex: "stock",
@@ -625,9 +760,14 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
                   <ShoppingCart size={18} /> Comanda
                 </Space>
               }
-              extra={cart.length > 0 && step === "items" && (
-                <Button size="small" type="link" onClick={clearCart}>Limpar</Button>
-              )}
+              extra={
+                cart.length > 0 &&
+                step === "items" && (
+                  <Button size="small" type="link" onClick={clearCart}>
+                    Limpar
+                  </Button>
+                )
+              }
               style={{ flex: 1, display: "flex", flexDirection: "column" }}
               styles={{ body: { flex: 1, overflowY: "auto" } }}
             >
@@ -669,7 +809,9 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
           <Space>
             <ShoppingCart size={18} /> Comanda
             {cart.length > 0 && step === "items" && (
-              <Button size="small" type="link" onClick={clearCart}>Limpar</Button>
+              <Button size="small" type="link" onClick={clearCart}>
+                Limpar
+              </Button>
             )}
           </Space>
         }
@@ -703,21 +845,28 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
               dataIndex: "type",
               width: 100,
               render: (t: string) => (
-                <Tag color={t === "balcao" ? "orange" : "blue"}>{t === "balcao" ? "Balcão" : "Serviço"}</Tag>
+                <Tag color={t === "balcao" ? "orange" : "blue"}>
+                  {t === "balcao" ? "Balcão" : "Serviço"}
+                </Tag>
               ),
             },
             { title: "Itens", dataIndex: "items", width: 70, align: "center" as const },
             {
               title: "Cliente",
               dataIndex: "customerId",
-              render: (id?: string) => customers.find((c) => c.id === id)?.name || <Text type="secondary">—</Text>,
+              render: (id?: string) =>
+                customers.find((c) => c.id === id)?.name || <Text type="secondary">—</Text>,
             },
             {
               title: "Total",
               dataIndex: "total",
               width: 110,
               align: "right" as const,
-              render: (v: number) => <Text strong style={{ color: "#F26B1F" }}>R$ {v.toFixed(2)}</Text>,
+              render: (v: number) => (
+                <Text strong style={{ color: "#F26B1F" }}>
+                  R$ {v.toFixed(2)}
+                </Text>
+              ),
             },
             {
               title: "Ações",
@@ -803,7 +952,11 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
                       title={
                         <Space>
                           <Text strong>{l.name}</Text>
-                          {l.size && <Tag color="orange" style={{ margin: 0 }}>Tam. {l.size}</Tag>}
+                          {l.size && (
+                            <Tag color="orange" style={{ margin: 0 }}>
+                              Tam. {l.size}
+                            </Tag>
+                          )}
                           {l.color && <Tag style={{ margin: 0 }}>{l.color}</Tag>}
                         </Space>
                       }
@@ -857,7 +1010,9 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
               </Row>
             ) : null}
             <Row justify="space-between" style={{ marginTop: 8 }}>
-              <Title level={4} style={{ margin: 0 }}>Total</Title>
+              <Title level={4} style={{ margin: 0 }}>
+                Total
+              </Title>
               <Title level={4} style={{ margin: 0, color: "#F26B1F" }}>
                 R$ {receiptSale.total.toFixed(2)}
               </Title>
@@ -865,7 +1020,6 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
           </div>
         )}
       </Modal>
-
 
       <Modal
         open={modalProduct !== null}
@@ -880,16 +1034,38 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
           <>
             <Row gutter={12} style={{ marginBottom: 16 }}>
               <Col>
-                <div style={{ width: 64, height: 64, borderRadius: 8, background: "linear-gradient(135deg, #fff3e8, #ffe0c2)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, color: "#F26B1F", fontSize: 24 }}>
+                <div
+                  style={{
+                    width: 64,
+                    height: 64,
+                    borderRadius: 8,
+                    background: "linear-gradient(135deg, #fff3e8, #ffe0c2)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: 700,
+                    color: "#F26B1F",
+                    fontSize: 24,
+                  }}
+                >
                   {modalProduct.name.charAt(0)}
                 </div>
               </Col>
               <Col flex="auto">
-                <Text strong style={{ display: "block" }}>{modalProduct.name}</Text>
-                <Text type="secondary" style={{ fontSize: 12 }}>{modalProduct.sku} · {modalProduct.category}</Text>
+                <Text strong style={{ display: "block" }}>
+                  {modalProduct.name}
+                </Text>
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  {modalProduct.sku} · {modalProduct.category}
+                </Text>
                 <div style={{ marginTop: 4 }}>
-                  <Text strong style={{ color: "#F26B1F", fontSize: 18 }}>R$ {modalProduct.price.toFixed(2)}</Text>
-                  <Tag style={{ marginLeft: 8 }} color={modalProduct.stock > 5 ? "green" : "orange"}>
+                  <Text strong style={{ color: "#F26B1F", fontSize: 18 }}>
+                    R$ {modalProduct.price.toFixed(2)}
+                  </Text>
+                  <Tag
+                    style={{ marginLeft: 8 }}
+                    color={modalProduct.stock > 5 ? "green" : "orange"}
+                  >
                     {modalProduct.stock} em estoque
                   </Tag>
                 </div>
@@ -902,24 +1078,42 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
               </Form.Item>
 
               {modalProduct.variations?.sizes?.length ? (
-                <Form.Item label="Tamanho" name="size" rules={[{ required: true, message: "Selecione o tamanho" }]}>
+                <Form.Item
+                  label="Tamanho"
+                  name="size"
+                  rules={[{ required: true, message: "Selecione o tamanho" }]}
+                >
                   <Radio.Group buttonStyle="solid">
                     {modalProduct.variations.sizes.map((s) => (
-                      <Radio.Button key={s} value={s}>{s}</Radio.Button>
+                      <Radio.Button key={s} value={s}>
+                        {s}
+                      </Radio.Button>
                     ))}
                   </Radio.Group>
                 </Form.Item>
               ) : null}
 
               {modalProduct.variations?.colors?.length ? (
-                <Form.Item label="Cor" name="color" rules={[{ required: true, message: "Selecione a cor" }]}>
-                  <Select placeholder="Selecione a cor" options={modalProduct.variations.colors.map((c) => ({ value: c, label: c }))} />
+                <Form.Item
+                  label="Cor"
+                  name="color"
+                  rules={[{ required: true, message: "Selecione a cor" }]}
+                >
+                  <Select
+                    placeholder="Selecione a cor"
+                    options={modalProduct.variations.colors.map((c) => ({ value: c, label: c }))}
+                  />
                 </Form.Item>
               ) : null}
 
               {settings.productObservations && (
                 <Form.Item label="Observação" name="observation">
-                  <Input.TextArea rows={2} placeholder="Ex: Embalagem para presente" maxLength={140} showCount />
+                  <Input.TextArea
+                    rows={2}
+                    placeholder="Ex: Embalagem para presente"
+                    maxLength={140}
+                    showCount
+                  />
                 </Form.Item>
               )}
             </Form>

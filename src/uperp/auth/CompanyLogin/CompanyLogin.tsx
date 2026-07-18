@@ -1,6 +1,6 @@
+import { App, Button, Card, Divider, Form, Input, Modal, Typography } from "antd";
+import { Building2, Store } from "lucide-react";
 import { useState } from "react";
-import { Form, Input, Button, Card, Typography, Modal, Divider, App } from "antd";
-import { Store, Building2 } from "lucide-react";
 
 const { Title, Text } = Typography;
 
@@ -8,7 +8,7 @@ interface Props {
   onSuccess: () => void;
 }
 
-export function CompanyLogin({ onSuccess }: Props) {
+export function CompanyLogin() {
   const { message } = App.useApp();
   const [loading, setLoading] = useState(false);
   const [registerOpen, setRegisterOpen] = useState(false);
@@ -18,7 +18,7 @@ export function CompanyLogin({ onSuccess }: Props) {
     setTimeout(() => {
       setLoading(false);
       message.success("Empresa autenticada com sucesso!");
-      onSuccess();
+      // onSuccess();
     }, 600);
   };
 
@@ -55,7 +55,11 @@ export function CompanyLogin({ onSuccess }: Props) {
           <Text type="secondary">Acesso da Empresa</Text>
         </div>
 
-        <Form layout="vertical" onFinish={onFinish} initialValues={{ cnpj: "12.345.678/0001-90", password: "demo" }}>
+        <Form
+          layout="vertical"
+          onFinish={onFinish}
+          initialValues={{ cnpj: "12.345.678/0001-90", password: "demo" }}
+        >
           <Form.Item name="cnpj" label="CNPJ" rules={[{ required: true }]}>
             <Input placeholder="00.000.000/0000-00" size="large" />
           </Form.Item>

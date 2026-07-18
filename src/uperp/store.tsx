@@ -100,7 +100,13 @@ const seedClosedSessions: ClosedCashSession[] = [
     movements: [
       { id: "m1", type: "venda", value: 150, note: "Venda V003", at: "2026-06-19T10:22:00" },
       { id: "m2", type: "venda", value: 1200, note: "Venda V004", at: "2026-06-19T14:45:00" },
-      { id: "m3", type: "sangria", value: 300, note: "Depósito bancário", at: "2026-06-19T16:00:00" },
+      {
+        id: "m3",
+        type: "sangria",
+        value: 300,
+        note: "Depósito bancário",
+        at: "2026-06-19T16:00:00",
+      },
       { id: "m4", type: "entrada", value: 50, note: "Ajuste de troco", at: "2026-06-19T17:30:00" },
     ],
     totals: { vendas: 1350, entradas: 50, reposicoes: 0, sangrias: 300, saldo: 1300 },
@@ -237,8 +243,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return applied;
   };
 
-  const resetCartPrices = () =>
-    setCart((c) => c.map((i) => ({ ...i, customPrice: undefined })));
+  const resetCartPrices = () => setCart((c) => c.map((i) => ({ ...i, customPrice: undefined })));
 
   const addSale = (s: Sale) => {
     setSales((arr) => [s, ...arr]);

@@ -1,6 +1,6 @@
+import { App, Button, Card, Form, Input, Select, Typography } from "antd";
+import { ArrowLeft, UserCircle2 } from "lucide-react";
 import { useState } from "react";
-import { Form, Input, Button, Card, Typography, Select, App } from "antd";
-import { UserCircle2, ArrowLeft } from "lucide-react";
 
 const { Title, Text } = Typography;
 
@@ -9,7 +9,7 @@ interface Props {
   onBack: () => void;
 }
 
-export function EmployeeLogin({ onSuccess, onBack }: Props) {
+export function EmployeeLogin() {
   const { message } = App.useApp();
   const [loading, setLoading] = useState(false);
 
@@ -18,7 +18,7 @@ export function EmployeeLogin({ onSuccess, onBack }: Props) {
     setTimeout(() => {
       setLoading(false);
       message.success(`Bem-vindo(a), ${values.name}!`);
-      onSuccess(values.name);
+      // onSuccess(values.name);
     }, 500);
   };
 
@@ -55,7 +55,11 @@ export function EmployeeLogin({ onSuccess, onBack }: Props) {
           <Text type="secondary">Minha Loja Demo Ltda</Text>
         </div>
 
-        <Form layout="vertical" onFinish={onFinish} initialValues={{ name: "Pedro Almeida", password: "demo" }}>
+        <Form
+          layout="vertical"
+          onFinish={onFinish}
+          initialValues={{ name: "Pedro Almeida", password: "demo" }}
+        >
           <Form.Item name="name" label="Funcionário" rules={[{ required: true }]}>
             <Select
               size="large"
@@ -74,7 +78,12 @@ export function EmployeeLogin({ onSuccess, onBack }: Props) {
           </Button>
         </Form>
 
-        <Button type="link" icon={<ArrowLeft size={14} />} onClick={onBack} style={{ marginTop: 8, padding: 0 }}>
+        <Button
+          type="link"
+          icon={<ArrowLeft size={14} />}
+          // onClick={onBack}
+          style={{ marginTop: 8, padding: 0 }}
+        >
           Trocar empresa
         </Button>
       </Card>

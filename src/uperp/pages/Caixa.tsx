@@ -33,11 +33,11 @@ import type { CashMovementType } from "../types";
 const { Title, Text } = Typography;
 
 interface Props {
-  operatorName: string;
+  operatorName?: string;
   onBack?: () => void;
 }
 
-export function Caixa({ operatorName, onBack }: Props) {
+export function Caixa({ operatorName: operatorNameProp, onBack }: Props) {
   const {
     cashOpen,
     cashSession,
@@ -46,6 +46,7 @@ export function Caixa({ operatorName, onBack }: Props) {
     closeCash,
     addCashMovement,
   } = useStore();
+  const operatorName = operatorNameProp || cashSession?.operatorName || "";
 
   const [openForm] = Form.useForm<{ initialValue: number }>();
   const [movementModal, setMovementModal] = useState<CashMovementType | null>(null);

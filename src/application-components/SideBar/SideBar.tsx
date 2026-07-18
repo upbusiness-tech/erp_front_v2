@@ -1,31 +1,33 @@
-import { useState } from "react";
-import { Layout, Menu, Avatar, Dropdown, Typography, Space, Drawer, Button, Grid, theme as antdTheme } from "antd";
+import { useStore } from "@/uperp/store";
 import {
-  Store,
-  Briefcase,
-  Boxes,
+  Avatar,
+  Button,
+  Drawer,
+  Dropdown,
+  Grid,
+  Layout,
+  Menu,
+  Space,
+  Typography,
+  theme as antdTheme,
+} from "antd";
+import {
   BarChart3,
-  Users,
-  UserCog,
+  Boxes,
+  Briefcase,
   Building2,
+  ChevronDown,
   CreditCard,
   LogOut,
-  ChevronDown,
-  Wallet,
-  Settings,
   Menu as MenuIcon,
+  Settings,
+  Store,
+  UserCog,
+  Users,
+  Wallet,
 } from "lucide-react";
-import { VendaBalcao } from "./pages/VendaBalcao";
-import { VendaServico } from "./pages/VendaServico";
-import { Estoque } from "./pages/Estoque";
-import { Financas } from "./pages/Financas";
-import { Clientes } from "./pages/Clientes";
-import { Funcionarios } from "./pages/Funcionarios";
-import { Empresa } from "./pages/Empresa";
-import { Planos } from "./pages/Planos";
-import { Caixa } from "./pages/Caixa";
-import { Configuracoes } from "./pages/Configuracoes";
-import { useStore } from "./store";
+import { useState } from "react";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 
 const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
@@ -70,8 +72,8 @@ const titles: Record<PageKey, string> = {
 };
 
 interface Props {
-  userName: string;
-  onLogout: () => void;
+  userName?: string;
+  onLogout?: () => void;
 }
 
 function BrandHeader({ dark, collapsed }: { dark: boolean; collapsed?: boolean }) {
@@ -110,34 +112,47 @@ function BrandHeader({ dark, collapsed }: { dark: boolean; collapsed?: boolean }
   );
 }
 
-export function Dashboard({ userName, onLogout }: Props) {
+const pageKeyToPath: Record<PageKey, string> = {
+  balcao: "/venda/balcao",
+  caixa: "/caixa",
+  servico: "/venda/servico",
+  estoque: "/estoque",
+  financas: "/financas",
+  clientes: "/clientes",
+  funcionarios: "/funcionarios",
+  empresa: "/empresa",
+  planos: "/planos",
+  configuracoes: "/configuracoes",
+};
+
+const pathToPageKey: Record<string, PageKey> = {
+  "/venda/balcao": "balcao",
+  "/caixa": "caixa",
+  "/venda/servico": "servico",
+  "/estoque": "estoque",
+  "/financas": "financas",
+  "/clientes": "clientes",
+  "/funcionarios": "funcionarios",
+  "/empresa": "empresa",
+  "/planos": "planos",
+  "/configuracoes": "configuracoes",
+};
+
+export function SideBar({ userName = "Sofia", onLogout = () => console.log("") }: Props) {
   const [collapsed, setCollapsed] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [page, setPage] = useState<PageKey>("balcao");
   const { token } = antdTheme.useToken();
   const { settings } = useStore();
   const screens = useBreakpoint();
+  const navigate = useNavigate();
+  const location = useLocation();
   const isMobile = !screens.lg;
-
-  const renderPage = () => {
-    switch (page) {
-      case "balcao": return <VendaBalcao onGoToCaixa={() => setPage("caixa")} />;
-      case "caixa": return <Caixa operatorName={userName} onBack={() => setPage("balcao")} />;
-      case "servico": return <VendaServico />;
-      case "estoque": return <Estoque />;
-      case "financas": return <Financas />;
-      case "clientes": return <Clientes />;
-      case "funcionarios": return <Funcionarios />;
-      case "empresa": return <Empresa />;
-      case "planos": return <Planos />;
-      case "configuracoes": return <Configuracoes />;
-    }
-  };
+  const currentPage = pathToPageKey[location.pathname] || "balcao";
 
   const dark = settings.darkSidebar;
 
   const handleMenuClick = (k: PageKey) => {
-    setPage(k);
+    navigate(pageKeyToPath[k]);
     if (isMobile) setDrawerOpen(false);
   };
 
@@ -157,7 +172,7 @@ export function Dashboard({ userName, onLogout }: Props) {
           <Menu
             theme={dark ? "dark" : "light"}
             mode="inline"
-            selectedKeys={[page]}
+            selectedKeys={[currentPage]}
             onClick={(e) => handleMenuClick(e.key as PageKey)}
             items={menuItems}
             style={{ borderRight: 0, paddingTop: 8 }}
@@ -180,7 +195,7 @@ export function Dashboard({ userName, onLogout }: Props) {
           <Menu
             theme={dark ? "dark" : "light"}
             mode="inline"
-            selectedKeys={[page]}
+            selectedKeys={[currentPage]}
             onClick={(e) => handleMenuClick(e.key as PageKey)}
             items={menuItems}
             style={{ borderRight: 0, paddingTop: 8 }}
@@ -217,7 +232,7 @@ export function Dashboard({ userName, onLogout }: Props) {
                 textOverflow: "ellipsis",
               }}
             >
-              {titles[page]}
+              {titles[currentPage]}
             </Title>
           </Space>
           <Dropdown
@@ -227,7 +242,7 @@ export function Dashboard({ userName, onLogout }: Props) {
                   key: "settings",
                   label: "Configurações",
                   icon: <Settings size={14} />,
-                  onClick: () => setPage("configuracoes"),
+                  onClick: () => navigate("/configuracoes"),
                 },
                 {
                   key: "logout",
@@ -244,8 +259,12 @@ export function Dashboard({ userName, onLogout }: Props) {
               </Avatar>
               {!isMobile && (
                 <div style={{ lineHeight: 1.2 }}>
-                  <Text strong style={{ display: "block" }}>{userName}</Text>
-                  <Text type="secondary" style={{ fontSize: 11 }}>Funcionário</Text>
+                  <Text strong style={{ display: "block" }}>
+                    {userName}
+                  </Text>
+                  <Text type="secondary" style={{ fontSize: 11 }}>
+                    Funcionário
+                  </Text>
                 </div>
               )}
               <ChevronDown size={14} />
@@ -259,7 +278,7 @@ export function Dashboard({ userName, onLogout }: Props) {
             minWidth: 0,
           }}
         >
-          {renderPage()}
+          <Outlet />
         </Content>
       </Layout>
     </Layout>

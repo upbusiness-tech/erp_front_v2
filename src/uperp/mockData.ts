@@ -1,4 +1,4 @@
-import type { Product, Customer, Employee, Sale, Invoice, Category } from "./types";
+import type { Category, Customer, Employee, Invoice, Product, Sale } from "./types";
 
 export const initialCategories: Category[] = [
   { id: "c1", name: "Vestuário" },
@@ -32,11 +32,28 @@ export const initialProducts: Product[] = [
     price: 299.9,
     stock: 7,
     category: "Calçados",
-    variations: { sizes: ["38", "39", "40", "41", "42", "43"], colors: ["Branco", "Preto", "Vermelho"] },
+    variations: {
+      sizes: ["38", "39", "40", "41", "42", "43"],
+      colors: ["Branco", "Preto", "Vermelho"],
+    },
   },
   { id: "4", name: "Boné Trucker", sku: "BON001", price: 39.9, stock: 0, category: "Acessórios" },
-  { id: "5", name: "Mochila Casual", sku: "MOC001", price: 189.9, stock: 12, category: "Acessórios" },
-  { id: "6", name: "Relógio Digital", sku: "REL001", price: 249.9, stock: 4, category: "Acessórios" },
+  {
+    id: "5",
+    name: "Mochila Casual",
+    sku: "MOC001",
+    price: 189.9,
+    stock: 12,
+    category: "Acessórios",
+  },
+  {
+    id: "6",
+    name: "Relógio Digital",
+    sku: "REL001",
+    price: 249.9,
+    stock: 4,
+    category: "Acessórios",
+  },
   {
     id: "7",
     name: "Camisa Polo",
@@ -58,24 +75,122 @@ export const initialProducts: Product[] = [
 ];
 
 export const initialCustomers: Customer[] = [
-  { id: "1", name: "Ana Souza", email: "ana@email.com", phone: "(11) 99999-1234", document: "123.456.789-00", loyalty: true },
-  { id: "2", name: "Bruno Lima", email: "bruno@email.com", phone: "(11) 98888-5678", document: "987.654.321-00", loyalty: false },
-  { id: "3", name: "Carla Mendes", email: "carla@email.com", phone: "(11) 97777-9999", document: "111.222.333-44", loyalty: true },
+  {
+    id: "1",
+    name: "Ana Souza",
+    email: "ana@email.com",
+    phone: "(11) 99999-1234",
+    document: "123.456.789-00",
+    loyalty: true,
+  },
+  {
+    id: "2",
+    name: "Bruno Lima",
+    email: "bruno@email.com",
+    phone: "(11) 98888-5678",
+    document: "987.654.321-00",
+    loyalty: false,
+  },
+  {
+    id: "3",
+    name: "Carla Mendes",
+    email: "carla@email.com",
+    phone: "(11) 97777-9999",
+    document: "111.222.333-44",
+    loyalty: true,
+  },
 ];
 
 export const initialEmployees: Employee[] = [
-  { id: "1", name: "Pedro Almeida", role: "Gerente", email: "pedro@uperp.com", active: true, permissions: ["vendas.balcao","vendas.servico","caixa.gerenciar","estoque.gerenciar","clientes.gerenciar","funcionarios.gerenciar","financas.visualizar","empresa.editar","planos.gerenciar","configuracoes.gerenciar"] },
-  { id: "2", name: "Juliana Costa", role: "Vendedor(a)", email: "juliana@uperp.com", active: true, permissions: ["vendas.balcao","vendas.servico","clientes.gerenciar"] },
-  { id: "3", name: "Marcos Silva", role: "Caixa", email: "marcos@uperp.com", active: true, permissions: ["vendas.balcao","caixa.gerenciar"] },
-  { id: "4", name: "Renata Dias", role: "Estoquista", email: "renata@uperp.com", active: false, permissions: ["estoque.gerenciar"] },
+  {
+    id: "1",
+    name: "Pedro Almeida",
+    role: "Gerente",
+    email: "pedro@uperp.com",
+    active: true,
+    permissions: [
+      "vendas.balcao",
+      "vendas.servico",
+      "caixa.gerenciar",
+      "estoque.gerenciar",
+      "clientes.gerenciar",
+      "funcionarios.gerenciar",
+      "financas.visualizar",
+      "empresa.editar",
+      "planos.gerenciar",
+      "configuracoes.gerenciar",
+    ],
+  },
+  {
+    id: "2",
+    name: "Juliana Costa",
+    role: "Vendedor(a)",
+    email: "juliana@uperp.com",
+    active: true,
+    permissions: ["vendas.balcao", "vendas.servico", "clientes.gerenciar"],
+  },
+  {
+    id: "3",
+    name: "Marcos Silva",
+    role: "Caixa",
+    email: "marcos@uperp.com",
+    active: true,
+    permissions: ["vendas.balcao", "caixa.gerenciar"],
+  },
+  {
+    id: "4",
+    name: "Renata Dias",
+    role: "Estoquista",
+    email: "renata@uperp.com",
+    active: false,
+    permissions: ["estoque.gerenciar"],
+  },
 ];
 
 export const initialSales: Sale[] = [
-  { id: "V001", date: "2026-06-20", total: 459.7, items: 3, type: "balcao", payments: [{ method: "credito", value: 459.7 }] },
-  { id: "V002", date: "2026-06-20", total: 289.9, items: 2, type: "balcao", payments: [{ method: "pix", value: 289.9 }] },
-  { id: "V003", date: "2026-06-19", total: 150.0, items: 1, type: "servico", payments: [{ method: "dinheiro", value: 150 }] },
-  { id: "V004", date: "2026-06-19", total: 1200.0, items: 5, type: "balcao", payments: [{ method: "credito", value: 800 }, { method: "pix", value: 400 }] },
-  { id: "V005", date: "2026-06-18", total: 89.9, items: 1, type: "balcao", payments: [{ method: "debito", value: 89.9 }] },
+  {
+    id: "V001",
+    date: "2026-06-20",
+    total: 459.7,
+    items: 3,
+    type: "balcao",
+    payments: [{ method: "credito", value: 459.7 }],
+  },
+  {
+    id: "V002",
+    date: "2026-06-20",
+    total: 289.9,
+    items: 2,
+    type: "balcao",
+    payments: [{ method: "pix", value: 289.9 }],
+  },
+  {
+    id: "V003",
+    date: "2026-06-19",
+    total: 150.0,
+    items: 1,
+    type: "servico",
+    payments: [{ method: "dinheiro", value: 150 }],
+  },
+  {
+    id: "V004",
+    date: "2026-06-19",
+    total: 1200.0,
+    items: 5,
+    type: "balcao",
+    payments: [
+      { method: "credito", value: 800 },
+      { method: "pix", value: 400 },
+    ],
+  },
+  {
+    id: "V005",
+    date: "2026-06-18",
+    total: 89.9,
+    items: 1,
+    type: "balcao",
+    payments: [{ method: "debito", value: 89.9 }],
+  },
 ];
 
 export const initialInvoices: Invoice[] = [
