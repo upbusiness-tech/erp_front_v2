@@ -528,6 +528,15 @@ export function Estoque() {
               ),
             },
             {
+              key: "stats",
+              label: (
+                <Space size={4}>
+                  <BarChart3 size={14} /> Estatísticas
+                </Space>
+              ),
+              children: <ProductStats />,
+            },
+            {
               key: "categorias",
               label: (
                 <Space size={4}>
