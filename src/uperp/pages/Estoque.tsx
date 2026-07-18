@@ -30,10 +30,15 @@ import {
   Trash2,
   Layers,
   TrendingDown,
+  TrendingUp,
   Boxes,
   Archive,
   Tag as TagIcon,
   ArrowLeft,
+  BarChart3,
+  Star,
+  RefreshCcw,
+  AlertCircle,
 } from "lucide-react";
 import { useStore } from "../store";
 import type { Product, Category } from "../types";
