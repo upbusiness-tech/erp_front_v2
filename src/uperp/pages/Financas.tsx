@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { Card, Row, Col, Statistic, Table, Typography, Progress, Tabs, Tag, Space, Select, DatePicker, Input, Button, Empty } from "antd";
-import { TrendingUp, DollarSign, ShoppingBag, Award, Search, Download, Wallet, LockOpen, Lock } from "lucide-react";
+import { Card, Row, Col, Statistic, Table, Typography, Progress, Tabs, Tag, Space, Select, DatePicker, Input, Button, Empty, List } from "antd";
+import { TrendingUp, DollarSign, ShoppingBag, Award, Search, Download, Wallet, LockOpen, Lock, FileText, Calendar, Plus } from "lucide-react";
 import { useStore } from "../store";
 import { PAYMENT_LABEL, type CashMovementType, type ClosedCashSession, type PaymentMethod, type Sale } from "../types";
 import dayjs, { type Dayjs } from "dayjs";
@@ -8,12 +8,29 @@ import dayjs, { type Dayjs } from "dayjs";
 const { Text, Title } = Typography;
 const { RangePicker } = DatePicker;
 
+const PAYMENT_COLORS: Record<PaymentMethod, string> = {
+  pix: "#16A34A",
+  debito: "#2563EB",
+  credito: "#F26B1F",
+  dinheiro: "#7C3AED",
+};
+
 export function Financas() {
   const { sales, products, customers, cashHistory } = useStore();
 
+  const today = new Date().toISOString().slice(0, 10);
+  const todaySales = sales.filter((s) => s.date === today);
+  const todayRevenue = todaySales.reduce((s, x) => s + x.total, 0);
+  const todayCount = todaySales.length;
+  const todayAvg = todayCount > 0 ? todayRevenue / todayCount : 0;
+
   const totalRevenue = sales.reduce((s, x) => s + x.total, 0);
-  const totalSales = sales.length;
-  const avgTicket = totalSales > 0 ? totalRevenue / totalSales : 0;
+
+  const paymentTotals = useMemo(() => {
+    const acc: Record<PaymentMethod, number> = { pix: 0, debito: 0, credito: 0, dinheiro: 0 };
+    sales.forEach((s) => s.payments?.forEach((p) => (acc[p.method] += p.value)));
+    return acc;
+  }, [sales]);
 
   const topProducts = products
     .slice(0, 5)
@@ -32,13 +49,73 @@ export function Financas() {
   ];
   const maxV = Math.max(...weekData.map((d) => d.v));
 
+  const PaymentBadges = (
+    <Card style={{ marginBottom: 16 }} styles={{ body: { padding: 12 } }}>
+      <Row gutter={[8, 8]} align="middle">
+        <Col xs={24} md={4}>
+          <Text type="secondary" style={{ fontSize: 12 }}>
+            Recebido por método (geral)
+          </Text>
+        </Col>
+        {(Object.keys(PAYMENT_LABEL) as PaymentMethod[]).map((m) => (
+          <Col xs={12} md={5} key={m}>
+            <div
+              style={{
+                padding: "8px 12px",
+                borderRadius: 8,
+                border: `1px solid ${PAYMENT_COLORS[m]}22`,
+                background: `${PAYMENT_COLORS[m]}0d`,
+              }}
+            >
+              <Text style={{ fontSize: 11, color: PAYMENT_COLORS[m], fontWeight: 600 }}>
+                {PAYMENT_LABEL[m]}
+              </Text>
+              <div style={{ fontWeight: 700, fontSize: 15 }}>
+                R$ {paymentTotals[m].toFixed(2)}
+              </div>
+            </div>
+          </Col>
+        ))}
+      </Row>
+    </Card>
+  );
+
+  const StatCard = ({
+    title, value, prefix, color, precision = 2,
+  }: { title: string; value: number; prefix?: React.ReactNode; color?: string; precision?: number }) => (
+    <Card>
+      <Space size={4} style={{ marginBottom: 4 }}>
+        <Tag color="orange" style={{ margin: 0, fontSize: 10 }}>HOJE</Tag>
+      </Space>
+      <Statistic title={title} value={value} precision={precision} prefix={prefix} valueStyle={color ? { color } : undefined} />
+    </Card>
+  );
+
   const Estatisticas = (
     <>
+      {PaymentBadges}
       <Row gutter={16} style={{ marginBottom: 16 }}>
-        <Col xs={12} md={6}><Card><Statistic title="Receita total" value={totalRevenue} precision={2} prefix={<DollarSign size={18} />} valueStyle={{ color: "#16A34A" }} /></Card></Col>
-        <Col xs={12} md={6}><Card><Statistic title="Vendas" value={totalSales} prefix={<ShoppingBag size={18} />} /></Card></Col>
-        <Col xs={12} md={6}><Card><Statistic title="Ticket médio" value={avgTicket} precision={2} prefix={<TrendingUp size={18} />} valueStyle={{ color: "#F26B1F" }} /></Card></Col>
-        <Col xs={12} md={6}><Card><Statistic title="Lucro estimado" value={totalRevenue * 0.32} precision={2} prefix={<Award size={18} />} /></Card></Col>
+        <Col xs={12} md={6}><StatCard title="Receita" value={todayRevenue} prefix={<DollarSign size={18} />} color="#16A34A" /></Col>
+        <Col xs={12} md={6}><StatCard title="Vendas" value={todayCount} precision={0} prefix={<ShoppingBag size={18} />} /></Col>
+        <Col xs={12} md={6}><StatCard title="Ticket médio" value={todayAvg} prefix={<TrendingUp size={18} />} color="#F26B1F" /></Col>
+        <Col xs={12} md={6}><StatCard title="Lucro estimado" value={todayRevenue * 0.32} prefix={<Award size={18} />} /></Col>
+      </Row>
+      <Row gutter={16} style={{ marginBottom: 16 }}>
+        <Col xs={24} md={8}>
+          <Card>
+            <Statistic title="Receita acumulada (total)" value={totalRevenue} precision={2} prefix="R$" valueStyle={{ color: "#0F172A" }} />
+          </Card>
+        </Col>
+        <Col xs={24} md={8}>
+          <Card>
+            <Statistic title="Total de vendas" value={sales.length} prefix={<ShoppingBag size={16} />} />
+          </Card>
+        </Col>
+        <Col xs={24} md={8}>
+          <Card>
+            <Statistic title="Clientes atendidos" value={new Set(sales.map((s) => s.customerId).filter(Boolean)).size} />
+          </Card>
+        </Col>
       </Row>
       <Row gutter={16}>
         <Col xs={24} lg={14}>
@@ -85,10 +162,12 @@ export function Financas() {
         { key: "stats", label: "Estatísticas", children: Estatisticas },
         { key: "history", label: "Histórico de Vendas", children: <SalesHistory sales={sales} customers={customers} /> },
         { key: "cash", label: "Histórico de Caixas", children: <CashHistory history={cashHistory} sales={sales} /> },
+        { key: "reports", label: "Relatórios", children: <Reports /> },
       ]}
     />
   );
 }
+
 
 function SalesHistory({ sales, customers }: { sales: Sale[]; customers: ReturnType<typeof useStore>["customers"] }) {
   const [search, setSearch] = useState("");
