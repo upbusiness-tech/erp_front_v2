@@ -218,6 +218,28 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setCart([]);
     setSelectedCustomerId(null);
   };
+
+  const applySpecialPricesToCart = (customerId: string | null): number => {
+    if (!customerId) return 0;
+    const customer = customers.find((c) => c.id === customerId);
+    const map = new Map((customer?.specialPrices || []).map((s) => [s.productId, s.price]));
+    let applied = 0;
+    setCart((c) =>
+      c.map((i) => {
+        const sp = map.get(i.product.id);
+        if (sp != null && sp !== i.product.price) {
+          applied += 1;
+          return { ...i, customPrice: sp };
+        }
+        return i;
+      }),
+    );
+    return applied;
+  };
+
+  const resetCartPrices = () =>
+    setCart((c) => c.map((i) => ({ ...i, customPrice: undefined })));
+
   const addSale = (s: Sale) => {
     setSales((arr) => [s, ...arr]);
     if (cashSession) {
