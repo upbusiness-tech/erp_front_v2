@@ -66,6 +66,8 @@ interface StoreCtx {
   updateCartQty: (id: string, qty: number) => void;
   removeFromCart: (id: string) => void;
   clearCart: () => void;
+  applySpecialPricesToCart: (customerId: string | null) => number;
+  resetCartPrices: () => void;
 
   company: Company;
   setCompany: (c: Company) => void;
