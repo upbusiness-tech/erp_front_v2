@@ -207,6 +207,19 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
 
   const selectedCustomer = customers.find((c) => c.id === selectedCustomerId);
 
+  const eligibleSpecialPrices = useMemo(() => {
+    if (!selectedCustomer?.specialPrices?.length) return [] as { name: string; original: number; special: number }[];
+    const map = new Map(selectedCustomer.specialPrices.map((s) => [s.productId, s.price]));
+    return cart
+      .filter((i) => map.has(i.product.id) && i.customPrice !== map.get(i.product.id))
+      .map((i) => ({
+        name: i.product.name,
+        original: i.product.price,
+        special: map.get(i.product.id)!,
+      }));
+  }, [cart, selectedCustomer]);
+
+
   const renderProductCard = (p: Product) => (
     <Card
       hoverable={p.stock > 0}
