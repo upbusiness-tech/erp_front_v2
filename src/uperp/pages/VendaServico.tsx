@@ -16,6 +16,8 @@ import {
   Steps,
   Space,
   Table,
+  Segmented,
+  Avatar,
   message,
 } from "antd";
 import {
@@ -28,9 +30,12 @@ import {
   CreditCard,
   CheckCircle2,
   Search,
+  User,
+  UserPlus,
+  Star,
 } from "lucide-react";
 import { useStore } from "../store";
-import { PAYMENT_LABEL, type Payment, type PaymentMethod, type Product, type Sale } from "../types";
+import { PAYMENT_LABEL, type Payment, type PaymentMethod, type Product, type Sale, type SaleLine } from "../types";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -43,13 +48,22 @@ interface ServiceLine {
   productId?: string;
   qty: number;
   price: number;
+  originalPrice?: number;
+}
+
+interface WalkInCustomer {
+  name: string;
+  phone?: string;
+  document?: string;
 }
 
 export function VendaServico() {
   const { employees, products, addSale, customers } = useStore();
   const [items, setItems] = useState<ServiceLine[]>([]);
   const [form] = Form.useForm();
+  const [customerMode, setCustomerMode] = useState<"cadastrado" | "avulso">("cadastrado");
   const [customerId, setCustomerId] = useState<string | null>(null);
+  const [walkIn, setWalkIn] = useState<WalkInCustomer>({ name: "" });
   const [step, setStep] = useState<"items" | "payment">("items");
   const [payments, setPayments] = useState<Payment[]>([]);
   const [pMethod, setPMethod] = useState<PaymentMethod>("pix");
@@ -71,6 +85,39 @@ export function VendaServico() {
       return p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q);
     });
   }, [products, productSearch]);
+
+  const selectedCustomer = customers.find((c) => c.id === customerId);
+  const specialMap = useMemo(() => {
+    const m = new Map<string, number>();
+    selectedCustomer?.specialPrices?.forEach((s) => m.set(s.productId, s.price));
+    return m;
+  }, [selectedCustomer]);
+
+  const eligibleSpecials = useMemo(() => {
+    if (!selectedCustomer) return [] as ServiceLine[];
+    return items.filter(
+      (i) =>
+        i.kind === "produto" &&
+        i.productId &&
+        specialMap.has(i.productId) &&
+        i.price !== specialMap.get(i.productId),
+    );
+  }, [items, specialMap, selectedCustomer]);
+
+  const applySpecialPrices = () => {
+    setItems((arr) =>
+      arr.map((i) => {
+        if (i.kind !== "produto" || !i.productId) return i;
+        const sp = specialMap.get(i.productId);
+        if (sp == null || sp === i.price) return i;
+        return { ...i, originalPrice: i.originalPrice ?? i.price, price: sp };
+      }),
+    );
+    message.success(`${eligibleSpecials.length} produto(s) atualizado(s) com preço especial`);
+  };
+
+  const resetPrices = () =>
+    setItems((arr) => arr.map((i) => (i.originalPrice != null ? { ...i, price: i.originalPrice, originalPrice: undefined } : i)));
 
   const onAddService = (v: { description: string; employeeId: string; price: number }) => {
     const emp = employees.find((e) => e.id === v.employeeId);
@@ -117,6 +164,8 @@ export function VendaServico() {
 
   const goToPayment = () => {
     if (items.length === 0) return message.warning("Adicione ao menos um item.");
+    if (customerMode === "avulso" && !walkIn.name.trim())
+      return message.warning("Informe o nome do cliente avulso.");
     setPValue(total);
     setStep("payment");
   };
@@ -130,19 +179,27 @@ export function VendaServico() {
 
   const finalize = () => {
     if (paid < total - 0.001) return message.warning("Pagamento incompleto.");
+    const lines: SaleLine[] = items.map((i) => ({
+      name: i.description,
+      qty: i.qty,
+      unitPrice: i.price,
+      observation: i.kind === "servico" ? `Serviço - ${i.employeeName}` : undefined,
+    }));
     const sale: Sale = {
       id: `S${Math.floor(Math.random() * 9000 + 1000)}`,
       date: new Date().toISOString().slice(0, 10),
       total,
       items: items.reduce((s, i) => s + i.qty, 0),
       type: "servico",
-      customerId: customerId || undefined,
+      customerId: customerMode === "cadastrado" ? customerId || undefined : undefined,
       payments,
+      lines,
     };
     addSale(sale);
     setItems([]);
     setPayments([]);
     setCustomerId(null);
+    setWalkIn({ name: "" });
     setStep("items");
     message.success(`OS ${sale.id} finalizada! Total R$ ${total.toFixed(2)}`);
   };
@@ -150,6 +207,83 @@ export function VendaServico() {
   return (
     <Row gutter={16}>
       <Col xs={24} lg={14}>
+        <Card
+          title={<Space><User size={18} /> Dados do Cliente</Space>}
+          style={{ marginBottom: 16 }}
+          extra={
+            <Segmented
+              value={customerMode}
+              onChange={(v) => {
+                setCustomerMode(v as "cadastrado" | "avulso");
+                setCustomerId(null);
+              }}
+              options={[
+                { value: "cadastrado", label: "Cadastrado", icon: <User size={12} /> },
+                { value: "avulso", label: "Avulso", icon: <UserPlus size={12} /> },
+              ]}
+            />
+          }
+        >
+          {customerMode === "cadastrado" ? (
+            <>
+              <Select
+                showSearch
+                allowClear
+                placeholder="Buscar e selecionar cliente cadastrado..."
+                value={customerId || undefined}
+                onChange={(v) => setCustomerId(v || null)}
+                style={{ width: "100%" }}
+                optionFilterProp="label"
+                suffixIcon={<Search size={14} />}
+                options={customers.map((c) => ({ value: c.id, label: `${c.name} · ${c.phone}` }))}
+              />
+              {selectedCustomer && (
+                <div style={{ marginTop: 12, padding: 12, borderRadius: 8, background: "#FFF7ED", display: "flex", alignItems: "center", gap: 12 }}>
+                  <Avatar size={40} style={{ background: "#F26B1F" }}>{selectedCustomer.name.charAt(0)}</Avatar>
+                  <div style={{ flex: 1 }}>
+                    <Text strong style={{ display: "block" }}>{selectedCustomer.name}</Text>
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                      {selectedCustomer.email} · {selectedCustomer.phone}
+                    </Text>
+                  </div>
+                  {(selectedCustomer.specialPrices?.length || 0) > 0 && (
+                    <Tag color="gold" icon={<Star size={11} />}>
+                      {selectedCustomer.specialPrices!.length} preço(s) especial(is)
+                    </Tag>
+                  )}
+                </div>
+              )}
+            </>
+          ) : (
+            <Row gutter={12}>
+              <Col xs={24} md={10}>
+                <Text type="secondary" style={{ fontSize: 12 }}>Nome *</Text>
+                <Input
+                  placeholder="Nome do cliente"
+                  value={walkIn.name}
+                  onChange={(e) => setWalkIn((w) => ({ ...w, name: e.target.value }))}
+                />
+              </Col>
+              <Col xs={12} md={7}>
+                <Text type="secondary" style={{ fontSize: 12 }}>Telefone</Text>
+                <Input
+                  placeholder="(00) 00000-0000"
+                  value={walkIn.phone || ""}
+                  onChange={(e) => setWalkIn((w) => ({ ...w, phone: e.target.value }))}
+                />
+              </Col>
+              <Col xs={12} md={7}>
+                <Text type="secondary" style={{ fontSize: 12 }}>CPF/CNPJ</Text>
+                <Input
+                  placeholder="Documento"
+                  value={walkIn.document || ""}
+                  onChange={(e) => setWalkIn((w) => ({ ...w, document: e.target.value }))}
+                />
+              </Col>
+            </Row>
+          )}
+        </Card>
+
         <Card title={<Space><Briefcase size={18} /> Novo Serviço</Space>} style={{ marginBottom: 16 }}>
           <Form layout="vertical" form={form} onFinish={onAddService}>
             <Form.Item name="description" label="Descrição do serviço" rules={[{ required: true }]}>
@@ -213,7 +347,18 @@ export function VendaServico() {
                 title: "Preço",
                 dataIndex: "price",
                 width: 100,
-                render: (v: number) => `R$ ${v.toFixed(2)}`,
+                render: (v: number, p: Product) => {
+                  const sp = specialMap.get(p.id);
+                  if (sp != null && sp !== v) {
+                    return (
+                      <Space direction="vertical" size={0}>
+                        <Text delete style={{ fontSize: 11 }}>R$ {v.toFixed(2)}</Text>
+                        <Text strong style={{ color: "#F26B1F", fontSize: 12 }}>R$ {sp.toFixed(2)}</Text>
+                      </Space>
+                    );
+                  }
+                  return `R$ ${v.toFixed(2)}`;
+                },
               },
               {
                 title: "Estoque",
@@ -251,17 +396,50 @@ export function VendaServico() {
 
           {step === "items" && (
             <>
-              <Text type="secondary" style={{ fontSize: 12 }}>Cliente</Text>
-              <Select
-                showSearch
-                allowClear
-                placeholder="Selecionar cliente (opcional)"
-                value={customerId || undefined}
-                onChange={(v) => setCustomerId(v || null)}
-                style={{ width: "100%", marginTop: 4, marginBottom: 12 }}
-                optionFilterProp="label"
-                options={customers.map((c) => ({ value: c.id, label: c.name }))}
-              />
+              <div style={{ padding: 8, background: "#F8FAFC", borderRadius: 6, marginBottom: 12 }}>
+                <Text type="secondary" style={{ fontSize: 11 }}>Cliente da OS</Text>
+                <div>
+                  <Text strong>
+                    {customerMode === "cadastrado"
+                      ? selectedCustomer?.name || "Nenhum selecionado"
+                      : walkIn.name || "Cliente avulso"}
+                  </Text>{" "}
+                  <Tag color={customerMode === "cadastrado" ? "blue" : "default"} style={{ margin: 0 }}>
+                    {customerMode === "cadastrado" ? "Cadastrado" : "Avulso"}
+                  </Tag>
+                </div>
+              </div>
+
+              {eligibleSpecials.length > 0 && (
+                <div
+                  style={{
+                    background: "#FEF3C7",
+                    border: "1px solid #FCD34D",
+                    padding: 10,
+                    borderRadius: 8,
+                    marginBottom: 12,
+                  }}
+                >
+                  <Space align="start" style={{ width: "100%", justifyContent: "space-between" }}>
+                    <div style={{ flex: 1 }}>
+                      <Text strong style={{ fontSize: 12, display: "block" }}>
+                        <Star size={12} style={{ verticalAlign: -2, marginRight: 4 }} />
+                        {eligibleSpecials.length} produto(s) com preço especial
+                      </Text>
+                      <Text type="secondary" style={{ fontSize: 11 }}>
+                        Aplicar preço especial deste cliente.
+                      </Text>
+                    </div>
+                    <Space direction="vertical" size={4}>
+                      <Button size="small" type="primary" onClick={applySpecialPrices}>Aplicar</Button>
+                      {items.some((i) => i.originalPrice != null) && (
+                        <Button size="small" type="link" onClick={resetPrices}>Restaurar</Button>
+                      )}
+                    </Space>
+                  </Space>
+                </div>
+              )}
+
               <Divider style={{ margin: "8px 0 12px" }} />
             </>
           )}
@@ -273,31 +451,43 @@ export function VendaServico() {
               ) : (
                 <List
                   dataSource={items}
-                  renderItem={(it) => (
-                    <List.Item
-                      actions={[
-                        <Button key="d" size="small" type="text" danger icon={<Trash2 size={14} />} onClick={() => setItems((a) => a.filter((x) => x.id !== it.id))} />,
-                      ]}
-                    >
-                      <List.Item.Meta
-                        title={
-                          <Space>
-                            {it.description}
-                            <Tag color={it.kind === "servico" ? "orange" : "blue"}>
-                              {it.kind === "servico" ? "Serviço" : "Produto"}
-                            </Tag>
-                          </Space>
-                        }
-                        description={
-                          <Text type="secondary" style={{ fontSize: 12 }}>
-                            {it.kind === "servico"
-                              ? `Resp.: ${it.employeeName}`
-                              : `Qtd.: ${it.qty}`} • R$ {(it.price * it.qty).toFixed(2)}
-                          </Text>
-                        }
-                      />
-                    </List.Item>
-                  )}
+                  renderItem={(it) => {
+                    const hasSpecial = it.originalPrice != null && it.originalPrice !== it.price;
+                    return (
+                      <List.Item
+                        actions={[
+                          <Button key="d" size="small" type="text" danger icon={<Trash2 size={14} />} onClick={() => setItems((a) => a.filter((x) => x.id !== it.id))} />,
+                        ]}
+                      >
+                        <List.Item.Meta
+                          title={
+                            <Space>
+                              {it.description}
+                              <Tag color={it.kind === "servico" ? "orange" : "blue"} style={{ margin: 0 }}>
+                                {it.kind === "servico" ? "Serviço" : "Produto"}
+                              </Tag>
+                              {hasSpecial && <Tag color="gold" icon={<Star size={10} />} style={{ margin: 0 }}>Especial</Tag>}
+                            </Space>
+                          }
+                          description={
+                            <Space direction="vertical" size={0}>
+                              {hasSpecial && (
+                                <Text type="secondary" style={{ fontSize: 11 }}>
+                                  De <Text delete style={{ fontSize: 11 }}>R$ {it.originalPrice!.toFixed(2)}</Text>{" "}
+                                  por <Text strong style={{ color: "#F26B1F", fontSize: 11 }}>R$ {it.price.toFixed(2)}</Text>
+                                </Text>
+                              )}
+                              <Text type="secondary" style={{ fontSize: 12 }}>
+                                {it.kind === "servico"
+                                  ? `Resp.: ${it.employeeName}`
+                                  : `Qtd.: ${it.qty}`} • R$ {(it.price * it.qty).toFixed(2)}
+                              </Text>
+                            </Space>
+                          }
+                        />
+                      </List.Item>
+                    );
+                  }}
                 />
               )}
               <Divider style={{ margin: "12px 0" }} />
