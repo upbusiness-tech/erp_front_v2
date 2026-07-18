@@ -117,7 +117,7 @@ export function VendaBalcao({ onGoToCaixa }: Props) {
     [filtered, page, pageSize]
   );
 
-  const subtotal = cart.reduce((s, i) => s + i.product.price * i.qty, 0);
+  const subtotal = cart.reduce((s, i) => s + (i.customPrice ?? i.product.price) * i.qty, 0);
   const discountValue = discountType === "percent" ? (subtotal * discount) / 100 : discount;
   const total = Math.max(0, subtotal - discountValue);
   const paid = payments.reduce((s, p) => s + p.value, 0);
