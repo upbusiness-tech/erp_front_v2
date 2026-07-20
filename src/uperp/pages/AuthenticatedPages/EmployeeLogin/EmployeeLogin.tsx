@@ -2,6 +2,7 @@ import { Button, Card, Form, Input, Select, Typography } from "antd";
 import { ArrowLeft, UserCircle2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEmployeeLoginController } from "./useEmployeeLogin.controller";
+import { useAuthStore } from "@/stores/auth.store";
 
 const { Title, Text } = Typography;
 
@@ -9,6 +10,8 @@ export function EmployeeLogin() {
   const navigate = useNavigate();
   const { avaliableEmployees, isLoading, handleLoginWithEmployee, isSubmitting } =
     useEmployeeLoginController();
+
+  const { logout } = useAuthStore();
 
   return (
     <div
@@ -67,7 +70,7 @@ export function EmployeeLogin() {
         <Button
           type="link"
           icon={<ArrowLeft size={14} />}
-          onClick={() => navigate("/")}
+          onClick={logout}
           style={{ marginTop: 8, padding: 0 }}
         >
           Trocar empresa

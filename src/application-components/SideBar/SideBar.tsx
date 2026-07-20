@@ -1,5 +1,5 @@
-import { useStore } from "@/uperp/store";
 import { useAuthStore } from "@/stores/auth.store";
+import { useStore } from "@/uperp/store";
 import {
   Avatar,
   Button,
@@ -28,7 +28,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { useState } from "react";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
@@ -149,9 +149,14 @@ export function SideBar({ userName: _userName, onLogout: _onLogout }: Props) {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = !screens.lg;
-  const currentPage = pathToPageKey[location.pathname] || "balcao";
+  const currentPage = pathToPageKey[`/${location.pathname.split("/")[1]}`] || "balcao";
   const userName = _userName ?? employeeName ?? "Sofia";
-  const onLogout = _onLogout ?? (() => { logout(); navigate("/"); });
+  const onLogout =
+    _onLogout ??
+    (() => {
+      logout();
+      navigate("/");
+    });
 
   const dark = settings.darkSidebar;
 
