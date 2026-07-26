@@ -1,13 +1,13 @@
 import { BasicRoute } from "@/routes/-types";
-import { Empresa } from "@/uperp/pages/Empresa";
+import { CompanyView } from "@/uperp/pages/AuthenticatedPages/Company/CompanyView/CompanyView";
 
 export enum CompanyPaths {
-  DETAIL = "/empresa",
+  BASE = "/empresa",
 }
 
 export const companyBaseRoutes: BasicRoute[] = [
   {
-    path: CompanyPaths.DETAIL,
-    element: <Empresa />,
+    path: CompanyPaths.BASE,
+    element: <CompanyView />,
   },
 ];
