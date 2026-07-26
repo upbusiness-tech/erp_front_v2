@@ -1,5 +1,5 @@
 import { BasicRoute } from "@/routes/-types";
-import { CommonSale } from "@/uperp/pages/CommonSale/CommonSale";
+import { CommonSale } from "@/uperp/pages/AuthenticatedPages/CommonSale/CommonSale";
 import { VendaServico } from "@/uperp/pages/VendaServico";
 
 export enum SalesPaths {

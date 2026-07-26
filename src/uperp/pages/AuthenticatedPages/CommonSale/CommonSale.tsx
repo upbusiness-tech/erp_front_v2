@@ -45,7 +45,7 @@ import {
   User,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useStore } from "../../store";
+import { useStore } from "../../../store";
 import {
   PAYMENT_LABEL,
   type Payment,
@@ -53,7 +53,7 @@ import {
   type Product,
   type Sale,
   type SaleLine,
-} from "../../types";
+} from "../../../types";
 
 const { Title, Text } = Typography;
 const { useBreakpoint } = Grid;

@@ -25,23 +25,26 @@ export const GenericTable = <T,>({
   onPageSizeChange,
 }: GenericTableProps<T>) => {
   const handleTableChange = (pagination: TablePaginationConfig) => {
+    if (pagination.current && pagination.current !== page) {
+      onPageChange?.(pagination.current);
+    }
     if (pagination.pageSize && pagination.pageSize !== pageSize) {
       onPageSizeChange?.(pagination.pageSize);
-    } else if (pagination.current && pagination.current !== page) {
-      onPageChange?.(pagination.current);
     }
   };
 
   return (
-    <Table
-      rowKey="id"
-      dataSource={data}
+    <Table<T>
+      dataSource={[...data]}
       pagination={{
         current: page,
         pageSize,
         total,
         showSizeChanger: true,
         pageSizeOptions,
+        ...(total !== undefined && {
+          showTotal: (totalCount, range) => `${range[0]}-${range[1]} de ${totalCount} registros`,
+        }),
       }}
       onChange={handleTableChange}
       scroll={{ x: 760 }}
