@@ -1,5 +1,5 @@
 import { BasicRoute } from "@/routes/-types";
-import { Planos } from "@/uperp/pages/Planos";
+import { InvoiceView } from "@/uperp/pages/AuthenticatedPages/Invoices/InvoiceView/InvoiceView";
 
 export enum PlansPaths {
   PAGE = "/planos",
@@ -8,6 +8,6 @@ export enum PlansPaths {
 export const plansBaseRoutes: BasicRoute[] = [
   {
     path: PlansPaths.PAGE,
-    element: <Planos />,
+    element: <InvoiceView />,
   },
 ];

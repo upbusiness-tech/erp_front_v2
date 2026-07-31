@@ -6,6 +6,7 @@ import { CompanyService } from "@/services/company.service";
 import { Form, message } from "antd";
 import { useEffect, useRef, useState } from "react";
 import { ICompanyUpdateForm } from "./types";
+import { useAuthStore } from "@/stores/auth.store";
 
 const companyService = new CompanyService("me");
 
@@ -15,6 +16,7 @@ export function useCompanyViewController() {
   const pendingFileRef = useRef<File | null>(null);
 
   const { data: company, isLoading } = useGetAllWithParams<CompanyDetailModel>(companyService);
+  const { setCurrentCompany } = useAuthStore();
 
   const { invalidateQuery } = useCacheManager();
 
@@ -45,6 +47,7 @@ export function useCompanyViewController() {
 
   useEffect(() => {
     if (company) {
+      setCurrentCompany(company);
       form.setFieldsValue({
         name: company.name,
         address: company.address,

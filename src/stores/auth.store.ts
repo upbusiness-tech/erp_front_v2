@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { getCookie, setCookie, removeCookie } from "@/lib/cookie";
 import type { EmployeeLoginResponse } from "@/services/auth.service";
+import { CompanyDetailModel } from "@/model/company.model";
 
 export const COMPANY_TOKEN_KEY = "company-token";
 const COMPANY_NAME_KEY = "company-name";
@@ -35,6 +36,8 @@ interface AuthState {
   setEmployee: (response: EmployeeLoginResponse) => void;
   logout: () => void;
   employeeLogout: () => void;
+  currentCompany: CompanyDetailModel | undefined;
+  setCurrentCompany: (company: CompanyDetailModel | undefined) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -46,7 +49,11 @@ export const useAuthStore = create<AuthState>((set) => ({
   isCompanyAuthenticated: !!initial.companyToken,
   isEmployeeAuthenticated: !!initial.employeeToken,
   hasCredentials: !!initial.companyToken && !!initial.employeeToken,
+  currentCompany: undefined,
 
+  setCurrentCompany: (company: CompanyDetailModel | undefined) => {
+    set({ currentCompany: company });
+  },
   login: (companyToken, companyName = "") => {
     setCookie(COMPANY_TOKEN_KEY, companyToken);
     setCookie(COMPANY_NAME_KEY, companyName);
