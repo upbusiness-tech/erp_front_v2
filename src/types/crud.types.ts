@@ -41,26 +41,6 @@ export interface CrudJoin {
   field: string;
   select?: string[];
 }
-
-/** Opções completas para uma listagem com filtros, paginação, etc. */
-export interface GetAllOptions {
-  filter?: CrudFilter | CrudFilter[];
-  sort?: CrudSort | CrudSort[];
-  join?: CrudJoin | CrudJoin[];
-  page?: number;
-  limit?: number;
-  offset?: number;
-  query?: string[];
-  /** Query params customizados (ex: employeeType, etc.) */
-  queryParams?: Record<string, string>;
-  /** Tempo em ms até o cache ser considerado obsoleto (default: 30s) */
-  staleTime?: number;
-  /** Tempo em ms até o cache ser removido (default: 5min) */
-  gcTime?: number;
-  /** Quando false, impede a requisição (útil para filtros ainda não preenchidos) */
-  enabled?: boolean;
-}
-
 export interface GetOneOption {
   id: number | string;
   queryParams?: Record<string, string>;

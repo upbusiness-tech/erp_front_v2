@@ -1,15 +1,16 @@
 import { useGetAllWithParams } from "@/hooks/useGetAllWithParams";
-import type { GetAllOptions, PaginatedResponse } from "@/types/crud.types";
+import type { PaginatedResponse } from "@/types/crud.types";
+import { CreateQueryParams } from "@dataui/crud-request";
 import { useGenericTable } from "./useGenericTable";
 
 export interface UseGenericTableFetchOptions<TItem> {
   /** Instância do service (precisa expor BASE_PATH e getAll) */
   service: {
     BASE_PATH: string;
-    getAll: (options: GetAllOptions) => Promise<PaginatedResponse<TItem>>;
+    getAll: (options?: CreateQueryParams) => Promise<PaginatedResponse<TItem>>;
   };
   /** Opções adicionais como sort, filter, join etc. (page e limit são injetados automaticamente) */
-  options?: Omit<GetAllOptions, "page" | "limit">;
+  options?: Omit<CreateQueryParams, "page" | "limit">;
   /** Quantidade inicial de itens por página (default: 8) */
   initialPageSize?: number;
 }

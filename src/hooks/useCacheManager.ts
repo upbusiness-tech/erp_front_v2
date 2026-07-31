@@ -1,5 +1,5 @@
+import { CreateQueryParams } from "@dataui/crud-request";
 import { useQueryClient } from "@tanstack/react-query";
-import type { GetAllOptions } from "@/types/crud.types";
 
 /**
  * Interface mínima que um serviço precisa expor para usar o cache manager.
@@ -39,7 +39,7 @@ export function useCacheManager() {
      * Sem parâmetro extra remove TUDO do serviço.
      * Com options remove apenas a consulta específica.
      */
-    removeQuery: (service: CachableService, options?: GetAllOptions) =>
+    removeQuery: (service: CachableService, options?: CreateQueryParams) =>
       options
         ? queryClient.removeQueries({ queryKey: [service.BASE_PATH, options] })
         : queryClient.removeQueries({ queryKey: [service.BASE_PATH] }),

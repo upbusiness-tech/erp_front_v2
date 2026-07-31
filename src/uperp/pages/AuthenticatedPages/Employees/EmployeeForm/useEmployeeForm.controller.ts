@@ -30,7 +30,13 @@ export function useEmployeeFormController({ isEdit }: { isEdit?: boolean }) {
 
   const { data: permissions } = useGetAllWithParams<AvaliablePermissions>(
     permissionService,
-    employeeType ? { queryParams: { employeeType }, enabled: true } : { enabled: false },
+    {},
+    {
+      queryParams: {
+        employeeType,
+      },
+      enabled: !!employeeType,
+    },
   );
 
   const { invalidateQuery } = useCacheManager();

@@ -37,7 +37,7 @@ export function EmployeesView() {
         }
       >
         <GenericTable<EmployeeModel>
-          data={employees!}
+          data={employees || []}
           columns={tableColumns}
           isLoading={isLoading}
           page={page}

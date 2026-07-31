@@ -1,4 +1,4 @@
-import type { GetAllOptions, PaginatedResponse } from "@/types/crud.types";
+import { CreateQueryParams } from "@dataui/crud-request";
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 
 /**
@@ -30,18 +30,25 @@ import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 export function useGetAllWithParams<TResponse>(
   service: {
     BASE_PATH: string;
-    getAll: (options: GetAllOptions) => Promise<TResponse>;
+    getAll: (options?: CreateQueryParams) => Promise<TResponse>;
   },
-  options: GetAllOptions = {},
+  options?: CreateQueryParams,
+  cacheManager?: {
+    queryParams?: Record<string, string>;
+    /** Tempo em ms até o cache ser considerado obsoleto (default: 30s) */
+    staleTime?: number;
+    /** Tempo em ms até o cache ser removido (default: 5min) */
+    gcTime?: number;
+    /** Quando false, impede a requisição (útil para filtros ainda não preenchidos) */
+    enabled?: boolean;
+  },
 ): UseQueryResult<TResponse> {
-  const { staleTime, gcTime, enabled, ...crudOptions } = options;
-
   return useQuery<TResponse>({
-    queryKey: [service.BASE_PATH, crudOptions],
-    queryFn: () => service.getAll(crudOptions),
-    staleTime: staleTime ?? 30_000,
-    gcTime: gcTime ?? 10 * 60 * 1000,
+    queryKey: [service.BASE_PATH, options],
+    queryFn: () => service.getAll(options),
+    staleTime: cacheManager?.staleTime ?? 30_000,
+    gcTime: cacheManager?.gcTime ?? 10 * 60 * 1000,
     refetchOnMount: true,
-    enabled,
+    enabled: cacheManager?.enabled ?? true,
   });
 }

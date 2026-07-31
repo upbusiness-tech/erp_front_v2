@@ -1,6 +1,17 @@
 import { api } from "@/config/axios.config";
-import { buildNestCrudQuery } from "@/lib/nestcrud-query";
-import type { GetAllOptions } from "@/types/crud.types";
+import { GetWithFilterProps } from "@/lib/request.types";
+import { CreateQueryParams, RequestQueryBuilder } from "@dataui/crud-request";
+
+export const buildApiPathWithQuery = ({ path, queryParams }: GetWithFilterProps) => {
+  let pathWithQuery = path;
+
+  const queryString = RequestQueryBuilder.create(queryParams).query();
+  if (queryString) {
+    pathWithQuery = `${pathWithQuery}?${queryString}`;
+  }
+
+  return pathWithQuery;
+};
 
 /**
  * Classe base para todos os serviços da aplicação.
@@ -34,9 +45,9 @@ export class BaseService {
    *   page       → página atual
    *   pageCount  → total de páginas
    */
-  getAll<TData>(options: GetAllOptions = {}): Promise<TData> {
+  getAll<TData>(options: CreateQueryParams | undefined): Promise<TData> {
     return api
-      .get<TData>(`${this.BASE_PATH}${buildNestCrudQuery(options)}`)
+      .get<TData>(buildApiPathWithQuery({ path: this.BASE_PATH, queryParams: options }))
       .then((response) => response.data);
   }
 
