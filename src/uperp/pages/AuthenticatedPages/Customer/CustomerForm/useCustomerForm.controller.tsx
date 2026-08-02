@@ -30,6 +30,8 @@ export function useCustomerFormController({ isEdit }: { isEdit?: boolean }) {
     enabled: !!id,
   });
 
+  const [search, setSearch] = useState("");
+
   const {
     data: products,
     total,
@@ -38,12 +40,21 @@ export function useCustomerFormController({ isEdit }: { isEdit?: boolean }) {
     pageSize,
     handlePageChange,
     handlePageSizeChange,
+    resetPage,
   } = useGenericTableFetch<ProductModel>({
     service: productService,
     options: {
+      filter: search.trim()
+        ? [{ field: "name", operator: "$contL", value: search.trim() }]
+        : undefined,
       sort: { field: "name", order: "ASC" },
     },
   });
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    resetPage();
+  };
 
   const [defaultPrice, setDefaultPrice] = useState<number>(0);
 
@@ -269,5 +280,7 @@ export function useCustomerFormController({ isEdit }: { isEdit?: boolean }) {
     handleSubmit,
     isSubmiting,
     handleDeleteCustomer,
+    search,
+    handleSearchChange,
   };
 }

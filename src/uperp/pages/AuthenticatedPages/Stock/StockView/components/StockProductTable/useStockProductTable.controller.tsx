@@ -10,19 +10,38 @@ import { Button, Space, Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
 import { TableProps } from "antd/lib/table";
 import { Pencil } from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 const { Text } = Typography;
 
 const productService = new ProductService();
 
 export function useStockProductTableController() {
-  const { data, total, isLoading, page, pageSize, handlePageChange, handlePageSizeChange } =
-    useGenericTableFetch<ProductModel>({
-      service: productService,
-      options: {
-        sort: { field: "name", order: "ASC" },
-      },
-    });
+  const [search, setSearch] = useState("");
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    resetPage();
+  };
+
+  const {
+    data,
+    total,
+    isLoading,
+    page,
+    pageSize,
+    handlePageChange,
+    handlePageSizeChange,
+    resetPage,
+  } = useGenericTableFetch<ProductModel>({
+    service: productService,
+    options: {
+      sort: { field: "name", order: "ASC" },
+      filter: search.trim()
+        ? [{ field: "name", operator: "$contL", value: search.trim() }]
+        : undefined,
+    },
+  });
 
   const navigate = useNavigate();
 
@@ -128,6 +147,9 @@ export function useStockProductTableController() {
     pageSize,
     handlePageChange,
     handlePageSizeChange,
+    resetPage,
+    search,
+    handleSearchChange,
     rowSelection,
   };
 }

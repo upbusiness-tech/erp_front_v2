@@ -4,6 +4,7 @@ import { Button, Card } from "antd";
 import { Plus } from "lucide-react";
 import { CustomerViewModal } from "./components/CustomerViewModal";
 import { useCustomerViewController } from "./useCustomerView.controller";
+import { SearchBar } from "@/application-components/SearchBar/SearchBar";
 
 export function CustomerView() {
   const {
@@ -20,6 +21,8 @@ export function CustomerView() {
     viewCustomerModalOpen,
     handleGoToEdit,
     handleGoToCreate,
+    handleSearchChange,
+    search,
   } = useCustomerViewController();
 
   return (
@@ -32,6 +35,16 @@ export function CustomerView() {
           </Button>
         }
       >
+        <SearchBar
+          searches={[
+            {
+              name: "name",
+              value: search,
+              onChange: handleSearchChange,
+              placeholder: "Buscar por nome",
+            },
+          ]}
+        />
         <GenericTable<InternCustomerModel>
           data={customers || []}
           columns={tableColumns}

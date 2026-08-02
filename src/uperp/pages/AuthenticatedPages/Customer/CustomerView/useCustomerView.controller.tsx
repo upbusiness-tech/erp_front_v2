@@ -4,12 +4,19 @@ import { CustomersPaths } from "@/routes/AuthenticatedRoutes/Customers/routes";
 import { InternCustomerService } from "@/services/internCustomer.service";
 import { Avatar, Button, Space } from "antd";
 import { ColumnsType } from "antd/es/table";
+import { se } from "date-fns/locale";
 import { Eye, Pencil } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const internCustomerService = new InternCustomerService();
 export function useCustomerViewController() {
+  const [search, setSearch] = useState("");
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+  };
+
   const {
     data: customers,
     handlePageChange,
@@ -20,6 +27,11 @@ export function useCustomerViewController() {
     total,
   } = useGenericTableFetch<InternCustomerModel>({
     service: internCustomerService,
+    options: {
+      filter: search.trim()
+        ? [{ field: "name", operator: "$contL", value: search.trim() }]
+        : undefined,
+    },
   });
 
   const navigate = useNavigate();
@@ -89,5 +101,7 @@ export function useCustomerViewController() {
     viewCustomerModalOpen,
     handleGoToEdit,
     handleGoToCreate,
+    handleSearchChange,
+    search,
   };
 }

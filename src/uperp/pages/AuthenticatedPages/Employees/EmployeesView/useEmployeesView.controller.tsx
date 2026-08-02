@@ -32,6 +32,12 @@ export default function useEmployeesViewController() {
     setIsDetailModalOpen(false);
   };
 
+  const [search, setSearch] = useState("");
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+  };
+
   const { data: employeesPaginated, isLoading } = useGetAllWithParams<
     PaginatedResponse<EmployeeModel>
   >(employeeService, {
@@ -41,6 +47,9 @@ export default function useEmployeesViewController() {
       field: "name",
       order: "ASC",
     },
+    filter: search.trim()
+      ? [{ field: "name", operator: "$contL", value: search.trim() }]
+      : undefined,
   });
 
   const handlePageChange = (newPage: number) => setPage(newPage);
@@ -126,5 +135,7 @@ export default function useEmployeesViewController() {
     pageSize: limit,
     handlePageChange,
     handlePageSizeChange,
+    handleSearchChange,
+    search,
   };
 }

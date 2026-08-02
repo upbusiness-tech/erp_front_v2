@@ -5,6 +5,7 @@ import { Button, Card } from "antd";
 import { Plus } from "lucide-react";
 import { EmployeeViewModal } from "./components/EmployeeViewModal/EmployeeViewModal";
 import useEmployeesViewController from "./useEmployeesView.controller";
+import { SearchBar } from "@/application-components/SearchBar/SearchBar";
 
 export function EmployeesView() {
   const {
@@ -20,6 +21,8 @@ export function EmployeesView() {
     pageSize,
     handlePageChange,
     handlePageSizeChange,
+    handleSearchChange,
+    search,
   } = useEmployeesViewController();
 
   return (
@@ -36,6 +39,16 @@ export function EmployeesView() {
           </Button>
         }
       >
+        <SearchBar
+          searches={[
+            {
+              name: "name",
+              value: search,
+              onChange: handleSearchChange,
+              placeholder: "Buscar por nome",
+            },
+          ]}
+        />
         <GenericTable<EmployeeModel>
           data={employees || []}
           columns={tableColumns}

@@ -1,4 +1,5 @@
 import { GenericTable } from "@/application-components/GenericTable/GenericTable";
+import { SearchBar } from "@/application-components/SearchBar/SearchBar";
 import { useStockProductTableController } from "./useStockProductTable.controller";
 
 export const StockProductTable = () => {
@@ -11,18 +12,32 @@ export const StockProductTable = () => {
     pageSize,
     handlePageChange,
     handlePageSizeChange,
+    search,
+    handleSearchChange,
   } = useStockProductTableController();
 
   return (
-    <GenericTable
-      columns={tableColumns}
-      data={data}
-      total={total}
-      isLoading={isLoading}
-      page={page}
-      pageSize={pageSize}
-      onPageChange={handlePageChange}
-      onPageSizeChange={handlePageSizeChange}
-    />
+    <>
+      <SearchBar
+        searches={[
+          {
+            name: "name",
+            value: search,
+            onChange: handleSearchChange,
+            placeholder: "Buscar por nome",
+          },
+        ]}
+      />
+      <GenericTable
+        columns={tableColumns}
+        data={data}
+        total={total}
+        isLoading={isLoading}
+        page={page}
+        pageSize={pageSize}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
+      />
+    </>
   );
 };

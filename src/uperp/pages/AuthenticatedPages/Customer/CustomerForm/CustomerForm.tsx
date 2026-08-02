@@ -31,6 +31,7 @@ import {
 import { SpecialPriceVariationModal } from "./components/SpecialPriceVariationModal";
 import { ILinkedVariation } from "./types";
 import { useCustomerFormController } from "./useCustomerForm.controller";
+import { SearchBar } from "@/application-components/SearchBar/SearchBar";
 
 const { Text, Title } = Typography;
 
@@ -65,6 +66,8 @@ export const CustomerForm = ({ isEdit = false }: CustomerFormProps) => {
     handleSubmit,
     isSubmiting,
     handleDeleteCustomer,
+    handleSearchChange,
+    search,
   } = useCustomerFormController({ isEdit });
 
   return (
@@ -198,6 +201,17 @@ export const CustomerForm = ({ isEdit = false }: CustomerFormProps) => {
                       Vincular {selectedProducts.length > 0 ? `(${selectedProducts.length})` : ""}
                     </Button>
                   </div>
+
+                  <SearchBar
+                    searches={[
+                      {
+                        name: "name",
+                        value: search,
+                        onChange: handleSearchChange,
+                        placeholder: "Buscar por nome",
+                      },
+                    ]}
+                  />
 
                   <GenericTable
                     key={"id"}

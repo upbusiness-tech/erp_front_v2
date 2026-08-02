@@ -15,7 +15,6 @@ interface AvaliablePermissions {
   employeeTypeDefaultPermissions: PermissionModel[];
 }
 
-const permissionService = new PermissionService("avaliable-permissions");
 const employeeService = new EmployeeService();
 
 export function useEmployeeFormController({ isEdit }: { isEdit?: boolean }) {
@@ -27,6 +26,10 @@ export function useEmployeeFormController({ isEdit }: { isEdit?: boolean }) {
   const [form] = Form.useForm<IEmployeeCreateForm>();
 
   const employeeType = Form.useWatch("type", form);
+
+  const permissionService = new PermissionService(
+    `avaliable-permissions?employeeType=${employeeType}`,
+  );
 
   const { data: permissions } = useGetAllWithParams<AvaliablePermissions>(
     permissionService,
