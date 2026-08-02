@@ -1,5 +1,6 @@
 import { Table } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
+import { TableRowSelection } from "antd/es/table/interface";
 
 type GenericTableProps<T> = {
   columns: ColumnsType<T>;
@@ -11,6 +12,8 @@ type GenericTableProps<T> = {
   pageSizeOptions?: number[];
   onPageChange?: (page: number) => void;
   onPageSizeChange?: (pageSize: number) => void;
+  rowSelection?: TableRowSelection<T> | undefined;
+  rowKey?: string;
 };
 
 export const GenericTable = <T,>({
@@ -23,6 +26,8 @@ export const GenericTable = <T,>({
   pageSizeOptions = [8, 12, 16, 20],
   onPageChange,
   onPageSizeChange,
+  rowSelection,
+  rowKey = "id",
 }: GenericTableProps<T>) => {
   const handleTableChange = (pagination: TablePaginationConfig) => {
     if (pagination.current && pagination.current !== page) {
@@ -50,6 +55,8 @@ export const GenericTable = <T,>({
       scroll={{ x: 760 }}
       columns={columns}
       loading={isLoading}
+      rowSelection={rowSelection}
+      rowKey={rowKey}
     />
   );
 };

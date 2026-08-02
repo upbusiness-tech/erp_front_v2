@@ -1,0 +1,55 @@
+import { GenericTable } from "@/application-components/GenericTable/GenericTable";
+import { InternCustomerModel } from "@/model/internCustomer.model";
+import { Button, Card } from "antd";
+import { Plus } from "lucide-react";
+import { CustomerViewModal } from "./components/CustomerViewModal";
+import { useCustomerViewController } from "./useCustomerView.controller";
+
+export function CustomerView() {
+  const {
+    customers,
+    tableColumns,
+    handlePageChange,
+    handlePageSizeChange,
+    isLoading,
+    page,
+    pageSize,
+    total,
+    selectedCustomer,
+    handleCloseViewModal,
+    viewCustomerModalOpen,
+    handleGoToEdit,
+    handleGoToCreate,
+  } = useCustomerViewController();
+
+  return (
+    <>
+      <Card
+        title="Clientes"
+        extra={
+          <Button type="primary" icon={<Plus size={14} />} onClick={handleGoToCreate}>
+            Novo Cliente
+          </Button>
+        }
+      >
+        <GenericTable<InternCustomerModel>
+          data={customers || []}
+          columns={tableColumns}
+          isLoading={isLoading}
+          page={page}
+          pageSize={pageSize}
+          total={total}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+        />
+      </Card>
+
+      <CustomerViewModal
+        isOpen={viewCustomerModalOpen}
+        customer={selectedCustomer}
+        onClose={handleCloseViewModal}
+        onEdit={handleGoToEdit}
+      />
+    </>
+  );
+}

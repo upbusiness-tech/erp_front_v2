@@ -6,9 +6,10 @@ import {
   calculeSalePriceRange,
   calculeStockTotalByProductEspecification,
 } from "@/uperp/common/productFormulas";
-import { Button, Popconfirm, Space, Tag, Typography } from "antd";
+import { Button, Space, Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
-import { Pencil, Trash2 } from "lucide-react";
+import { TableProps } from "antd/lib/table";
+import { Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 const { Text } = Typography;
 
@@ -27,6 +28,16 @@ export function useStockProductTableController() {
 
   const handleGoToEditProduct = (id: number) => {
     navigate(StockPaths.UPDATE_PRODUCT.replace(":id", String(id)));
+  };
+
+  const rowSelection: TableProps<ProductModel>["rowSelection"] = {
+    onChange: (selectedRowKeys: React.Key[], selectedRows: ProductModel[]) => {
+      console.log(`selectedRowKeys: ${selectedRowKeys}`, "selectedRows: ", selectedRows);
+    },
+    getCheckboxProps: (record: ProductModel) => ({
+      disabled: record.name === "Disabled User", // Column configuration not to be checked
+      name: record.name,
+    }),
   };
 
   const tableColumns: ColumnsType<ProductModel> = [
@@ -55,7 +66,19 @@ export function useStockProductTableController() {
     {
       title: "Categoria",
       dataIndex: "productCategoryId",
-      render: (_, p: ProductModel) => <Text>{p.productCategory?.name || "—"}</Text>,
+      render: (_, p: ProductModel) => (
+        <Space>
+          <div
+            style={{
+              width: 10,
+              height: 10,
+              borderRadius: "50%",
+              background: `${p.productCategory?.color || "#F26B1F"}`,
+            }}
+          />
+          <Text strong>{p.productCategory?.name || "-"}</Text>
+        </Space>
+      ),
     },
     { title: "Un.", dataIndex: "unitOfMeasure", width: 70, render: (u: string) => u || "—" },
     { title: "Fornecedor", dataIndex: "supplierName", render: (u: string) => u || "—" },
@@ -105,5 +128,6 @@ export function useStockProductTableController() {
     pageSize,
     handlePageChange,
     handlePageSizeChange,
+    rowSelection,
   };
 }

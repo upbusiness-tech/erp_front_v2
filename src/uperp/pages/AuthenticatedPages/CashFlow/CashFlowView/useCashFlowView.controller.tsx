@@ -62,7 +62,7 @@ export function useCashFlowViewController() {
 
   const sangriasData = stats?.data?.find((st) => st.origin === TransactionOrigin.SANGRIA);
   const replacementData = stats?.data?.find((st) => st.origin === TransactionOrigin.REPLACEMENT);
-  const generalTotal = stats?.data?.find((st) => st.origin === "Total geral");
+  const generalTotal = stats?.data?.find((st) => st.origin === "Total Geral");
 
   const navigate = useNavigate();
 

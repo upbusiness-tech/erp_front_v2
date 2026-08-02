@@ -1,6 +1,9 @@
 import { GenericTable } from "@/application-components/GenericTable/GenericTable";
 import { TransactionOrigin } from "@/enums/cashFlow.enum";
-import { calculeCashFlowTransactionAmount } from "@/uperp/common/cashFlowFormulas";
+import {
+  calculeCashFlowEstimetedAmount,
+  calculeCashFlowTransactionAmount,
+} from "@/uperp/common/cashFlowFormulas";
 import { formatIsoDateIntoDateTimeString } from "@/uperp/common/dates";
 import { Button, Card, Col, Row, Space, Statistic, Typography } from "antd";
 import {
@@ -44,8 +47,6 @@ export const CashFlowView = () => {
     setOpenCloseCashFlowModal,
     generalTotal,
   } = useCashFlowViewController();
-
-  const { cashSession, cashMovements } = useStore();
 
   return (
     <>
@@ -145,7 +146,12 @@ export const CashFlowView = () => {
           <Col>
             <Text type="secondary">Saldo estimado em caixa</Text>
             <Title level={2} style={{ margin: 0, color: "#F26B1F" }}>
-              R$ {generalTotal?.amount}
+              R${" "}
+              {calculeCashFlowEstimetedAmount(
+                Number(sangriasData?.amount),
+                Number(replacementData?.amount),
+                Number(currentCashFlow?.initialBalance),
+              ).toFixed(2)}
             </Title>
           </Col>
           <Col>

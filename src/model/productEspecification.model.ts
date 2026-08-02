@@ -1,4 +1,5 @@
 import { DefaultIdModel } from "./base.model";
+import { ProductModel } from "./product.model";
 
 export interface ProductEspecificationModel extends DefaultIdModel {
   code: string;
