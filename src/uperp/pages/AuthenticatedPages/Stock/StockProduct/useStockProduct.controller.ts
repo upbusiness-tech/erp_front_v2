@@ -49,6 +49,7 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
       if (file) {
         const url = await uploadToCloudinary(file);
         form.setFieldValue("productPicture", url);
+        values.productPicture = url;
       }
       if (isEdit && id) {
         const variants: IProductVariantField[] = values.variants.map((p) => {

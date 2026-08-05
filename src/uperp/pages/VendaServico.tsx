@@ -35,7 +35,14 @@ import {
   Star,
 } from "lucide-react";
 import { useStore } from "../store";
-import { PAYMENT_LABEL, type Payment, type PaymentMethod, type Product, type Sale, type SaleLine } from "../types";
+import {
+  PAYMENT_LABEL,
+  type Payment,
+  type PaymentMethod,
+  type Product,
+  type Sale,
+  type SaleLine,
+} from "../types";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -117,7 +124,11 @@ export function VendaServico() {
   };
 
   const resetPrices = () =>
-    setItems((arr) => arr.map((i) => (i.originalPrice != null ? { ...i, price: i.originalPrice, originalPrice: undefined } : i)));
+    setItems((arr) =>
+      arr.map((i) =>
+        i.originalPrice != null ? { ...i, price: i.originalPrice, originalPrice: undefined } : i,
+      ),
+    );
 
   const onAddService = (v: { description: string; employeeId: string; price: number }) => {
     const emp = employees.find((e) => e.id === v.employeeId);
@@ -208,7 +219,11 @@ export function VendaServico() {
     <Row gutter={16}>
       <Col xs={24} lg={14}>
         <Card
-          title={<Space><User size={18} /> Dados do Cliente</Space>}
+          title={
+            <Space>
+              <User size={18} /> Dados do Cliente
+            </Space>
+          }
           style={{ marginBottom: 16 }}
           extra={
             <Segmented
@@ -238,10 +253,24 @@ export function VendaServico() {
                 options={customers.map((c) => ({ value: c.id, label: `${c.name} · ${c.phone}` }))}
               />
               {selectedCustomer && (
-                <div style={{ marginTop: 12, padding: 12, borderRadius: 8, background: "#FFF7ED", display: "flex", alignItems: "center", gap: 12 }}>
-                  <Avatar size={40} style={{ background: "#F26B1F" }}>{selectedCustomer.name.charAt(0)}</Avatar>
+                <div
+                  style={{
+                    marginTop: 12,
+                    padding: 12,
+                    borderRadius: 8,
+                    background: "#FFF7ED",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                  }}
+                >
+                  <Avatar size={40} style={{ background: "#F26B1F" }}>
+                    {selectedCustomer.name.charAt(0)}
+                  </Avatar>
                   <div style={{ flex: 1 }}>
-                    <Text strong style={{ display: "block" }}>{selectedCustomer.name}</Text>
+                    <Text strong style={{ display: "block" }}>
+                      {selectedCustomer.name}
+                    </Text>
                     <Text type="secondary" style={{ fontSize: 12 }}>
                       {selectedCustomer.email} · {selectedCustomer.phone}
                     </Text>
@@ -257,7 +286,9 @@ export function VendaServico() {
           ) : (
             <Row gutter={12}>
               <Col xs={24} md={10}>
-                <Text type="secondary" style={{ fontSize: 12 }}>Nome *</Text>
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  Nome *
+                </Text>
                 <Input
                   placeholder="Nome do cliente"
                   value={walkIn.name}
@@ -265,7 +296,9 @@ export function VendaServico() {
                 />
               </Col>
               <Col xs={12} md={7}>
-                <Text type="secondary" style={{ fontSize: 12 }}>Telefone</Text>
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  Telefone
+                </Text>
                 <Input
                   placeholder="(00) 00000-0000"
                   value={walkIn.phone || ""}
@@ -273,7 +306,9 @@ export function VendaServico() {
                 />
               </Col>
               <Col xs={12} md={7}>
-                <Text type="secondary" style={{ fontSize: 12 }}>CPF/CNPJ</Text>
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  CPF/CNPJ
+                </Text>
                 <Input
                   placeholder="Documento"
                   value={walkIn.document || ""}
@@ -284,17 +319,33 @@ export function VendaServico() {
           )}
         </Card>
 
-        <Card title={<Space><Briefcase size={18} /> Novo Serviço</Space>} style={{ marginBottom: 16 }}>
+        <Card
+          title={
+            <Space>
+              <Briefcase size={18} /> Novo Serviço
+            </Space>
+          }
+          style={{ marginBottom: 16 }}
+        >
           <Form layout="vertical" form={form} onFinish={onAddService}>
             <Form.Item name="description" label="Descrição do serviço" rules={[{ required: true }]}>
-              <TextArea rows={3} placeholder="Ex: Ajuste de barra de calça, reparo, instalação..." />
+              <TextArea
+                rows={3}
+                placeholder="Ex: Ajuste de barra de calça, reparo, instalação..."
+              />
             </Form.Item>
             <Row gutter={12}>
               <Col span={14}>
-                <Form.Item name="employeeId" label="Funcionário responsável" rules={[{ required: true }]}>
+                <Form.Item
+                  name="employeeId"
+                  label="Funcionário responsável"
+                  rules={[{ required: true }]}
+                >
                   <Select
                     placeholder="Selecione"
-                    options={employees.filter((e) => e.active).map((e) => ({ value: e.id, label: `${e.name} (${e.role})` }))}
+                    options={employees
+                      .filter((e) => e.active)
+                      .map((e) => ({ value: e.id, label: `${e.name} (${e.role})` }))}
                   />
                 </Form.Item>
               </Col>
@@ -311,7 +362,11 @@ export function VendaServico() {
         </Card>
 
         <Card
-          title={<Space><Package size={18} /> Produtos do Estoque</Space>}
+          title={
+            <Space>
+              <Package size={18} /> Produtos do Estoque
+            </Space>
+          }
           extra={
             <Button
               type="primary"
@@ -352,8 +407,12 @@ export function VendaServico() {
                   if (sp != null && sp !== v) {
                     return (
                       <Space direction="vertical" size={0}>
-                        <Text delete style={{ fontSize: 11 }}>R$ {v.toFixed(2)}</Text>
-                        <Text strong style={{ color: "#F26B1F", fontSize: 12 }}>R$ {sp.toFixed(2)}</Text>
+                        <Text delete style={{ fontSize: 11 }}>
+                          R$ {v.toFixed(2)}
+                        </Text>
+                        <Text strong style={{ color: "#F26B1F", fontSize: 12 }}>
+                          R$ {sp.toFixed(2)}
+                        </Text>
                       </Space>
                     );
                   }
@@ -397,14 +456,19 @@ export function VendaServico() {
           {step === "items" && (
             <>
               <div style={{ padding: 8, background: "#F8FAFC", borderRadius: 6, marginBottom: 12 }}>
-                <Text type="secondary" style={{ fontSize: 11 }}>Cliente da OS</Text>
+                <Text type="secondary" style={{ fontSize: 11 }}>
+                  Cliente da OS
+                </Text>
                 <div>
                   <Text strong>
                     {customerMode === "cadastrado"
                       ? selectedCustomer?.name || "Nenhum selecionado"
                       : walkIn.name || "Cliente avulso"}
                   </Text>{" "}
-                  <Tag color={customerMode === "cadastrado" ? "blue" : "default"} style={{ margin: 0 }}>
+                  <Tag
+                    color={customerMode === "cadastrado" ? "blue" : "default"}
+                    style={{ margin: 0 }}
+                  >
                     {customerMode === "cadastrado" ? "Cadastrado" : "Avulso"}
                   </Tag>
                 </div>
@@ -431,9 +495,13 @@ export function VendaServico() {
                       </Text>
                     </div>
                     <Space direction="vertical" size={4}>
-                      <Button size="small" type="primary" onClick={applySpecialPrices}>Aplicar</Button>
+                      <Button size="small" type="primary" onClick={applySpecialPrices}>
+                        Aplicar
+                      </Button>
                       {items.some((i) => i.originalPrice != null) && (
-                        <Button size="small" type="link" onClick={resetPrices}>Restaurar</Button>
+                        <Button size="small" type="link" onClick={resetPrices}>
+                          Restaurar
+                        </Button>
                       )}
                     </Space>
                   </Space>
@@ -456,31 +524,52 @@ export function VendaServico() {
                     return (
                       <List.Item
                         actions={[
-                          <Button key="d" size="small" type="text" danger icon={<Trash2 size={14} />} onClick={() => setItems((a) => a.filter((x) => x.id !== it.id))} />,
+                          <Button
+                            key="d"
+                            size="small"
+                            type="text"
+                            danger
+                            icon={<Trash2 size={14} />}
+                            onClick={() => setItems((a) => a.filter((x) => x.id !== it.id))}
+                          />,
                         ]}
                       >
                         <List.Item.Meta
                           title={
                             <Space>
                               {it.description}
-                              <Tag color={it.kind === "servico" ? "orange" : "blue"} style={{ margin: 0 }}>
+                              <Tag
+                                color={it.kind === "servico" ? "orange" : "blue"}
+                                style={{ margin: 0 }}
+                              >
                                 {it.kind === "servico" ? "Serviço" : "Produto"}
                               </Tag>
-                              {hasSpecial && <Tag color="gold" icon={<Star size={10} />} style={{ margin: 0 }}>Especial</Tag>}
+                              {hasSpecial && (
+                                <Tag color="gold" icon={<Star size={10} />} style={{ margin: 0 }}>
+                                  Especial
+                                </Tag>
+                              )}
                             </Space>
                           }
                           description={
                             <Space direction="vertical" size={0}>
                               {hasSpecial && (
                                 <Text type="secondary" style={{ fontSize: 11 }}>
-                                  De <Text delete style={{ fontSize: 11 }}>R$ {it.originalPrice!.toFixed(2)}</Text>{" "}
-                                  por <Text strong style={{ color: "#F26B1F", fontSize: 11 }}>R$ {it.price.toFixed(2)}</Text>
+                                  De{" "}
+                                  <Text delete style={{ fontSize: 11 }}>
+                                    R$ {it.originalPrice!.toFixed(2)}
+                                  </Text>{" "}
+                                  por{" "}
+                                  <Text strong style={{ color: "#F26B1F", fontSize: 11 }}>
+                                    R$ {it.price.toFixed(2)}
+                                  </Text>
                                 </Text>
                               )}
                               <Text type="secondary" style={{ fontSize: 12 }}>
                                 {it.kind === "servico"
                                   ? `Resp.: ${it.employeeName}`
-                                  : `Qtd.: ${it.qty}`} • R$ {(it.price * it.qty).toFixed(2)}
+                                  : `Qtd.: ${it.qty}`}{" "}
+                                • R$ {(it.price * it.qty).toFixed(2)}
                               </Text>
                             </Space>
                           }
@@ -492,33 +581,71 @@ export function VendaServico() {
               )}
               <Divider style={{ margin: "12px 0" }} />
               <Row justify="space-between">
-                <Title level={4} style={{ margin: 0 }}>Total</Title>
-                <Title level={4} style={{ margin: 0, color: "#F26B1F" }}>R$ {total.toFixed(2)}</Title>
+                <Title level={4} style={{ margin: 0 }}>
+                  Total
+                </Title>
+                <Title level={4} style={{ margin: 0, color: "#F26B1F" }}>
+                  R$ {total.toFixed(2)}
+                </Title>
               </Row>
-              <Button type="primary" block size="large" style={{ marginTop: 12 }} icon={<ArrowRight size={14} />} iconPosition="end" onClick={goToPayment}>
+              <Button
+                type="primary"
+                block
+                size="large"
+                style={{ marginTop: 12 }}
+                icon={<ArrowRight size={14} />}
+                iconPosition="end"
+                onClick={goToPayment}
+              >
                 Ir para pagamento
               </Button>
             </>
           ) : (
             <>
-              <div style={{ background: "#FFF7ED", padding: 12, borderRadius: 8, marginBottom: 12 }}>
-                <Row justify="space-between"><Text>Total</Text><Text strong>R$ {total.toFixed(2)}</Text></Row>
-                <Row justify="space-between"><Text type="secondary">Pago</Text><Text type="secondary">R$ {paid.toFixed(2)}</Text></Row>
+              <div
+                style={{ background: "#FFF7ED", padding: 12, borderRadius: 8, marginBottom: 12 }}
+              >
                 <Row justify="space-between">
-                  <Text strong style={{ color: remaining > 0 ? "#DC2626" : "#16A34A" }}>Restante</Text>
-                  <Text strong style={{ color: remaining > 0 ? "#DC2626" : "#16A34A" }}>R$ {remaining.toFixed(2)}</Text>
+                  <Text>Total</Text>
+                  <Text strong>R$ {total.toFixed(2)}</Text>
+                </Row>
+                <Row justify="space-between">
+                  <Text type="secondary">Pago</Text>
+                  <Text type="secondary">R$ {paid.toFixed(2)}</Text>
+                </Row>
+                <Row justify="space-between">
+                  <Text strong style={{ color: remaining > 0 ? "#DC2626" : "#16A34A" }}>
+                    Restante
+                  </Text>
+                  <Text strong style={{ color: remaining > 0 ? "#DC2626" : "#16A34A" }}>
+                    R$ {remaining.toFixed(2)}
+                  </Text>
                 </Row>
               </div>
-              <Text type="secondary" style={{ fontSize: 12 }}>Adicionar pagamento</Text>
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                Adicionar pagamento
+              </Text>
               <Space.Compact style={{ width: "100%", marginTop: 4 }}>
                 <Select
                   value={pMethod}
                   onChange={setPMethod}
                   style={{ width: 130 }}
-                  options={(Object.keys(PAYMENT_LABEL) as PaymentMethod[]).map((m) => ({ value: m, label: PAYMENT_LABEL[m] }))}
+                  options={(Object.keys(PAYMENT_LABEL) as PaymentMethod[]).map((m) => ({
+                    value: m,
+                    label: PAYMENT_LABEL[m],
+                  }))}
                 />
-                <InputNumber min={0} step={0.5} value={pValue} onChange={(v) => setPValue(v || 0)} prefix="R$" style={{ width: "100%" }} />
-                <Button type="primary" icon={<Plus size={14} />} onClick={addPayment}>Add</Button>
+                <InputNumber
+                  min={0}
+                  step={0.5}
+                  value={pValue}
+                  onChange={(v) => setPValue(v || 0)}
+                  prefix="R$"
+                  style={{ width: "100%" }}
+                />
+                <Button type="primary" icon={<Plus size={14} />} onClick={addPayment}>
+                  Add
+                </Button>
               </Space.Compact>
 
               {payments.length > 0 && (
@@ -529,10 +656,20 @@ export function VendaServico() {
                   renderItem={(p, idx) => (
                     <List.Item
                       actions={[
-                        <Button key="x" size="small" type="text" danger icon={<Trash2 size={14} />} onClick={() => removePayment(idx)} />,
+                        <Button
+                          key="x"
+                          size="small"
+                          type="text"
+                          danger
+                          icon={<Trash2 size={14} />}
+                          onClick={() => removePayment(idx)}
+                        />,
                       ]}
                     >
-                      <Space><CreditCard size={14} color="#F26B1F" /><Text>{PAYMENT_LABEL[p.method]}</Text></Space>
+                      <Space>
+                        <CreditCard size={14} color="#F26B1F" />
+                        <Text>{PAYMENT_LABEL[p.method]}</Text>
+                      </Space>
                       <Text strong>R$ {p.value.toFixed(2)}</Text>
                     </List.Item>
                   )}
@@ -540,10 +677,19 @@ export function VendaServico() {
               )}
 
               <Space direction="vertical" style={{ width: "100%", marginTop: 16 }}>
-                <Button type="primary" block size="large" icon={<CheckCircle2 size={16} />} disabled={paid < total - 0.001} onClick={finalize}>
+                <Button
+                  type="primary"
+                  block
+                  size="large"
+                  icon={<CheckCircle2 size={16} />}
+                  disabled={paid < total - 0.001}
+                  onClick={finalize}
+                >
                   Finalizar Serviço
                 </Button>
-                <Button block icon={<ArrowLeft size={14} />} onClick={() => setStep("items")}>Voltar</Button>
+                <Button block icon={<ArrowLeft size={14} />} onClick={() => setStep("items")}>
+                  Voltar
+                </Button>
               </Space>
             </>
           )}

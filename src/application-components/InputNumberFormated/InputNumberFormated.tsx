@@ -8,7 +8,7 @@ type InputNumberFormattedProps = Omit<InputProps, "value" | "onChange" | "type">
   onChange?: (value: number) => void;
 };
 
-const formatDisplay = (val: number): string => val.toFixed(2).replace(".", ",");
+const formatDisplay = (val: number): string => Number(val).toFixed(2).replace(".", ",");
 
 const parseValue = (raw: string): number => {
   const digits = raw.replace(/\D/g, "");

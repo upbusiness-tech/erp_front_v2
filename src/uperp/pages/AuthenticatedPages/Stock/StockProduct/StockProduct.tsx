@@ -19,6 +19,7 @@ import { ArrowLeft, Camera, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { ProductUnitOfMeasure } from "./types";
 import { useStockProductController } from "./useStockProduct.controller";
+import InputNumberFormatted from "@/application-components/InputNumberFormated/InputNumberFormated";
 
 const { Text, Title } = Typography;
 
@@ -205,7 +206,7 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
                         label="Preço venda"
                         rules={[{ required: true, message: "Preço" }]}
                       >
-                        <InputNumber
+                        <InputNumberFormatted
                           min={0}
                           step={0.5}
                           placeholder="0,00"
@@ -216,7 +217,7 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
                     </Col>
                     <Col xs={12} md={3}>
                       <Form.Item name={[field.name, "costPrice"]} label="Preço custo">
-                        <InputNumber
+                        <InputNumberFormatted
                           min={0}
                           step={0.5}
                           placeholder="0,00"

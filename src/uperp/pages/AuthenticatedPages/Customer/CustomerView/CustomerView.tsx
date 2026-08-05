@@ -2,7 +2,7 @@ import { GenericTable } from "@/application-components/GenericTable/GenericTable
 import { InternCustomerModel } from "@/model/internCustomer.model";
 import { Button, Card } from "antd";
 import { Plus } from "lucide-react";
-import { CustomerViewModal } from "./components/CustomerViewModal";
+import { CustomerDetailsModal } from "@/application-components/CustomerDetailsModal/CustomerDetailsModal";
 import { useCustomerViewController } from "./useCustomerView.controller";
 import { SearchBar } from "@/application-components/SearchBar/SearchBar";
 
@@ -57,7 +57,7 @@ export function CustomerView() {
         />
       </Card>
 
-      <CustomerViewModal
+      <CustomerDetailsModal
         isOpen={viewCustomerModalOpen}
         customer={selectedCustomer}
         onClose={handleCloseViewModal}

@@ -26,3 +26,7 @@ export const calculeSalePriceRange = (variants: ProductEspecificationModel[]): s
 
   return `${formatPrice(min)} - ${formatPrice(max)}`;
 };
+
+export const formatPrice = (v: string | number) => {
+  return `R$ ${Number(v).toFixed(2).replace(".", ",")}`;
+};

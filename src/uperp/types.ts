@@ -72,16 +72,66 @@ export interface PermissionDefinition {
 }
 
 export const PERMISSIONS: PermissionDefinition[] = [
-  { key: "vendas.balcao", label: "Vendas de Balcão", description: "Registrar e finalizar vendas de balcão", group: "Vendas" },
-  { key: "vendas.servico", label: "Vendas de Serviço", description: "Abrir e concluir ordens de serviço", group: "Vendas" },
-  { key: "caixa.gerenciar", label: "Gerenciar Caixa", description: "Abrir, fechar caixa e movimentações", group: "Vendas" },
-  { key: "estoque.gerenciar", label: "Gerenciar Estoque", description: "Cadastrar e editar produtos e categorias", group: "Cadastros" },
-  { key: "clientes.gerenciar", label: "Gerenciar Clientes", description: "Cadastrar e editar clientes", group: "Cadastros" },
-  { key: "funcionarios.gerenciar", label: "Gerenciar Funcionários", description: "Cadastrar funcionários e permissões", group: "Administração" },
-  { key: "financas.visualizar", label: "Ver Finanças e Relatórios", description: "Acessar relatórios e histórico de caixas", group: "Financeiro" },
-  { key: "empresa.editar", label: "Editar Empresa", description: "Alterar dados cadastrais da empresa", group: "Administração" },
-  { key: "planos.gerenciar", label: "Planos e Mensalidades", description: "Visualizar e alterar plano contratado", group: "Financeiro" },
-  { key: "configuracoes.gerenciar", label: "Configurações do Sistema", description: "Alterar preferências gerais", group: "Administração" },
+  {
+    key: "vendas.balcao",
+    label: "Vendas de Balcão",
+    description: "Registrar e finalizar vendas de balcão",
+    group: "Vendas",
+  },
+  {
+    key: "vendas.servico",
+    label: "Vendas de Serviço",
+    description: "Abrir e concluir ordens de serviço",
+    group: "Vendas",
+  },
+  {
+    key: "caixa.gerenciar",
+    label: "Gerenciar Caixa",
+    description: "Abrir, fechar caixa e movimentações",
+    group: "Vendas",
+  },
+  {
+    key: "estoque.gerenciar",
+    label: "Gerenciar Estoque",
+    description: "Cadastrar e editar produtos e categorias",
+    group: "Cadastros",
+  },
+  {
+    key: "clientes.gerenciar",
+    label: "Gerenciar Clientes",
+    description: "Cadastrar e editar clientes",
+    group: "Cadastros",
+  },
+  {
+    key: "funcionarios.gerenciar",
+    label: "Gerenciar Funcionários",
+    description: "Cadastrar funcionários e permissões",
+    group: "Administração",
+  },
+  {
+    key: "financas.visualizar",
+    label: "Ver Finanças e Relatórios",
+    description: "Acessar relatórios e histórico de caixas",
+    group: "Financeiro",
+  },
+  {
+    key: "empresa.editar",
+    label: "Editar Empresa",
+    description: "Alterar dados cadastrais da empresa",
+    group: "Administração",
+  },
+  {
+    key: "planos.gerenciar",
+    label: "Planos e Mensalidades",
+    description: "Visualizar e alterar plano contratado",
+    group: "Financeiro",
+  },
+  {
+    key: "configuracoes.gerenciar",
+    label: "Configurações do Sistema",
+    description: "Alterar preferências gerais",
+    group: "Administração",
+  },
 ];
 
 export interface Employee {
@@ -121,7 +171,6 @@ export interface Sale {
   lines?: SaleLine[];
   discount?: number;
 }
-
 
 export interface Invoice {
   id: string;

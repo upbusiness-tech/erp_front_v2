@@ -2,12 +2,13 @@ import { useGenericTableFetch } from "@/application-components/GenericTable/useG
 import { InternCustomerModel } from "@/model/internCustomer.model";
 import { CustomersPaths } from "@/routes/AuthenticatedRoutes/Customers/routes";
 import { InternCustomerService } from "@/services/internCustomer.service";
-import { Avatar, Button, Space } from "antd";
+import { Avatar, Button, Space, Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
-import { se } from "date-fns/locale";
 import { Eye, Pencil } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+const { Text } = Typography;
 
 const internCustomerService = new InternCustomerService();
 export function useCustomerViewController() {
@@ -74,6 +75,12 @@ export function useCustomerViewController() {
     },
     { title: "Tipo", dataIndex: "type" },
     { title: "Telefone", dataIndex: "phoneNumber" },
+    {
+      title: "Preços especiais",
+      render: (_, c: InternCustomerModel) => (
+        <Tag color={"lime"}>{c.internCustomerPrices.length} produtos</Tag>
+      ),
+    },
     {
       title: "Ações",
       width: 160,

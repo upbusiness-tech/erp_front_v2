@@ -1,7 +1,7 @@
+import { useDebounce } from "@/hooks/useDebounce";
 import { Input, Space } from "antd";
 import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useDebounce } from "@/hooks/useDebounce";
 
 export type SearchBarItem = {
   /** Identificador único do campo de busca (ex: "name") */
@@ -12,6 +12,7 @@ export type SearchBarItem = {
   onChange: (value: string) => void;
   placeholder?: string;
   debounceMs?: number;
+  size?: "medium" | "large" | "small" | "middle";
 };
 
 type SearchBarProps = {
@@ -37,6 +38,7 @@ const SearchField = ({ search }: { search: SearchBarItem }) => {
 
   return (
     <Input
+      size={search.size || "medium"}
       allowClear
       value={inputValue}
       onChange={(e) => setInputValue(e.target.value)}

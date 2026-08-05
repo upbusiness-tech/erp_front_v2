@@ -92,7 +92,11 @@ export function Configuracoes() {
     <Row gutter={[16, 16]}>
       <Col xs={24} lg={16}>
         {groups.map((g, idx) => (
-          <Card key={g.title} title={g.title} style={{ marginBottom: idx === groups.length - 1 ? 0 : 16 }}>
+          <Card
+            key={g.title}
+            title={g.title}
+            style={{ marginBottom: idx === groups.length - 1 ? 0 : 16 }}
+          >
             {g.items.map((item, i) => (
               <div key={item.key}>
                 <Row align="middle" justify="space-between" gutter={16}>
@@ -113,16 +117,17 @@ export function Configuracoes() {
                         {item.icon}
                       </div>
                       <div>
-                        <Text strong style={{ display: "block" }}>{item.title}</Text>
-                        <Text type="secondary" style={{ fontSize: 12 }}>{item.description}</Text>
+                        <Text strong style={{ display: "block" }}>
+                          {item.title}
+                        </Text>
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          {item.description}
+                        </Text>
                       </div>
                     </Space>
                   </Col>
                   <Col>
-                    <Switch
-                      checked={settings[item.key]}
-                      onChange={(v) => toggle(item.key, v)}
-                    />
+                    <Switch checked={settings[item.key]} onChange={(v) => toggle(item.key, v)} />
                   </Col>
                 </Row>
                 {i < g.items.length - 1 && <Divider style={{ margin: "16px 0" }} />}
@@ -133,16 +138,17 @@ export function Configuracoes() {
       </Col>
       <Col xs={24} lg={8}>
         <Card>
-          <Title level={5} style={{ marginTop: 0 }}>Sobre as preferências</Title>
+          <Title level={5} style={{ marginTop: 0 }}>
+            Sobre as preferências
+          </Title>
           <Text type="secondary">
-            As configurações abaixo afetam o comportamento do sistema para todos os
-            operadores da loja. As alterações são aplicadas imediatamente nas próximas
-            operações.
+            As configurações abaixo afetam o comportamento do sistema para todos os operadores da
+            loja. As alterações são aplicadas imediatamente nas próximas operações.
           </Text>
           <Divider />
           <Text type="secondary" style={{ fontSize: 12 }}>
-            Precisa de mais opções? Entre em contato com o suporte para personalizações
-            avançadas do seu plano.
+            Precisa de mais opções? Entre em contato com o suporte para personalizações avançadas do
+            seu plano.
           </Text>
         </Card>
       </Col>

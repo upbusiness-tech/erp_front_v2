@@ -12,6 +12,7 @@ type GenericTableProps<T> = {
   pageSizeOptions?: number[];
   onPageChange?: (page: number) => void;
   onPageSizeChange?: (pageSize: number) => void;
+  onRowClick?: (record: T) => void;
   rowSelection?: TableRowSelection<T> | undefined;
   rowKey?: string;
 };
@@ -26,6 +27,7 @@ export const GenericTable = <T,>({
   pageSizeOptions = [8, 12, 16, 20],
   onPageChange,
   onPageSizeChange,
+  onRowClick,
   rowSelection,
   rowKey = "id",
 }: GenericTableProps<T>) => {
@@ -57,6 +59,12 @@ export const GenericTable = <T,>({
       loading={isLoading}
       rowSelection={rowSelection}
       rowKey={rowKey}
+      {...(onRowClick && {
+        onRow: (record) => ({
+          onClick: () => onRowClick(record),
+          style: { cursor: "pointer" },
+        }),
+      })}
     />
   );
 };
