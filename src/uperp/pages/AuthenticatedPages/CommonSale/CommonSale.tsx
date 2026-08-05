@@ -3,6 +3,7 @@ import { OrderContent } from "@/application-components/OrderContent/OrderContent
 import { GenericTable } from "@/application-components/GenericTable/GenericTable";
 import { ProductCard } from "@/application-components/ProductCard/ProductCard";
 import { ProductEspecificationModal } from "@/application-components/ProductEspecificationModal/ProductEspecificationModal";
+import { SaleReceiptModal } from "@/application-components/SaleReceiptModal/SaleReceiptModal";
 import { SearchBar } from "@/application-components/SearchBar/SearchBar";
 import { EProductView, useSalesStore } from "@/stores/sales.store";
 import { AppstoreOutlined, BarsOutlined } from "@ant-design/icons";
@@ -20,7 +21,6 @@ import {
   Space,
 } from "antd";
 import { ShoppingCart } from "lucide-react";
-import { useStore } from "../../../store";
 import { useCommonSaleController } from "./useCommonSale.controller";
 
 const { useBreakpoint } = Grid;
@@ -49,9 +49,11 @@ export function CommonSale() {
     cartOpen,
     setCartOpen,
     handleSubmitSale,
+    receiptSale,
+    handleCloseReceipt,
+    resetSale,
   } = useCommonSaleController();
 
-  const { cart, clearCart } = useStore();
   const { selectedCustomer } = useSalesStore();
   const screens = useBreakpoint();
   const isMobile = !screens.lg;
@@ -145,9 +147,9 @@ export function CommonSale() {
                 </Space>
               }
               extra={
-                cart.length > 0 &&
+                saleItems.length > 0 &&
                 saleStep === "items" && (
-                  <Button size="small" type="link" onClick={clearCart}>
+                  <Button size="small" type="link" onClick={resetSale}>
                     Limpar
                   </Button>
                 )
@@ -193,8 +195,8 @@ export function CommonSale() {
         title={
           <Space>
             <ShoppingCart size={18} /> Comanda
-            {cart.length > 0 && saleStep === "items" && (
-              <Button size="small" type="link" onClick={clearCart}>
+            {saleItems.length > 0 && saleStep === "items" && (
+              <Button size="small" type="link" onClick={resetSale}>
                 Limpar
               </Button>
             )}
@@ -220,7 +222,7 @@ export function CommonSale() {
       />
 
       {/* modal de recibo de venda */}
-      {/* <SaleReceiptModal /> */}
+      <SaleReceiptModal receiptSale={receiptSale} onClose={handleCloseReceipt} />
     </>
   );
 }

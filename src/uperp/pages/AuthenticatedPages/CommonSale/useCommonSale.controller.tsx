@@ -1,6 +1,7 @@
 import { useGenericTableFetch } from "@/application-components/GenericTable/useGenericTableFetch";
 import { SaleType } from "@/enums/sale.enum";
 import { ProductModel } from "@/model/product.model";
+import { SaleModel, SaleReceiptModel } from "@/model/sale.model";
 import { ProductService } from "@/services/product.service";
 import { SaleService } from "@/services/sale.service";
 import { useCashFlowStore } from "@/stores/cashFlow.store";
@@ -9,6 +10,7 @@ import {
   calculeSalePriceRange,
   calculeStockTotalByProductEspecification,
 } from "@/uperp/common/productFormulas";
+import { createSaleReceipt } from "@/uperp/common/saleReceipt";
 import { Form, message, Space, Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
 import { useState } from "react";
@@ -21,11 +23,19 @@ const saleService = new SaleService();
 
 export function useCommonSaleController() {
   const { currentCashFlow } = useCashFlowStore();
-  const isCashFlowOpen = !currentCashFlow?.isClosed;
+  const isCashFlowOpen = Boolean(currentCashFlow && !currentCashFlow.isClosed);
 
   const [cartOpen, setCartOpen] = useState(false);
 
-  const { productsView, setProductsView, saleItems, payments, saleStep } = useSalesStore();
+  const {
+    productsView,
+    setProductsView,
+    saleItems,
+    payments,
+    saleStep,
+    resetSale,
+    selectedCustomer,
+  } = useSalesStore();
 
   const [search, setSearch] = useState("");
 
@@ -132,39 +142,50 @@ export function useCommonSaleController() {
   const [saleForm] = Form.useForm<ICreateSaleForm>();
 
   const [submiting, setsubmiting] = useState(false);
+  const [receiptSale, setReceiptSale] = useState<SaleReceiptModel | null>(null);
+
+  const handleCloseReceipt = () => {
+    setReceiptSale(null);
+  };
+
   const handleSubmitSale = async () => {
     try {
       setsubmiting(true);
-      if (currentCashFlow) {
-        const items: ISaleItemField[] = saleItems.map((s) => {
-          return {
-            isEspecialPrice: s.isEspecialPrice,
-            note: s.note,
-            productEspecificationId: s.productEspecificationId,
-            productId: s.productId,
-            quantitySold: s.quantitySold,
-            internCustomerPriceId: s.internCustomerPriceId,
-          };
-        });
-
-        const paymentsConverted: IPaymentMethodField[] = payments.map((p) => {
-          return {
-            amount: p.amount,
-            type: p.type,
-          };
-        });
-
-        const data: ICreateSaleForm = {
-          cashFlowId: currentCashFlow?.id,
-          type: SaleType.NORMAL,
-          items,
-          payments: paymentsConverted,
-        };
-
-        await saleService.create(data);
-      } else {
+      if (!currentCashFlow || currentCashFlow.isClosed) {
         message.warning("Não foi possível encontrar um caixa aberto.");
+        return;
       }
+
+      const items: ISaleItemField[] = saleItems.map((s) => {
+        return {
+          isEspecialPrice: s.isEspecialPrice,
+          note: s.note,
+          productEspecificationId: s.productEspecificationId,
+          productId: s.productId,
+          quantitySold: s.quantitySold,
+          internCustomerPriceId: s.internCustomerPriceId,
+        };
+      });
+
+      const paymentsConverted: IPaymentMethodField[] = payments.map((p) => {
+        return {
+          amount: p.amount,
+          type: p.type,
+        };
+      });
+
+      const data: ICreateSaleForm = {
+        cashFlowId: currentCashFlow.id,
+        type: SaleType.NORMAL,
+        items,
+        payments: paymentsConverted,
+        internCustomerId: selectedCustomer?.id,
+      };
+
+      const sale = await saleService.create<SaleModel>(data);
+      setReceiptSale(createSaleReceipt(sale));
+      resetSale();
+      setCartOpen(false);
       message.success("Venda realizada com sucesso!");
     } catch (error) {
       message.error("Ocorreu um erro ao realizar a venda");
@@ -199,5 +220,8 @@ export function useCommonSaleController() {
     setCartOpen,
     handleSubmitSale,
     submiting,
+    receiptSale,
+    handleCloseReceipt,
+    resetSale,
   };
 }

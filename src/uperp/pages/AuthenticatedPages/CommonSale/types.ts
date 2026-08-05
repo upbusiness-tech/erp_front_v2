@@ -9,6 +9,7 @@ export interface ICreateSaleForm {
   cashFlowId: number;
   items: ISaleItemField[];
   payments: IPaymentMethodField[];
+  internCustomerId?: number;
 }
 
 export interface ISaleItemField {

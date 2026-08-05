@@ -18,6 +18,7 @@ interface SalesState {
   setSaleItems: (items: CartSaleItem[]) => void;
   payments: PaymentItem[];
   setPayments: (p: PaymentItem[]) => void;
+  resetSale: () => void;
   saleStep: OrderSteps;
   setSaleStep: (step: OrderSteps) => void;
   selectedCustomer: InternCustomerModel | undefined;
@@ -39,6 +40,9 @@ export const useSalesStore = create<SalesState>((set, get) => ({
   payments: [],
   setPayments: (p: PaymentItem[]) => {
     set({ payments: p });
+  },
+  resetSale: () => {
+    set({ saleItems: [], payments: [], selectedCustomer: undefined, saleStep: "items" });
   },
   saleStep: "items",
   setSaleStep: (step) => {
