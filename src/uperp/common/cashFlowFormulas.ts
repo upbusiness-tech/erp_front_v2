@@ -15,7 +15,8 @@ export const calculeCashFlowTransactionAmount = (
 export const calculeCashFlowEstimetedAmount = (
   sangriaAmount: number,
   replamentAmount: number,
+  salesAmount: number,
   initialBalance: number,
 ) => {
-  return initialBalance + replamentAmount - sangriaAmount;
+  return initialBalance + salesAmount + replamentAmount - sangriaAmount;
 };

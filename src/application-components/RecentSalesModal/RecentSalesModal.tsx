@@ -1,77 +1,49 @@
-import { Sale } from "@/uperp/types";
-import { Button, Modal, Space, Table, Tag, Typography } from "antd";
-import { Receipt } from "lucide-react";
-
-const { Text } = Typography;
+import { GenericTable } from "@/application-components/GenericTable/GenericTable";
+import { SaleModel } from "@/model/sale.model";
+import { ColumnsType } from "antd/es/table";
+import { Modal } from "antd";
 
 type RecentSalesModalProps = {
-  recentOpen: boolean;
+  open: boolean;
   onClose: () => void;
+  columns: ColumnsType<SaleModel>;
+  data: SaleModel[];
+  isLoading: boolean;
+  total?: number;
+  page: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (pageSize: number) => void;
+  onRowClick?: (sale: SaleModel) => void;
 };
 
-export const RecentSalesModal = ({ recentOpen, onClose }: RecentSalesModalProps) => {
-  const recentSales = [];
-  const customers = [];
-
+export const RecentSalesModal = ({
+  open,
+  onClose,
+  columns,
+  data,
+  isLoading,
+  total,
+  page,
+  pageSize,
+  onPageChange,
+  onPageSizeChange,
+  onRowClick,
+}: RecentSalesModalProps) => {
   return (
-    <Modal open={recentOpen} title="Vendas recentes" onCancel={onClose} footer={null} width={860}>
-      <Table
+    <Modal open={open} title="Vendas recentes" onCancel={onClose} footer={null} width={860}>
+      <GenericTable
         rowKey="id"
-        size="small"
-        dataSource={[]}
-        pagination={{ pageSize: 8 }}
-        scroll={{ x: 720 }}
+        columns={columns}
+        data={data}
+        total={total}
+        isLoading={isLoading}
+        page={page}
+        pageSize={pageSize}
+        onPageChange={onPageChange}
+        onPageSizeChange={onPageSizeChange}
+        onRowClick={onRowClick}
         locale={{ emptyText: "Nenhuma venda registrada" }}
-        columns={[
-          { title: "Código", dataIndex: "id", width: 90 },
-          { title: "Data", dataIndex: "date", width: 110 },
-          {
-            title: "Tipo",
-            dataIndex: "type",
-            width: 100,
-            render: (t: string) => (
-              <Tag color={t === "balcao" ? "orange" : "blue"}>
-                {t === "balcao" ? "Balcão" : "Serviço"}
-              </Tag>
-            ),
-          },
-          { title: "Itens", dataIndex: "items", width: 70, align: "center" as const },
-          // {
-          //   title: "Cliente",
-          //   dataIndex: "customerId",
-          //   render: (id?: string) =>
-          //     customers.find((c) => c.id === id)?.name || <Text type="secondary">—</Text>,
-          // },
-          {
-            title: "Total",
-            dataIndex: "total",
-            width: 110,
-            align: "right" as const,
-            render: (v: number) => (
-              <Text strong style={{ color: "#F26B1F" }}>
-                R$ {v.toFixed(2)}
-              </Text>
-            ),
-          },
-          {
-            title: "Ações",
-            width: 130,
-            render: (_, s: Sale) => (
-              <Space>
-                <Button
-                  size="small"
-                  icon={<Receipt size={14} />}
-                  // onClick={() => {
-                  //   setRecentOpen(false);
-                  //   setReceiptSale(s);
-                  // }}
-                >
-                  Ver
-                </Button>
-              </Space>
-            ),
-          },
-        ]}
       />
     </Modal>
   );

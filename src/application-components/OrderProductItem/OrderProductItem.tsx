@@ -1,8 +1,8 @@
 import { InternCustomerSpecialPriceModel } from "@/model/internCustomerPrice.model";
 import { formatPrice } from "@/uperp/common/productFormulas";
 import { CartSaleItem } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
-import { Button, Collapse, InputNumber, List, Row, Space, Tag, Typography } from "antd";
-import { ChevronDown, ChevronRight, Star, Trash2, X } from "lucide-react";
+import { Button, InputNumber, List, Row, Space, Tag, Typography } from "antd";
+import { ChevronDown, ChevronRight, Percent, Star, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { useOrderProductItemController } from "./useOrderProductItem.controller";
 
@@ -13,6 +13,7 @@ type OrderProductItemProps = {
   specialPriceAvailable?: InternCustomerSpecialPriceModel;
   onApplySpecialPrice?: (item: CartSaleItem) => void;
   onRemoveSpecialPrice?: (item: CartSaleItem) => void;
+  onOpenDiscount?: (item: CartSaleItem) => void;
 };
 
 export const OrderProductItem = ({
@@ -20,6 +21,7 @@ export const OrderProductItem = ({
   specialPriceAvailable,
   onApplySpecialPrice,
   onRemoveSpecialPrice,
+  onOpenDiscount,
 }: OrderProductItemProps) => {
   const { removeSaleItem, updateSaleItemQuantity } = useOrderProductItemController();
   const [expanded, setExpanded] = useState(false);
@@ -27,6 +29,9 @@ export const OrderProductItem = ({
   const effective = item.productEspecification.salePrice;
   const itemPrice = item.internCustomerPrice?.specialPrice ?? item.productEspecification.salePrice;
   const hasSpecial = item.isEspecialPrice;
+  const hasDiscount = item.discountInfo?.value != null && item.discountInfo.value > 0;
+  const discountValue = Number(item.discountInfo?.value ?? 0);
+  const lineTotal = Math.max(itemPrice * Number(item.quantitySold) - discountValue, 0);
 
   const discountPercent = specialPriceAvailable
     ? (
@@ -39,6 +44,16 @@ export const OrderProductItem = ({
   return (
     <List.Item
       actions={[
+        onOpenDiscount && (
+          <Button
+            key="d"
+            size="small"
+            type="text"
+            icon={<Percent size={14} />}
+            onClick={() => onOpenDiscount(item)}
+            title="Desconto"
+          />
+        ),
         <Button
           key="r"
           size="small"
@@ -105,6 +120,14 @@ export const OrderProductItem = ({
                 </Text>
               </Text>
             )}
+            {hasDiscount && (
+              <Space size={4}>
+                <Tag color="red" style={{ margin: 0 }}>
+                  -{formatPrice(discountValue)}
+                  {item.discountInfo?.percent ? ` (${item.discountInfo.percent}%)` : ""}
+                </Tag>
+              </Space>
+            )}
             {specialPriceAvailable && !hasSpecial && (
               <div
                 style={{
@@ -167,7 +190,7 @@ export const OrderProductItem = ({
                 </Text>
               </Space>
               <Text strong style={{ fontSize: 15 }}>
-                {formatPrice(itemPrice * item.quantitySold)}
+                {formatPrice(lineTotal)}
               </Text>
             </Row>
           </Space>

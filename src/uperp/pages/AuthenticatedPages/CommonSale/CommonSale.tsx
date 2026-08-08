@@ -3,6 +3,7 @@ import { OrderContent } from "@/application-components/OrderContent/OrderContent
 import { GenericTable } from "@/application-components/GenericTable/GenericTable";
 import { ProductCard } from "@/application-components/ProductCard/ProductCard";
 import { ProductEspecificationModal } from "@/application-components/ProductEspecificationModal/ProductEspecificationModal";
+import { RecentSalesModal } from "@/application-components/RecentSalesModal/RecentSalesModal";
 import { SaleReceiptModal } from "@/application-components/SaleReceiptModal/SaleReceiptModal";
 import { SearchBar } from "@/application-components/SearchBar/SearchBar";
 import { EProductView, useSalesStore } from "@/stores/sales.store";
@@ -52,6 +53,18 @@ export function CommonSale() {
     receiptSale,
     handleCloseReceipt,
     resetSale,
+    receiptVariant,
+    recentOpen,
+    setRecentOpen,
+    recentSales,
+    recentSalesTotal,
+    recentSalesLoading,
+    recentSalesPage,
+    recentSalesPageSize,
+    handleRecentSalesPageChange,
+    handleRecentSalesPageSizeChange,
+    recentSalesColumns,
+    handleViewRecentSale,
   } = useCommonSaleController();
 
   const { selectedCustomer } = useSalesStore();
@@ -64,7 +77,7 @@ export function CommonSale() {
     <>
       <Row gutter={16} style={{ minHeight: "calc(100vh - 112px)" }} align="stretch">
         <Col xs={24} lg={16} style={{ display: "flex", flexDirection: "column" }}>
-          <CashFlowStatus />
+          <CashFlowStatus onShowRecentSales={() => setRecentOpen(true)} />
 
           <Card
             style={{ flex: 1, display: "flex", flexDirection: "column" }}
@@ -211,6 +224,19 @@ export function CommonSale() {
       </Drawer>
 
       {/* modal de vendas recentes */}
+      <RecentSalesModal
+        open={recentOpen}
+        onClose={() => setRecentOpen(false)}
+        columns={recentSalesColumns}
+        data={recentSales}
+        isLoading={recentSalesLoading}
+        total={recentSalesTotal}
+        page={recentSalesPage}
+        pageSize={recentSalesPageSize}
+        onPageChange={handleRecentSalesPageChange}
+        onPageSizeChange={handleRecentSalesPageSizeChange}
+        onRowClick={handleViewRecentSale}
+      />
 
       {/* modal para escolher variação do produto */}
       <ProductEspecificationModal
@@ -222,7 +248,11 @@ export function CommonSale() {
       />
 
       {/* modal de recibo de venda */}
-      <SaleReceiptModal receiptSale={receiptSale} onClose={handleCloseReceipt} />
+      <SaleReceiptModal
+        receiptSale={receiptSale}
+        onClose={handleCloseReceipt}
+        variant={receiptVariant}
+      />
     </>
   );
 }

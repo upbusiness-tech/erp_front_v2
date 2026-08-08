@@ -1,21 +1,35 @@
 import { PaymentMethod } from "@/enums/payment.enum";
 import { formatPrice } from "@/uperp/common/productFormulas";
-import { CartSaleItem } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
-import { Avatar, Button, Divider, Empty, List, Row, Select, Space, Steps, Typography } from "antd";
+import {
+  Avatar,
+  Button,
+  Divider,
+  Empty,
+  Input,
+  InputNumber,
+  List,
+  Row,
+  Select,
+  Space,
+  Steps,
+  Typography,
+} from "antd";
 import {
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
+  ChevronDown,
+  ChevronRight,
   CreditCard,
   Eye,
   Plus,
   Trash2,
   User,
 } from "lucide-react";
-import { useState } from "react";
 import { ApplySpecialPriceModal } from "../ApplySpecialPriceModal/ApplySpecialPriceModal";
 import { CustomerDetailsModal } from "../CustomerDetailsModal/CustomerDetailsModal";
 import InputNumberFormatted from "../InputNumberFormated/InputNumberFormated";
+import { ItemDiscountModal } from "../ItemDiscountModal/ItemDiscountModal";
 import { OrderProductItem } from "../OrderProductItem/OrderProductItem";
 import { PAYMENT_LABEL, useOrderContentController } from "./useOrderContent.controller";
 
@@ -28,7 +42,6 @@ export type OrderContentProps = {
 export const OrderContent = ({ handleSubmitSale }: OrderContentProps) => {
   const {
     saleItems,
-    setSaleItems,
     saleStep,
     setSaleStep,
     customers,
@@ -50,53 +63,34 @@ export const OrderContent = ({ handleSubmitSale }: OrderContentProps) => {
     paid,
     remaining,
     total,
+    saleDiscount,
+    specialPriceModalOpen,
+    discountModalOpen,
+    itemForDiscount,
+    customerDetailsOpen,
+    setCustomerDetailsOpen,
+    saleDiscountExpanded,
+    handleOpenSpecialPriceModal,
+    handleApplySpecialPrice,
+    handleRemoveSpecialPrice,
+    handleOpenDiscountModal,
+    handleApplyItemDiscount,
+    handleRemoveItemDiscount,
+    handleSaleDiscountPercentChange,
+    handleSaleDiscountValueChange,
+    handleSaleDiscountReasonChange,
+    handleRemoveSaleDiscount,
+    grossSubtotal,
+    specialPriceSavings,
+    itemDiscountsTotal,
+    setSaleDiscountExpanded,
+    saleDiscountValue,
+    itemForSpecialPrice,
+    setSpecialPriceModalOpen,
+    setItemForSpecialPrice,
+    setDiscountModalOpen,
+    setItemForDiscount,
   } = useOrderContentController();
-
-  const [specialPriceModalOpen, setSpecialPriceModalOpen] = useState(false);
-  const [itemForSpecialPrice, setItemForSpecialPrice] = useState<CartSaleItem | null>(null);
-  const [customerDetailsOpen, setCustomerDetailsOpen] = useState(false);
-
-  const handleOpenSpecialPriceModal = (item: CartSaleItem) => {
-    setItemForSpecialPrice(item);
-    setSpecialPriceModalOpen(true);
-  };
-
-  const handleApplySpecialPrice = () => {
-    if (!itemForSpecialPrice) return;
-    const specialPrice = getSpecialPriceForItem(itemForSpecialPrice);
-    if (!specialPrice) return;
-
-    setSaleItems(
-      saleItems.map((item) =>
-        item.id === itemForSpecialPrice.id
-          ? {
-              ...item,
-              isEspecialPrice: true,
-              internCustomerPriceId: specialPrice.id,
-              internCustomerPrice: specialPrice,
-            }
-          : item,
-      ),
-    );
-
-    setSpecialPriceModalOpen(false);
-    setItemForSpecialPrice(null);
-  };
-
-  const handleRemoveSpecialPrice = (item: CartSaleItem) => {
-    setSaleItems(
-      saleItems.map((i) =>
-        i.id === item.id
-          ? {
-              ...i,
-              isEspecialPrice: false,
-              internCustomerPriceId: undefined,
-              internCustomerPrice: undefined,
-            }
-          : i,
-      ),
-    );
-  };
 
   return (
     <>
@@ -164,47 +158,6 @@ export const OrderContent = ({ handleSubmitSale }: OrderContentProps) => {
 
           <Divider style={{ margin: "8px 0 12px" }} />
 
-          {/* {eligibleSpecialPrices.length > 0 && (
-            <div
-              style={{
-                background: "#FEF3C7",
-                border: "1px solid #FCD34D",
-                padding: 10,
-                borderRadius: 8,
-                marginBottom: 12,
-              }}
-            >
-              <Space align="start" style={{ width: "100%", justifyContent: "space-between" }}>
-                <div style={{ flex: 1 }}>
-                  <Text strong style={{ fontSize: 12, display: "block" }}>
-                    <Star size={12} style={{ verticalAlign: -2, marginRight: 4 }} />
-                    {eligibleSpecialPrices.length} produto(s) com preço especial
-                  </Text>
-                  <Text type="secondary" style={{ fontSize: 11 }}>
-                    Este cliente tem preço diferenciado para itens da comanda.
-                  </Text>
-                </div>
-                <Space direction="vertical" size={4}>
-                  <Button
-                    size="small"
-                    type="primary"
-                    onClick={() => {
-                      const n = applySpecialPricesToCart(selectedCustomerId);
-                      message.success(`${n} item(ns) atualizado(s) com preço especial`);
-                    }}
-                  >
-                    Aplicar
-                  </Button>
-                  {cart.some((i) => i.customPrice != null) && (
-                    <Button size="small" type="link" onClick={resetCartPrices}>
-                      Restaurar
-                    </Button>
-                  )}
-                </Space>
-              </Space>
-            </div>
-          )} */}
-
           {saleItems.length === 0 ? (
             <Empty description="Carrinho vazio" />
           ) : (
@@ -222,47 +175,97 @@ export const OrderContent = ({ handleSubmitSale }: OrderContentProps) => {
                   }
                   onApplySpecialPrice={handleOpenSpecialPriceModal}
                   onRemoveSpecialPrice={handleRemoveSpecialPrice}
+                  onOpenDiscount={handleOpenDiscountModal}
                 />
               )}
             />
           )}
 
           <Divider style={{ margin: "12px 0" }} />
-          <Text type="secondary">Desconto</Text>
-          {/* <Space.Compact style={{ width: "100%", marginTop: 4, marginBottom: 8 }}>
-            <Select
-              value={discountType}
-              onChange={setDiscountType}
-              options={[
-                { value: "percent", label: "%" },
-                { value: "value", label: "R$" },
-              ]}
-              style={{ width: 80 }}
-            />
-            <InputNumber
-              min={0}
-              value={discount}
-              onChange={(v) => setDiscount(v || 0)}
-              style={{ width: "100%" }}
-            />
-          </Space.Compact>
-          {settings.askDiscountReason && discountValue > 0 && (
-            <Input
-              placeholder="Motivo do desconto"
-              value={discountReason}
-              onChange={(e) => setDiscountReason(e.target.value)}
-              style={{ marginBottom: 12 }}
-            />
-          )} */}
 
           <Row justify="space-between">
             <Text>Subtotal</Text>
-            <Text>{formatPrice(total)}</Text>
+            <Text>{formatPrice(grossSubtotal)}</Text>
           </Row>
-          <Row justify="space-between">
-            <Text type="secondary">Desconto</Text>
-            {/* <Text type="secondary">- R$ {discountValue.toFixed(2)}</Text> */}
-          </Row>
+          {specialPriceSavings > 0 && (
+            <Row justify="space-between">
+              <Text type="secondary">Preços especiais</Text>
+              <Text type="secondary">-{formatPrice(specialPriceSavings)}</Text>
+            </Row>
+          )}
+          {itemDiscountsTotal > 0 && (
+            <Row justify="space-between">
+              <Text type="secondary">Desconto dos itens</Text>
+              <Text type="secondary">-{formatPrice(itemDiscountsTotal)}</Text>
+            </Row>
+          )}
+
+          <div
+            style={{
+              cursor: "pointer",
+              marginBottom: 4,
+              marginTop: 4,
+            }}
+            onClick={() => setSaleDiscountExpanded(!saleDiscountExpanded)}
+          >
+            <Row justify="space-between" align="middle">
+              <Space size={4}>
+                {saleDiscountExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                <Text style={{ color: saleDiscountValue > 0 ? "#F26B1F" : undefined }}>
+                  Desconto da venda
+                </Text>
+              </Space>
+              <Text type={saleDiscountValue > 0 ? "secondary" : undefined}>
+                {saleDiscountValue > 0 ? `-${formatPrice(saleDiscountValue)}` : "R$ 0,00"}
+              </Text>
+            </Row>
+          </div>
+
+          {saleDiscountExpanded && (
+            <div
+              style={{
+                background: "#F5F5F5",
+                borderRadius: 6,
+                padding: "8px 10px",
+                marginBottom: 8,
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Space.Compact style={{ width: "100%", marginBottom: 6 }}>
+                <InputNumberFormatted
+                  style={{ width: "100%" }}
+                  placeholder="0"
+                  prefix="R$"
+                  min={0}
+                  max={grossSubtotal - specialPriceSavings - itemDiscountsTotal}
+                  value={saleDiscountValue}
+                  onChange={handleSaleDiscountValueChange}
+                />
+                <InputNumber
+                  style={{ width: "100%" }}
+                  placeholder="%"
+                  suffix="%"
+                  min={0}
+                  max={100}
+                  value={saleDiscount?.percent ?? null}
+                  onChange={handleSaleDiscountPercentChange}
+                />
+              </Space.Compact>
+              <Input
+                size="small"
+                placeholder="Motivo do desconto (opcional)"
+                value={saleDiscount?.reason ?? ""}
+                onChange={(e) => handleSaleDiscountReasonChange(e.target.value)}
+                style={{ marginBottom: 6 }}
+              />
+              {saleDiscountValue > 0 && (
+                <Button size="small" danger block onClick={handleRemoveSaleDiscount}>
+                  Remover desconto da venda
+                </Button>
+              )}
+            </div>
+          )}
+
           <Row justify="space-between" style={{ marginTop: 8 }}>
             <Title level={4} style={{ margin: 0 }}>
               Total
@@ -424,6 +427,17 @@ export const OrderContent = ({ handleSubmitSale }: OrderContentProps) => {
         isOpen={customerDetailsOpen}
         customer={selectedCustomer}
         onClose={() => setCustomerDetailsOpen(false)}
+      />
+
+      <ItemDiscountModal
+        open={discountModalOpen}
+        item={itemForDiscount}
+        onApply={handleApplyItemDiscount}
+        onRemove={handleRemoveItemDiscount}
+        onCancel={() => {
+          setDiscountModalOpen(false);
+          setItemForDiscount(null);
+        }}
       />
     </>
   );

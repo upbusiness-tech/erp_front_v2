@@ -5,14 +5,17 @@ import { InternCustomerSpecialPriceModel } from "@/model/internCustomerPrice.mod
 import { InternCustomerService } from "@/services/internCustomer.service";
 import { useCashFlowStore } from "@/stores/cashFlow.store";
 import { useSalesStore } from "@/stores/sales.store";
-import { CartSaleItem } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
 import { PaginatedResponse } from "@/types/crud.types";
 import {
   calculateChangeSaleOnOrderContent,
+  calculateGrossSubtotal,
+  calculateItemDiscountsTotal,
   calculateRemainingSaleOnOrderContent,
+  calculateSpecialPriceSavings,
   calculateTotalCartItems,
   calculateTotalPayments,
 } from "@/uperp/common/saleFormulas";
+import { CartSaleItem, DiscountInfo } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
 import { message } from "antd";
 import { useMemo, useState } from "react";
 
@@ -36,6 +39,8 @@ export function useOrderContentController() {
     setSaleStep,
     selectedCustomer,
     setSelectedCustomer,
+    saleDiscount,
+    setSaleDiscount,
   } = useSalesStore();
 
   const { currentCashFlow } = useCashFlowStore();
@@ -67,6 +72,14 @@ export function useOrderContentController() {
     return specialPriceMap.get(item.productEspecificationId);
   };
 
+  const applyItemDiscount = (item: CartSaleItem, discount: DiscountInfo) => {
+    setSaleItems(saleItems.map((i) => (i.id === item.id ? { ...i, discountInfo: discount } : i)));
+  };
+
+  const removeItemDiscount = (item: CartSaleItem) => {
+    setSaleItems(saleItems.map((i) => (i.id === item.id ? { ...i, discountInfo: undefined } : i)));
+  };
+
   const goToPayment = () => {
     if (currentCashFlow?.isClosed) {
       message.warning("Abra o caixa antes de finalizar uma venda.");
@@ -78,10 +91,10 @@ export function useOrderContentController() {
   const [pMethod, setpMethod] = useState<PaymentMethod>(PaymentMethod.CASH);
   const [pValue, setpValue] = useState<number>(0);
 
-  const total = calculateTotalCartItems(saleItems);
+  const total = calculateTotalCartItems(saleItems, saleDiscount);
   const paid = calculateTotalPayments(payments);
-  const remaining = calculateRemainingSaleOnOrderContent(saleItems, payments);
-  const change = calculateChangeSaleOnOrderContent(saleItems, payments);
+  const remaining = calculateRemainingSaleOnOrderContent(total, payments);
+  const change = calculateChangeSaleOnOrderContent(total, payments);
   const isOverpaid = paid > total;
   const isCashPayment = pMethod === PaymentMethod.CASH;
   const changePreview =
@@ -115,6 +128,111 @@ export function useOrderContentController() {
     setPayments(updatesPayments);
   };
 
+  const [specialPriceModalOpen, setSpecialPriceModalOpen] = useState(false);
+  const [itemForSpecialPrice, setItemForSpecialPrice] = useState<CartSaleItem | null>(null);
+  const [discountModalOpen, setDiscountModalOpen] = useState(false);
+  const [itemForDiscount, setItemForDiscount] = useState<CartSaleItem | null>(null);
+  const [customerDetailsOpen, setCustomerDetailsOpen] = useState(false);
+  const [saleDiscountExpanded, setSaleDiscountExpanded] = useState(false);
+
+  const grossSubtotal = calculateGrossSubtotal(saleItems);
+  const specialPriceSavings = calculateSpecialPriceSavings(saleItems);
+  const itemDiscountsTotal = calculateItemDiscountsTotal(saleItems);
+  const saleDiscountValue = saleDiscount?.value ?? 0;
+
+  const handleOpenSpecialPriceModal = (item: CartSaleItem) => {
+    setItemForSpecialPrice(item);
+    setSpecialPriceModalOpen(true);
+  };
+
+  const handleApplySpecialPrice = () => {
+    if (!itemForSpecialPrice) return;
+    const specialPrice = getSpecialPriceForItem(itemForSpecialPrice);
+    if (!specialPrice) return;
+
+    setSaleItems(
+      saleItems.map((item) =>
+        item.id === itemForSpecialPrice.id
+          ? {
+              ...item,
+              isEspecialPrice: true,
+              internCustomerPriceId: specialPrice.id,
+              internCustomerPrice: specialPrice,
+            }
+          : item,
+      ),
+    );
+
+    setSpecialPriceModalOpen(false);
+    setItemForSpecialPrice(null);
+  };
+
+  const handleRemoveSpecialPrice = (item: CartSaleItem) => {
+    setSaleItems(
+      saleItems.map((i) =>
+        i.id === item.id
+          ? {
+              ...i,
+              isEspecialPrice: false,
+              internCustomerPriceId: undefined,
+              internCustomerPrice: undefined,
+            }
+          : i,
+      ),
+    );
+  };
+
+  const handleOpenDiscountModal = (item: CartSaleItem) => {
+    setItemForDiscount(item);
+    setDiscountModalOpen(true);
+  };
+
+  const handleApplyItemDiscount = (item: CartSaleItem, discount: DiscountInfo) => {
+    applyItemDiscount(item, discount);
+    setDiscountModalOpen(false);
+    setItemForDiscount(null);
+  };
+
+  const handleRemoveItemDiscount = (item: CartSaleItem) => {
+    removeItemDiscount(item);
+    setDiscountModalOpen(false);
+    setItemForDiscount(null);
+  };
+
+  const handleSaleDiscountPercentChange = (percent: number | null) => {
+    if (percent != null && (percent < 0 || percent > 100)) return;
+    const itemsTotal = grossSubtotal - specialPriceSavings - itemDiscountsTotal;
+    const value = percent != null ? Math.round((percent / 100) * itemsTotal * 100) / 100 : 0;
+    setSaleDiscount({ value, percent: percent ?? undefined });
+  };
+
+  const handleSaleDiscountValueChange = (value: number | null) => {
+    const itemsTotal = grossSubtotal - specialPriceSavings - itemDiscountsTotal;
+    if (value != null && value > itemsTotal) return;
+    const percent =
+      value != null && itemsTotal > 0
+        ? Math.round((value / itemsTotal) * 100 * 100) / 100
+        : undefined;
+    setSaleDiscount({
+      value: value ?? 0,
+      percent,
+      reason: saleDiscount?.reason,
+    });
+  };
+
+  const handleSaleDiscountReasonChange = (reason: string) => {
+    setSaleDiscount({
+      value: saleDiscountValue,
+      percent: saleDiscount?.percent,
+      reason: reason.trim() || undefined,
+    });
+  };
+
+  const handleRemoveSaleDiscount = () => {
+    setSaleDiscount(undefined);
+    setSaleDiscountExpanded(false);
+  };
+
   return {
     saleStep,
     setSaleStep,
@@ -128,6 +246,8 @@ export function useOrderContentController() {
     setselectedCustomer: setSelectedCustomer,
     specialPriceMap,
     getSpecialPriceForItem,
+    applyItemDiscount,
+    removeItemDiscount,
     goToPayment,
     payments,
     addPayment,
@@ -143,5 +263,32 @@ export function useOrderContentController() {
     isOverpaid,
     isCashPayment,
     changePreview,
+    saleDiscount,
+    specialPriceModalOpen,
+    discountModalOpen,
+    itemForDiscount,
+    customerDetailsOpen,
+    setCustomerDetailsOpen,
+    saleDiscountExpanded,
+    handleOpenSpecialPriceModal,
+    handleApplySpecialPrice,
+    handleRemoveSpecialPrice,
+    handleOpenDiscountModal,
+    handleApplyItemDiscount,
+    handleRemoveItemDiscount,
+    handleSaleDiscountPercentChange,
+    handleSaleDiscountValueChange,
+    handleSaleDiscountReasonChange,
+    handleRemoveSaleDiscount,
+    grossSubtotal,
+    specialPriceSavings,
+    itemDiscountsTotal,
+    setSaleDiscountExpanded,
+    saleDiscountValue,
+    itemForSpecialPrice,
+    setSpecialPriceModalOpen,
+    setItemForSpecialPrice,
+    setDiscountModalOpen,
+    setItemForDiscount,
   };
 }

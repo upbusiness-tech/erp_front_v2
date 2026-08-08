@@ -2,7 +2,7 @@ import { SaleReceiptModel } from "@/model/sale.model";
 import { formatPrice } from "@/uperp/common/productFormulas";
 import { SALE_PAYMENT_LABEL } from "@/uperp/common/saleReceipt";
 import { Button, Divider, List, message, Modal, Row, Space, Tag, Typography } from "antd";
-import { CheckCircle2, CreditCard, Printer, Star } from "lucide-react";
+import { CheckCircle2, CreditCard, Percent, Printer, Star } from "lucide-react";
 import { useState } from "react";
 import { printSaleReceipt } from "./printSaleReceipt";
 
@@ -11,6 +11,7 @@ const { Title, Text } = Typography;
 type SaleReceiptModalProps = {
   receiptSale: SaleReceiptModel | null;
   onClose: () => void;
+  variant?: "success" | "view";
 };
 
 const formatDate = (value: string) => {
@@ -18,7 +19,11 @@ const formatDate = (value: string) => {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString("pt-BR");
 };
 
-export const SaleReceiptModal = ({ receiptSale, onClose }: SaleReceiptModalProps) => {
+export const SaleReceiptModal = ({
+  receiptSale,
+  onClose,
+  variant = "success",
+}: SaleReceiptModalProps) => {
   const [printing, setPrinting] = useState(false);
 
   const handlePrint = async () => {
@@ -40,10 +45,16 @@ export const SaleReceiptModal = ({ receiptSale, onClose }: SaleReceiptModalProps
       open={receiptSale !== null}
       title={
         receiptSale ? (
-          <Space>
-            <CheckCircle2 size={20} color="#16A34A" />
-            <span>Venda realizada com sucesso</span>
-          </Space>
+          variant === "success" ? (
+            <Space>
+              <CheckCircle2 size={20} color="#16A34A" />
+              <span>Venda realizada com sucesso</span>
+            </Space>
+          ) : (
+            <Space>
+              <span>Venda {receiptSale.code}</span>
+            </Space>
+          )
         ) : undefined
       }
       onCancel={onClose}
@@ -52,7 +63,7 @@ export const SaleReceiptModal = ({ receiptSale, onClose }: SaleReceiptModalProps
       footer={
         receiptSale ? (
           <Space wrap>
-            <Button onClick={onClose}>Nova venda</Button>
+            <Button onClick={onClose}>{variant === "success" ? "Nova venda" : "Fechar"}</Button>
             <Button
               type="primary"
               icon={<Printer size={15} />}
@@ -80,7 +91,7 @@ export const SaleReceiptModal = ({ receiptSale, onClose }: SaleReceiptModalProps
               Venda {receiptSale.code} · {formatDate(receiptSale.date)}
             </Text>
             <Title level={2} style={{ margin: "4px 0 0", color: "#15803D" }}>
-              {formatPrice(receiptSale.subtotal)}
+              {formatPrice(receiptSale.total)}
             </Title>
             <Text strong style={{ display: "block", marginTop: 8 }}>
               Cliente: {receiptSale.customerName || "Consumidor final"}
@@ -100,6 +111,11 @@ export const SaleReceiptModal = ({ receiptSale, onClose }: SaleReceiptModalProps
                       {item.hasSpecialPrice && (
                         <Tag color="gold" icon={<Star size={11} />} style={{ margin: 0 }}>
                           Preço especial
+                        </Tag>
+                      )}
+                      {item.discountValue != null && item.discountValue > 0 && (
+                        <Tag color="red" icon={<Percent size={11} />} style={{ margin: 0 }}>
+                          {formatPrice(item.discountValue)}
                         </Tag>
                       )}
                     </Space>
@@ -139,8 +155,20 @@ export const SaleReceiptModal = ({ receiptSale, onClose }: SaleReceiptModalProps
           </Row>
           {receiptSale.specialPriceTotal > 0 && (
             <Row justify="space-between" style={{ marginBottom: 4 }}>
-              <Text type="secondary">Total de preços especiais</Text>
-              <Text type="secondary">{formatPrice(receiptSale.specialPriceTotal)}</Text>
+              <Text type="secondary">Preços especiais</Text>
+              <Text type="secondary">-{formatPrice(receiptSale.specialPriceTotal)}</Text>
+            </Row>
+          )}
+          {receiptSale.itemDiscountTotal > 0 && (
+            <Row justify="space-between" style={{ marginBottom: 4 }}>
+              <Text type="secondary">Desconto dos itens</Text>
+              <Text type="secondary">-{formatPrice(receiptSale.itemDiscountTotal)}</Text>
+            </Row>
+          )}
+          {receiptSale.saleDiscountValue > 0 && (
+            <Row justify="space-between" style={{ marginBottom: 4 }}>
+              <Text type="secondary">Desconto da venda</Text>
+              <Text type="secondary">-{formatPrice(receiptSale.saleDiscountValue)}</Text>
             </Row>
           )}
           <Row justify="space-between" style={{ marginTop: 8 }}>
@@ -148,7 +176,7 @@ export const SaleReceiptModal = ({ receiptSale, onClose }: SaleReceiptModalProps
               Total
             </Title>
             <Title level={4} style={{ margin: 0, color: "#F26B1F" }}>
-              {formatPrice(receiptSale.subtotal)}
+              {formatPrice(receiptSale.total)}
             </Title>
           </Row>
 

@@ -1,20 +1,13 @@
 import { InternCustomerModel } from "@/model/internCustomer.model";
 import { ProductModel } from "@/model/product.model";
-import { ProductEspecificationModel } from "@/model/productEspecification.model";
-import { useSalesStore } from "@/stores/sales.store";
-import {
-  calculeSalePriceRange,
-  calculeStockTotalByProductEspecification,
-  formatPrice,
-} from "@/uperp/common/productFormulas";
-import { CartSaleItem, ICreateSaleForm } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
+import { calculeSalePriceRange, formatPrice } from "@/uperp/common/productFormulas";
+import { ICreateSaleForm } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
 import {
   Col,
   Form,
   FormInstance,
   Input,
   InputNumber,
-  message,
   Modal,
   Radio,
   Row,
@@ -24,7 +17,7 @@ import {
   Typography,
 } from "antd";
 import { Star } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useProductEspecificationModalController } from "./useProductEspecificationModal.controller";
 
 const { Text } = Typography;
 
@@ -43,77 +36,27 @@ export const ProductEspecificationModal = ({
   form,
   selectedCustomer,
 }: ProductEspecificationModalProps) => {
-  const [qty, setQty] = useState(1);
-  const [note, setNote] = useState("");
-  const [selectedSize, setSelectedSize] = useState<string | undefined>(undefined);
-  const [selectedColor, setSelectedColor] = useState<string | undefined>(undefined);
-
-  const stock = calculeStockTotalByProductEspecification(product?.productEspecifications || []);
-
-  const sizes = Array.from(
-    new Set(product?.productEspecifications?.filter((pe) => pe.size).map((pe) => pe.size) ?? []),
-  );
-
-  const colorOptions =
-    product?.productEspecifications?.filter((pe) =>
-      sizes.length > 0 ? pe.size === selectedSize : !!pe.color,
-    ) ?? [];
-
-  const colors = Array.from(
-    new Set(colorOptions.map((pe) => pe.color).filter(Boolean)),
-  ) as string[];
-
-  const findSpecification = (): ProductEspecificationModel | undefined => {
-    return product?.productEspecifications.find(
-      (pe) =>
-        (sizes.length === 0 || pe.size === selectedSize) &&
-        (colors.length === 0 || pe.color === selectedColor),
-    );
-  };
-
-  const specialPriceForSpec = useMemo(() => {
-    const spec = product?.productEspecifications.find(
-      (pe) =>
-        (sizes.length === 0 || pe.size === selectedSize) &&
-        (colors.length === 0 || pe.color === selectedColor),
-    );
-    if (!spec || !selectedCustomer?.internCustomerPrices) return null;
-    return selectedCustomer.internCustomerPrices.find(
-      (sp) => sp.productEspecificationId === spec.id,
-    );
-  }, [selectedSize, selectedColor, selectedCustomer, product, sizes, colors]);
-
-  const { saleItems, setSaleItems } = useSalesStore();
-
-  const handleAddToComanda = () => {
-    if (!product) return;
-    if (sizes.length > 0 && !selectedSize) return message.error("Selecione o tamanho");
-    if (colors.length > 0 && !selectedColor) return message.error("Selecione a cor");
-
-    const specification = findSpecification();
-    if (specification) {
-      const specificationSelected: CartSaleItem = {
-        id: Date.now() + Math.floor(Math.random() * 1000),
-        isEspecialPrice: false,
-        note,
-        productEspecificationId: specification?.id,
-        productId: product.id,
-        quantitySold: qty,
-        product,
-        productEspecification: specification,
-      };
-      setSaleItems([...saleItems, specificationSelected]);
-    }
-    onClose();
-  };
-
-  useEffect(() => {
-    if (openProductEspecificationModal) {
-      setQty(1);
-      setSelectedSize(undefined);
-      setSelectedColor(undefined);
-    }
-  }, [openProductEspecificationModal, product?.id]);
+  const {
+    handleAddToComanda,
+    findSpecification,
+    stock,
+    specialPriceForSpec,
+    qty,
+    setQty,
+    sizes,
+    selectedSize,
+    selectedColor,
+    setSelectedSize,
+    setSelectedColor,
+    colors,
+    setNote,
+    note,
+  } = useProductEspecificationModalController({
+    openProductEspecificationModal,
+    product,
+    onClose,
+    selectedCustomer,
+  });
 
   return (
     <Modal
@@ -219,6 +162,7 @@ export const ProductEspecificationModal = ({
             ) : null}
             <Input.TextArea
               rows={2}
+              value={note ?? ""}
               placeholder="Ex: Embalagem para presente"
               maxLength={140}
               showCount

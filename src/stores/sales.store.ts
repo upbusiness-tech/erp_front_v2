@@ -1,5 +1,9 @@
 import { InternCustomerModel } from "@/model/internCustomer.model";
-import { CartSaleItem, PaymentItem } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
+import {
+  CartSaleItem,
+  DiscountInfo,
+  PaymentItem,
+} from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
 import { create } from "zustand";
 
 export enum EProductView {
@@ -23,6 +27,8 @@ interface SalesState {
   setSaleStep: (step: OrderSteps) => void;
   selectedCustomer: InternCustomerModel | undefined;
   setSelectedCustomer: (customer: InternCustomerModel | undefined) => void;
+  saleDiscount?: DiscountInfo;
+  setSaleDiscount: (d: DiscountInfo | undefined) => void;
 }
 
 export const useSalesStore = create<SalesState>((set, get) => ({
@@ -42,7 +48,13 @@ export const useSalesStore = create<SalesState>((set, get) => ({
     set({ payments: p });
   },
   resetSale: () => {
-    set({ saleItems: [], payments: [], selectedCustomer: undefined, saleStep: "items" });
+    set({
+      saleItems: [],
+      payments: [],
+      selectedCustomer: undefined,
+      saleStep: "items",
+      saleDiscount: undefined,
+    });
   },
   saleStep: "items",
   setSaleStep: (step) => {
@@ -65,5 +77,9 @@ export const useSalesStore = create<SalesState>((set, get) => ({
     } else {
       set({ selectedCustomer: customer });
     }
+  },
+  saleDiscount: undefined,
+  setSaleDiscount: (d) => {
+    set({ saleDiscount: d });
   },
 }));

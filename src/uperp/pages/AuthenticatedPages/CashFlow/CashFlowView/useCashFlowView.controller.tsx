@@ -61,6 +61,7 @@ export function useCashFlowViewController() {
   );
 
   const sangriasData = stats?.data?.find((st) => st.origin === TransactionOrigin.SANGRIA);
+  const salesData = stats?.data?.find((st) => st.origin === TransactionOrigin.SALE);
   const replacementData = stats?.data?.find((st) => st.origin === TransactionOrigin.REPLACEMENT);
   const generalTotal = stats?.data?.find((st) => st.origin === "Total Geral");
 
@@ -141,6 +142,7 @@ export function useCashFlowViewController() {
     transactions,
     sangriasData,
     replacementData,
+    salesData,
     cashFlowTransactionsTableColumns,
     total,
     isLoading,

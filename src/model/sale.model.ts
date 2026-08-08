@@ -2,54 +2,31 @@ import { PaymentMethod } from "@/enums/payment.enum";
 import { SaleStatus, SaleType } from "@/enums/sale.enum";
 import { DefaultIdModel } from "./base.model";
 import { InternCustomerSpecialPriceModel } from "./internCustomerPrice.model";
-import { ProductEspecificationModel } from "./productEspecification.model";
 import { ProductModel } from "./product.model";
+import { ProductEspecificationModel } from "./productEspecification.model";
 import { UserModel } from "./user.model";
+import { InternCustomerModel } from "./internCustomer.model";
+import { DiscountInfo } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
 
 export type ApiMoney = string | number | null;
-
-export type SaleProductModel = Pick<ProductModel, "id" | "name" | "unitOfMeasure"> & {
-  productPicture?: string | null;
-};
-
-export type SaleProductSpecificationModel = Omit<
-  ProductEspecificationModel,
-  "salePrice" | "costPrice" | "stockQuantity"
-> & {
-  salePrice: ApiMoney;
-  costPrice: ApiMoney;
-  stockQuantity: number;
-};
-
-export type SaleSpecialPriceModel = Pick<
-  InternCustomerSpecialPriceModel,
-  "id" | "internCustomerId" | "productEspecificationId"
-> & {
-  specialPrice: ApiMoney;
-};
 
 export interface SaleItemModel extends DefaultIdModel {
   note: string;
   quantitySold: number;
   isEspecialPrice: boolean;
-  discountPrice?: ApiMoney;
+  discountInfo?: DiscountInfo;
   internCustomerPriceId?: number | null;
-  internCustomerPrice?: SaleSpecialPriceModel | null;
+  internCustomerPrice?: InternCustomerSpecialPriceModel | null;
   productId: number;
-  product: SaleProductModel;
+  product: ProductModel;
   productEspecificationId: number;
-  productEspecification: SaleProductSpecificationModel;
+  productEspecification: ProductEspecificationModel;
 }
 
 export interface SalePaymentModel extends DefaultIdModel {
   type: PaymentMethod;
   amount: ApiMoney;
 }
-
-export type SaleCustomerModel = Pick<
-  NonNullable<import("./internCustomer.model").InternCustomerModel>,
-  "id" | "name" | "phoneNumber"
->;
 
 export type SaleUserModel = Pick<UserModel, "uid" | "username">;
 
@@ -58,8 +35,9 @@ export interface SaleModel extends DefaultIdModel {
   type: SaleType;
   status: SaleStatus;
   canceledAt?: string | null;
+  discount?: DiscountInfo;
   internCustomerId?: number | null;
-  internCustomer?: SaleCustomerModel | null;
+  internCustomer?: InternCustomerModel | null;
   soldByUserUid?: string | null;
   soldByUser?: SaleUserModel | null;
   cashFlowId: number;
@@ -82,6 +60,7 @@ export interface SaleReceiptItemModel {
   brand?: string;
   unitOfMeasure?: string;
   note?: string;
+  discountValue?: number;
 }
 
 export interface SaleReceiptPaymentModel {
@@ -99,6 +78,9 @@ export interface SaleReceiptModel {
   payments: SaleReceiptPaymentModel[];
   subtotal: number;
   specialPriceTotal: number;
+  itemDiscountTotal: number;
+  saleDiscountValue: number;
+  total: number;
   paid: number;
   change: number;
 }

@@ -1,7 +1,7 @@
 import { useGenericTableFetch } from "@/application-components/GenericTable/useGenericTableFetch";
 import { SaleType } from "@/enums/sale.enum";
 import { ProductModel } from "@/model/product.model";
-import { SaleModel, SaleReceiptModel } from "@/model/sale.model";
+import { SaleItemModel, SaleModel, SaleReceiptModel } from "@/model/sale.model";
 import { ProductService } from "@/services/product.service";
 import { SaleService } from "@/services/sale.service";
 import { useCashFlowStore } from "@/stores/cashFlow.store";
@@ -9,17 +9,23 @@ import { useSalesStore } from "@/stores/sales.store";
 import {
   calculeSalePriceRange,
   calculeStockTotalByProductEspecification,
+  formatPrice,
 } from "@/uperp/common/productFormulas";
-import { createSaleReceipt } from "@/uperp/common/saleReceipt";
-import { Form, message, Space, Tag, Typography } from "antd";
+import { SALE_PAYMENT_LABEL, createSaleReceipt } from "@/uperp/common/saleReceipt";
+import { calculateTotalCartItems } from "@/uperp/common/saleFormulas";
+import { Button, Form, message, Space, Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
+import { Receipt } from "lucide-react";
 import { useState } from "react";
 import { ICreateSaleForm, IPaymentMethodField, ISaleItemField } from "./types";
+import { useCacheManager } from "@/hooks/useCacheManager";
+import { CashFlowTransactionService } from "@/services/cashFlowTransaction.service";
 
 const { Text } = Typography;
 
 const productService = new ProductService();
 const saleService = new SaleService();
+const cashFlowTransaction = new CashFlowTransactionService();
 
 export function useCommonSaleController() {
   const { currentCashFlow } = useCashFlowStore();
@@ -35,6 +41,7 @@ export function useCommonSaleController() {
     saleStep,
     resetSale,
     selectedCustomer,
+    saleDiscount,
   } = useSalesStore();
 
   const [search, setSearch] = useState("");
@@ -59,6 +66,32 @@ export function useCommonSaleController() {
       filter: search.trim()
         ? [{ field: "name", operator: "$contL", value: search.trim() }]
         : undefined,
+    },
+  });
+
+  const {
+    data: recentSales,
+    total: recentSalesTotal,
+    isLoading: recentSalesLoading,
+    page: recentSalesPage,
+    pageSize: recentSalesPageSize,
+    handlePageChange: handleRecentSalesPageChange,
+    handlePageSizeChange: handleRecentSalesPageSizeChange,
+  } = useGenericTableFetch<SaleModel>({
+    service: saleService,
+    options: {
+      sort: { field: "createdAt", order: "DESC" },
+      filter: currentCashFlow
+        ? [{ field: "cashFlowId", operator: "$eq", value: currentCashFlow.id }]
+        : undefined,
+      join: [
+        { field: "items" },
+        { field: "items.product" },
+        { field: "items.productEspecification" },
+        { field: "items.internCustomerPrice" },
+        { field: "internCustomer" },
+        { field: "payments" },
+      ],
     },
   });
 
@@ -128,6 +161,93 @@ export function useCommonSaleController() {
     },
   ];
 
+  const [recentOpen, setRecentOpen] = useState(false);
+  const [receiptVariant, setReceiptVariant] = useState<"success" | "view">("success");
+
+  const handleViewRecentSale = (sale: SaleModel) => {
+    setRecentOpen(false);
+    setReceiptVariant("view");
+    setReceiptSale(createSaleReceipt(sale));
+  };
+
+  const recentSalesColumns: ColumnsType<SaleModel> = [
+    // { title: "Código", dataIndex: "code", width: 110 },
+    {
+      title: "Data",
+      dataIndex: "createdAt",
+      width: 130,
+      render: (v?: string) => (v ? new Date(v).toLocaleString("pt-BR") : "—"),
+    },
+    {
+      title: "Tipo",
+      dataIndex: "type",
+      width: 100,
+      render: (t: SaleType) => {
+        const map: Record<SaleType, { label: string; color: string }> = {
+          [SaleType.NORMAL]: { label: "Balcão", color: "orange" },
+          [SaleType.SERVICE]: { label: "Serviço", color: "blue" },
+          [SaleType.PDV]: { label: "PDV", color: "purple" },
+        };
+        const { label, color } = map[t] || { label: t, color: "default" };
+        return <Tag color={color}>{label}</Tag>;
+      },
+    },
+    {
+      title: "Cliente",
+      render: (_, sale: SaleModel) => sale.internCustomer?.name || "—",
+    },
+    {
+      title: "Itens",
+      dataIndex: "items",
+      width: 70,
+      align: "center",
+      render: (items: SaleItemModel[]) => items?.length ?? 0,
+    },
+    {
+      title: "Pagamentos",
+      render: (_, sale: SaleModel) =>
+        sale.payments?.length ? (
+          <Space size={4} wrap>
+            {sale.payments.map((p) => (
+              <Tag key={p.id} style={{ margin: 0 }}>
+                {SALE_PAYMENT_LABEL[p.type] || p.type}
+              </Tag>
+            ))}
+          </Space>
+        ) : (
+          "—"
+        ),
+    },
+    {
+      title: "Total",
+      width: 110,
+      align: "right",
+      render: (_, sale: SaleModel) => (
+        <strong style={{ color: "#F26B1F" }}>
+          {formatPrice(calculateTotalCartItems(sale.items, sale.discount))}
+        </strong>
+      ),
+    },
+    {
+      title: "Ações",
+      width: 90,
+      align: "center",
+      render: (_, sale: SaleModel) => (
+        <Button
+          size="small"
+          type="link"
+          icon={<Receipt size={14} />}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleViewRecentSale(sale);
+          }}
+        >
+          Ver
+        </Button>
+      ),
+    },
+  ];
+
   const [openProductModal, setOpenProductModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<ProductModel | undefined>(undefined);
   const handleOpenProductModal = (p: ProductModel) => {
@@ -146,7 +266,10 @@ export function useCommonSaleController() {
 
   const handleCloseReceipt = () => {
     setReceiptSale(null);
+    setRecentOpen(true);
   };
+
+  const { invalidateQuery } = useCacheManager();
 
   const handleSubmitSale = async () => {
     try {
@@ -164,6 +287,7 @@ export function useCommonSaleController() {
           productId: s.productId,
           quantitySold: s.quantitySold,
           internCustomerPriceId: s.internCustomerPriceId,
+          discountInfo: s.discountInfo,
         };
       });
 
@@ -180,9 +304,12 @@ export function useCommonSaleController() {
         items,
         payments: paymentsConverted,
         internCustomerId: selectedCustomer?.id,
+        discount: saleDiscount?.value != null ? saleDiscount : undefined,
       };
 
       const sale = await saleService.create<SaleModel>(data);
+      invalidateQueries();
+      setReceiptVariant("success");
       setReceiptSale(createSaleReceipt(sale));
       resetSale();
       setCartOpen(false);
@@ -192,6 +319,12 @@ export function useCommonSaleController() {
     } finally {
       setsubmiting(false);
     }
+  };
+
+  const invalidateQueries = () => {
+    invalidateQuery(productService);
+    invalidateQuery(saleService);
+    invalidateQuery(cashFlowTransaction);
   };
 
   return {
@@ -222,6 +355,18 @@ export function useCommonSaleController() {
     submiting,
     receiptSale,
     handleCloseReceipt,
+    receiptVariant,
+    recentOpen,
+    setRecentOpen,
+    recentSales,
+    recentSalesTotal,
+    recentSalesLoading,
+    recentSalesPage,
+    recentSalesPageSize,
+    handleRecentSalesPageChange,
+    handleRecentSalesPageSizeChange,
+    recentSalesColumns,
+    handleViewRecentSale,
     resetSale,
   };
 }

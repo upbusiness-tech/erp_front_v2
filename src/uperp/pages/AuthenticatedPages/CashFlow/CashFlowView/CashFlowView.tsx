@@ -22,6 +22,7 @@ import type { CashMovementType } from "../../../../types";
 import { CashFlowTransactionModal } from "./CashFlowTransactionModal/CashFlowTransactionModal";
 import { CloseCashFlowModal } from "./CloseCashFlowModal/CloseCashFlowModal";
 import { useCashFlowViewController } from "./useCashFlowView.controller";
+import { formatPrice } from "@/uperp/common/productFormulas";
 
 const { Title, Text } = Typography;
 
@@ -34,6 +35,7 @@ export const CashFlowView = () => {
     currentModalTransaction,
     replacementData,
     sangriasData,
+    salesData,
     transactions,
     cashFlowTransactionsTableColumns,
     total,
@@ -110,7 +112,7 @@ export const CashFlowView = () => {
           <Card>
             <Statistic
               title="Vendas"
-              value={0}
+              value={salesData?.amount}
               precision={2}
               valueStyle={{ color: "#16A34A" }}
               prefix={<TrendingUp size={16} />}
@@ -146,12 +148,14 @@ export const CashFlowView = () => {
           <Col>
             <Text type="secondary">Saldo estimado em caixa</Text>
             <Title level={2} style={{ margin: 0, color: "#F26B1F" }}>
-              R${" "}
-              {calculeCashFlowEstimetedAmount(
-                Number(sangriasData?.amount),
-                Number(replacementData?.amount),
-                Number(currentCashFlow?.initialBalance),
-              ).toFixed(2)}
+              {formatPrice(
+                calculeCashFlowEstimetedAmount(
+                  Number(sangriasData?.amount ?? []),
+                  Number(replacementData?.amount ?? []),
+                  Number(salesData?.amount ?? []),
+                  Number(currentCashFlow?.initialBalance ?? []),
+                ).toFixed(2),
+              )}
             </Title>
           </Col>
           <Col>

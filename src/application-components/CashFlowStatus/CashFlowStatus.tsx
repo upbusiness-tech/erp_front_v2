@@ -8,10 +8,10 @@ import { useEffect } from "react";
 
 const { Title, Text } = Typography;
 
-export const CashFlowStatus = () => {
+export const CashFlowStatus = ({ onShowRecentSales }: { onShowRecentSales?: () => void }) => {
   const { currentCashFlow, loadCurrentCashOpen } = useCashFlowStore();
 
-  const isCashFlowOpen = !currentCashFlow?.isClosed;
+  const isCashFlowOpen = currentCashFlow ? !currentCashFlow?.isClosed : false;
 
   const navigate = useNavigate();
 
@@ -25,8 +25,7 @@ export const CashFlowStatus = () => {
 
   useEffect(() => {
     const load = async () => {
-      const result = await loadCurrentCashOpen();
-      if (!result) navigate(CashierPaths.OPEN);
+      await loadCurrentCashOpen();
     };
 
     if (!currentCashFlow) load();
@@ -61,10 +60,7 @@ export const CashFlowStatus = () => {
         <Col>
           <Space wrap>
             {isCashFlowOpen && (
-              <Button
-                icon={<History size={14} />}
-                // onClick={() => setRecentOpen(true)}
-              >
+              <Button icon={<History size={14} />} onClick={onShowRecentSales}>
                 Ver vendas recentes
               </Button>
             )}

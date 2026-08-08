@@ -23,6 +23,7 @@ const createReceiptHtml = (receipt: SaleReceiptModel) => {
           <div class="line strong"><span>${escapeHtml(item.name)}</span><span>${formatPrice(item.lineTotal)}</span></div>
           <div class="muted">${item.quantity} x ${formatPrice(item.unitPrice)}${item.size ? ` · Tam. ${escapeHtml(item.size)}` : ""}${item.color ? ` · ${escapeHtml(item.color)}` : ""}</div>
           ${item.hasSpecialPrice ? `<div class="special">PREÇO ESPECIAL · De ${formatPrice(item.originalUnitPrice)} por ${formatPrice(item.unitPrice)}</div>` : ""}
+          ${item.discountValue != null && item.discountValue > 0 ? `<div class="discount">DESCONTO: -${formatPrice(item.discountValue)}</div>` : ""}
           ${item.note ? `<div class="muted">Obs.: ${escapeHtml(item.note)}</div>` : ""}
         </article>`,
     )
@@ -52,6 +53,7 @@ const createReceiptHtml = (receipt: SaleReceiptModel) => {
           .strong { font-weight: 700; }
           .item { break-inside: avoid; margin: 0 0 8px; }
           .special { color: #8a4b00; font-size: 10px; font-weight: 700; margin-top: 2px; }
+          .discount { color: #b91c1c; font-size: 10px; font-weight: 700; margin-top: 2px; }
           .total { border-top: 1px solid #111; font-size: 15px; font-weight: 700; margin-top: 8px; padding-top: 6px; }
           .footer { color: #555; margin-top: 16px; text-align: center; }
         </style>
@@ -68,8 +70,10 @@ const createReceiptHtml = (receipt: SaleReceiptModel) => {
         ${items}
         <h2>Resumo</h2>
         <div class="line"><span>Subtotal</span><span>${formatPrice(receipt.subtotal)}</span></div>
-        ${receipt.specialPriceTotal > 0 ? `<div class="line"><span>Total de preços especiais</span><span>${formatPrice(receipt.specialPriceTotal)}</span></div>` : ""}
-        <div class="line total"><span>Total</span><span>${formatPrice(receipt.subtotal)}</span></div>
+        ${receipt.specialPriceTotal > 0 ? `<div class="line"><span>Preços especiais</span><span>-${formatPrice(receipt.specialPriceTotal)}</span></div>` : ""}
+        ${receipt.itemDiscountTotal > 0 ? `<div class="line"><span>Desconto dos itens</span><span>-${formatPrice(receipt.itemDiscountTotal)}</span></div>` : ""}
+        ${receipt.saleDiscountValue > 0 ? `<div class="line"><span>Desconto da venda</span><span>-${formatPrice(receipt.saleDiscountValue)}</span></div>` : ""}
+        <div class="line total"><span>Total</span><span>${formatPrice(receipt.total)}</span></div>
         <h2>Pagamentos</h2>
         ${payments}
         <div class="line"><span>Pago</span><span>${formatPrice(receipt.paid)}</span></div>

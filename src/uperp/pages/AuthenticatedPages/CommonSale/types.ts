@@ -4,21 +4,29 @@ import { InternCustomerSpecialPriceModel } from "@/model/internCustomerPrice.mod
 import { ProductModel } from "@/model/product.model";
 import { ProductEspecificationModel } from "@/model/productEspecification.model";
 
+export interface DiscountInfo {
+  value?: number;
+  percent?: number;
+  reason?: string;
+}
+
 export interface ICreateSaleForm {
   type: SaleType;
   cashFlowId: number;
   items: ISaleItemField[];
   payments: IPaymentMethodField[];
   internCustomerId?: number;
+  discount?: DiscountInfo;
 }
 
 export interface ISaleItemField {
-  note: string;
+  note?: string;
   quantitySold: number;
   isEspecialPrice: boolean;
   internCustomerPriceId?: number;
   productId: number;
   productEspecificationId: number;
+  discountInfo?: DiscountInfo;
 }
 
 export type CartSaleItem = ISaleItemField & {
