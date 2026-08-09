@@ -8,6 +8,7 @@ export enum PermissionModules {
   REPORT = "Report",
   SIDEBAR = "SideBar",
   INVOICE = "Invoice",
+  STATS = "Stats",
 }
 
 export const mapModuleName = (moduleName: PermissionModules) => {
@@ -30,6 +31,8 @@ export const mapModuleName = (moduleName: PermissionModules) => {
       return "Menu lateral";
     case PermissionModules.INVOICE:
       return "Mensalidades";
+    case PermissionModules.STATS:
+      return "Estatísticas";
     default:
       return "Permissões";
   }

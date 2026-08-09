@@ -20,12 +20,14 @@ import { useState } from "react";
 import { ICreateSaleForm, IPaymentMethodField, ISaleItemField } from "./types";
 import { useCacheManager } from "@/hooks/useCacheManager";
 import { CashFlowTransactionService } from "@/services/cashFlowTransaction.service";
+import { ProductDashboardService } from "@/services/productDashboard.service";
 
 const { Text } = Typography;
 
 const productService = new ProductService();
 const saleService = new SaleService();
 const cashFlowTransaction = new CashFlowTransactionService();
+const productDashboardService = new ProductDashboardService("product-dashboard");
 
 export function useCommonSaleController() {
   const { currentCashFlow } = useCashFlowStore();
@@ -174,7 +176,7 @@ export function useCommonSaleController() {
   };
 
   const recentSalesColumns: ColumnsType<SaleModel> = [
-    // { title: "Código", dataIndex: "code", width: 110 },
+    { title: "Código", dataIndex: "code", width: 110 },
     {
       title: "Data",
       dataIndex: "createdAt",
@@ -328,6 +330,7 @@ export function useCommonSaleController() {
     invalidateQuery(productService);
     invalidateQuery(saleService);
     invalidateQuery(cashFlowTransaction);
+    invalidateQuery(productDashboardService);
   };
 
   return {

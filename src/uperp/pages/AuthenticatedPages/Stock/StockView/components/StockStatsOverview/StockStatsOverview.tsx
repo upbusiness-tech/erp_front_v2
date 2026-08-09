@@ -1,5 +1,22 @@
-import { Card, Col, Empty, Progress, Row, Space, Statistic, Typography } from "antd";
+import {
+  Card,
+  Col,
+  Empty,
+  Progress,
+  Row,
+  Skeleton,
+  Space,
+  Statistic,
+  Typography,
+  message,
+} from "antd";
+import { useEffect } from "react";
 
+import { PeriodSelector } from "@/application-components/PeriodSelector/PeriodSelector";
+import { useDashboardPeriod } from "@/hooks/useDashboardPeriod";
+import { useGetAllWithParams } from "@/hooks/useGetAllWithParams";
+import type { ProductDashboardResponse } from "@/types/productDashboard";
+import dayjs from "dayjs";
 import {
   AlertCircle,
   AlertTriangle,
@@ -9,175 +26,218 @@ import {
   Star,
   TrendingUp,
 } from "lucide-react";
-import { useStore } from "../../../../../../store";
+import { ProductDashboardService } from "@/services/productDashboard.service";
+
 const { Text } = Typography;
 
+const productDashboardService = new ProductDashboardService("product-dashboard");
 export const StockStatsOverview = () => {
-  const { products, sales } = useStore();
+  const { period, setPreset, setCustomRange } = useDashboardPeriod("this_month");
 
-  // Compute sold quantities per product name from sale lines (fallback to random for mock lines)
-  const soldByName = new Map<string, number>();
-  sales.forEach((s) =>
-    s.lines?.forEach((l) => soldByName.set(l.name, (soldByName.get(l.name) || 0) + l.qty)),
-  );
+  const { data, isLoading, isFetching, isError, error } =
+    useGetAllWithParams<ProductDashboardResponse>(productDashboardService, undefined, {
+      queryParams: {
+        from: period.from,
+        to: period.to,
+        limit: "5",
+      },
+    });
 
-  const enriched = products.map((p) => {
-    const sold = soldByName.get(p.name) ?? Math.floor((Math.abs(hashCode(p.id)) % 60) + 5);
-    const turnover = p.stock > 0 ? sold / p.stock : sold;
-    const revenue = sold * p.price;
-    return { ...p, sold, turnover, revenue };
-  });
+  useEffect(() => {
+    if (isError && error) {
+      message.error("Erro ao carregar dados do dashboard de produtos.");
+    }
+  }, [isError, error]);
 
-  const topSold = [...enriched].sort((a, b) => b.sold - a.sold).slice(0, 5);
-  const topRevenue = [...enriched].sort((a, b) => b.revenue - a.revenue).slice(0, 5);
-  const topTurnover = [...enriched].sort((a, b) => b.turnover - a.turnover).slice(0, 5);
-  const lowStock = enriched
-    .filter((p) => p.stock <= 5)
-    .sort((a, b) => a.stock - b.stock)
-    .slice(0, 5);
-  const dead = enriched.filter((p) => p.sold === 0).slice(0, 5);
+  const handlePeriodChange = (next: typeof period) => {
+    if (next.preset === "custom") {
+      setPreset("custom");
+      setCustomRange(dayjs(next.from), dayjs(next.to));
+    } else {
+      setPreset(next.preset);
+    }
+  };
 
-  const totalSold = enriched.reduce((s, p) => s + p.sold, 0);
-  const totalRevenue = enriched.reduce((s, p) => s + p.revenue, 0);
-  const bestSeller = topSold[0];
+  const containerStyle = isFetching && data ? { opacity: 0.6, transition: "opacity 0.2s" } : {};
+
+  const summary = data?.summary;
+  const rankings = data?.rankings;
 
   return (
     <>
-      <Row gutter={16} style={{ marginBottom: 16 }}>
-        <Col xs={12} md={6}>
-          <Card>
-            <Statistic
-              title="Unidades vendidas (estim.)"
-              value={totalSold}
-              prefix={<Package size={16} />}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} md={6}>
-          <Card>
-            <Statistic
-              title="Faturamento por produtos"
-              value={totalRevenue}
-              precision={2}
-              prefix="R$"
-              valueStyle={{ color: "#F26B1F" }}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} md={6}>
-          <Card>
-            <Text type="secondary" style={{ fontSize: 12 }}>
-              Produto destaque
-            </Text>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
-              <Star size={20} color="#F26B1F" />
-              <div>
-                <Text strong style={{ display: "block", fontSize: 13 }}>
-                  {bestSeller?.name || "—"}
-                </Text>
-                <Text type="secondary" style={{ fontSize: 11 }}>
-                  {bestSeller?.sold || 0} un. vendidas
-                </Text>
-              </div>
-            </div>
-          </Card>
-        </Col>
-        <Col xs={12} md={6}>
-          <Card>
-            <Statistic
-              title="Sem giro"
-              value={dead.length}
-              prefix={<AlertCircle size={16} />}
-              valueStyle={{ color: dead.length > 0 ? "#DC2626" : undefined }}
-            />
-          </Card>
-        </Col>
-      </Row>
+      <PeriodSelector period={period} onChange={handlePeriodChange} />
 
-      <Row gutter={[16, 16]}>
-        <Col xs={24} md={12}>
-          <Card
-            title={
-              <Space>
-                <TrendingUp size={16} color="#16A34A" /> Mais vendidos
-              </Space>
-            }
-          >
-            <RankList
-              items={topSold.map((p) => ({
-                label: p.name,
-                sub: `${p.sold} un.`,
-                value: p.sold,
-                max: topSold[0]?.sold || 1,
-              }))}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} md={12}>
-          <Card
-            title={
-              <Space>
-                <DollarSign size={16} color="#F26B1F" /> Maior faturamento
-              </Space>
-            }
-          >
-            <RankList
-              items={topRevenue.map((p) => ({
-                label: p.name,
-                sub: `R$ ${p.revenue.toFixed(2)}`,
-                value: p.revenue,
-                max: topRevenue[0]?.revenue || 1,
-              }))}
-              color="#F26B1F"
-            />
-          </Card>
-        </Col>
-        <Col xs={24} md={12}>
-          <Card
-            title={
-              <Space>
-                <RefreshCcw size={16} color="#2563EB" /> Maior giro
-              </Space>
-            }
-          >
-            <RankList
-              items={topTurnover.map((p) => ({
-                label: p.name,
-                sub: `Giro ${p.turnover.toFixed(1)}x`,
-                value: p.turnover,
-                max: topTurnover[0]?.turnover || 1,
-              }))}
-              color="#2563EB"
-            />
-          </Card>
-        </Col>
-        <Col xs={24} md={12}>
-          <Card
-            title={
-              <Space>
-                <AlertTriangle size={16} color="#DC2626" /> Reposição urgente
-              </Space>
-            }
-          >
-            {lowStock.length === 0 ? (
-              <Empty
-                description="Nenhum produto com estoque crítico"
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-              />
-            ) : (
-              <RankList
-                items={lowStock.map((p) => ({
-                  label: p.name,
-                  sub: `${p.stock} em estoque`,
-                  value: 6 - Math.min(p.stock, 5),
-                  max: 6,
-                }))}
-                color="#DC2626"
-              />
-            )}
-          </Card>
-        </Col>
-      </Row>
+      <div style={containerStyle}>
+        <Row gutter={16} style={{ marginBottom: 16 }}>
+          <Col xs={12} md={6}>
+            <Card>
+              {isLoading && !data ? (
+                <Skeleton active paragraph={{ rows: 1 }} />
+              ) : (
+                <Statistic
+                  title="Unidades vendidas"
+                  value={summary?.unitsSold ?? 0}
+                  prefix={<Package size={16} />}
+                />
+              )}
+            </Card>
+          </Col>
+          <Col xs={12} md={6}>
+            <Card>
+              {isLoading && !data ? (
+                <Skeleton active paragraph={{ rows: 1 }} />
+              ) : (
+                <Statistic
+                  title="Faturamento por produtos"
+                  value={summary?.revenue ?? 0}
+                  precision={2}
+                  prefix="R$"
+                  valueStyle={{ color: "#F26B1F" }}
+                />
+              )}
+            </Card>
+          </Col>
+          <Col xs={12} md={6}>
+            <Card>
+              {isLoading && !data ? (
+                <Skeleton active paragraph={{ rows: 1 }} />
+              ) : (
+                <>
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    Produto destaque
+                  </Text>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
+                    <Star size={20} color="#F26B1F" />
+                    <div>
+                      <Text strong style={{ display: "block", fontSize: 13 }}>
+                        {summary?.featuredProduct?.productName || "—"}
+                      </Text>
+                      <Text type="secondary" style={{ fontSize: 11 }}>
+                        {summary?.featuredProduct?.quantitySold ?? 0} un. vendidas
+                      </Text>
+                    </div>
+                  </div>
+                </>
+              )}
+            </Card>
+          </Col>
+          <Col xs={12} md={6}>
+            <Card>
+              {isLoading && !data ? (
+                <Skeleton active paragraph={{ rows: 1 }} />
+              ) : (
+                <Statistic
+                  title="Sem giro"
+                  value={summary?.zeroStockProducts ?? 0}
+                  prefix={<AlertCircle size={16} />}
+                  valueStyle={{
+                    color: (summary?.zeroStockProducts ?? 0) > 0 ? "#DC2626" : undefined,
+                  }}
+                />
+              )}
+            </Card>
+          </Col>
+        </Row>
+
+        <Row gutter={[16, 16]}>
+          <Col xs={24} md={12}>
+            <Card
+              title={
+                <Space>
+                  <TrendingUp size={16} color="#16A34A" /> Mais vendidos
+                </Space>
+              }
+            >
+              {isLoading && !data ? (
+                <Skeleton active paragraph={{ rows: 4 }} />
+              ) : (
+                <RankList
+                  items={(rankings?.bestSelling ?? []).map((p) => ({
+                    label: p.productName,
+                    sub: `${p.quantitySold} un.`,
+                    value: p.quantitySold,
+                    max: rankings?.bestSelling[0]?.quantitySold || 1,
+                  }))}
+                />
+              )}
+            </Card>
+          </Col>
+          <Col xs={24} md={12}>
+            <Card
+              title={
+                <Space>
+                  <DollarSign size={16} color="#F26B1F" /> Maior faturamento
+                </Space>
+              }
+            >
+              {isLoading && !data ? (
+                <Skeleton active paragraph={{ rows: 4 }} />
+              ) : (
+                <RankList
+                  items={(rankings?.highestRevenue ?? []).map((p) => ({
+                    label: p.productName,
+                    sub: `R$ ${p.revenue.toFixed(2)}`,
+                    value: p.revenue,
+                    max: rankings?.highestRevenue[0]?.revenue || 1,
+                  }))}
+                  color="#F26B1F"
+                />
+              )}
+            </Card>
+          </Col>
+          <Col xs={24} md={12}>
+            <Card
+              title={
+                <Space>
+                  <RefreshCcw size={16} color="#2563EB" /> Maior giro
+                </Space>
+              }
+            >
+              {isLoading && !data ? (
+                <Skeleton active paragraph={{ rows: 4 }} />
+              ) : (
+                <RankList
+                  items={(rankings?.highestTurnover ?? []).map((p) => ({
+                    label: p.productName,
+                    sub: `Giro ${p.turnover.toFixed(1)}x`,
+                    value: p.turnover,
+                    max: rankings?.highestTurnover[0]?.turnover || 1,
+                  }))}
+                  color="#2563EB"
+                />
+              )}
+            </Card>
+          </Col>
+          <Col xs={24} md={12}>
+            <Card
+              title={
+                <Space>
+                  <AlertTriangle size={16} color="#DC2626" /> Reposição urgente
+                </Space>
+              }
+            >
+              {isLoading && !data ? (
+                <Skeleton active paragraph={{ rows: 4 }} />
+              ) : (rankings?.urgentRestock ?? []).length === 0 ? (
+                <Empty
+                  description="Nenhum produto com estoque crítico"
+                  image={Empty.PRESENTED_IMAGE_SIMPLE}
+                />
+              ) : (
+                <RankList
+                  items={(rankings?.urgentRestock ?? []).map((p) => ({
+                    label: p.productName,
+                    sub: `${p.stockQuantity} em estoque`,
+                    value: 6 - Math.min(p.stockQuantity, 5),
+                    max: 6,
+                  }))}
+                  color="#DC2626"
+                />
+              )}
+            </Card>
+          </Col>
+        </Row>
+      </div>
     </>
   );
 };
@@ -212,10 +272,4 @@ function RankList({
       ))}
     </div>
   );
-}
-
-function hashCode(s: string) {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (h << 5) - h + s.charCodeAt(i);
-  return h;
 }
