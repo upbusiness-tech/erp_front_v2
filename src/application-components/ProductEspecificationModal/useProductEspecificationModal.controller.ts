@@ -2,7 +2,7 @@ import { InternCustomerModel } from "@/model/internCustomer.model";
 import { ProductModel } from "@/model/product.model";
 import { ProductEspecificationModel } from "@/model/productEspecification.model";
 import { useSalesStore } from "@/stores/sales.store";
-import { calculeStockTotalByProductEspecification } from "@/uperp/common/productFormulas";
+import { calculeStockTotalByProductEspecification } from "@/uperp/common/formulas/productFormulas";
 import { CartSaleItem } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
 import { message } from "antd";
 import { useEffect, useMemo, useState } from "react";

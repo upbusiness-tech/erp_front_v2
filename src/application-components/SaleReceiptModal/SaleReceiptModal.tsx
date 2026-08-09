@@ -1,6 +1,6 @@
 import { SaleReceiptModel } from "@/model/sale.model";
-import { formatPrice } from "@/uperp/common/productFormulas";
-import { SALE_PAYMENT_LABEL } from "@/uperp/common/saleReceipt";
+import { formatPrice } from "@/uperp/common/formulas/productFormulas";
+import { SALE_PAYMENT_LABEL } from "@/uperp/common/formulas/saleReceipt";
 import { Button, Divider, List, message, Modal, Row, Space, Tag, Typography } from "antd";
 import { CheckCircle2, CreditCard, Percent, Printer, Star } from "lucide-react";
 import { useState } from "react";

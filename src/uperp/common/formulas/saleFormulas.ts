@@ -1,5 +1,7 @@
 import { SaleItemModel, SaleModel } from "@/model/sale.model";
-import { CartSaleItem, PaymentItem } from "../pages/AuthenticatedPages/CommonSale/types";
+import { CartSaleItem, PaymentItem } from "../../pages/AuthenticatedPages/CommonSale/types";
+
+export const round2 = (n: number) => Math.round(n * 100) / 100;
 
 export const calculateGrossSubtotal = (items: CartSaleItem[] | SaleItemModel[]) => {
   return items.reduce((acc, item) => {

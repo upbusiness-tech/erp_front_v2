@@ -1,6 +1,6 @@
 import { SaleReceiptModel } from "@/model/sale.model";
-import { formatPrice } from "@/uperp/common/productFormulas";
-import { SALE_PAYMENT_LABEL } from "@/uperp/common/saleReceipt";
+import { formatPrice } from "@/uperp/common/formulas/productFormulas";
+import { SALE_PAYMENT_LABEL } from "@/uperp/common/formulas/saleReceipt";
 
 const escapeHtml = (value: string) =>
   value

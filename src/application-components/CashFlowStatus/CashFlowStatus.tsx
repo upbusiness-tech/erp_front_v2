@@ -4,12 +4,11 @@ import { Button, Card, Col, Row, Space, Typography } from "antd";
 import { ArrowRight, History, Lock, LockOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { CLOSED_CASH_FLOW_COLOR, OPEN_CASH_FLOW_COLOR } from "./consts";
-import { useEffect } from "react";
 
 const { Title, Text } = Typography;
 
 export const CashFlowStatus = ({ onShowRecentSales }: { onShowRecentSales?: () => void }) => {
-  const { currentCashFlow, loadCurrentCashOpen } = useCashFlowStore();
+  const { currentCashFlow } = useCashFlowStore();
 
   const isCashFlowOpen = currentCashFlow ? !currentCashFlow?.isClosed : false;
 
@@ -22,14 +21,6 @@ export const CashFlowStatus = ({ onShowRecentSales }: { onShowRecentSales?: () =
       navigate(CashierPaths.OPEN);
     }
   };
-
-  useEffect(() => {
-    const load = async () => {
-      await loadCurrentCashOpen();
-    };
-
-    if (!currentCashFlow) load();
-  }, [currentCashFlow, loadCurrentCashOpen]);
 
   return (
     <Card

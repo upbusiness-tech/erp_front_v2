@@ -12,7 +12,7 @@ const { Title, Text } = Typography;
 export const CashFlowOpen = () => {
   const [openForm] = Form.useForm<{ initialBalance: number }>();
 
-  const { loadCurrentCashOpen, currentCashFlow, handleOpenCashFlow } = useCashFlowStore();
+  const { currentCashFlow, handleOpenCashFlow } = useCashFlowStore();
   const navigate = useNavigate();
 
   const handleOpen = async () => {
@@ -25,13 +25,13 @@ export const CashFlowOpen = () => {
     }
   };
 
-  useEffect(() => {
-    loadCurrentCashOpen();
-  }, [loadCurrentCashOpen]);
+  // useEffect(() => {
+  //   loadCurrentCashOpen();
+  // }, [loadCurrentCashOpen]);
 
   useEffect(() => {
     if (currentCashFlow) navigate(CashierPaths.BASE);
-  }, [currentCashFlow]);
+  }, [currentCashFlow, navigate]);
 
   const { employeeName } = useAuthStore();
 

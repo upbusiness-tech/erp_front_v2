@@ -1,5 +1,5 @@
 import { PaymentMethod } from "@/enums/payment.enum";
-import { formatPrice } from "@/uperp/common/productFormulas";
+import { formatPrice } from "@/uperp/common/formulas/productFormulas";
 import {
   Avatar,
   Button,

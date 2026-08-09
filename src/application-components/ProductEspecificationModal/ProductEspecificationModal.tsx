@@ -1,6 +1,6 @@
 import { InternCustomerModel } from "@/model/internCustomer.model";
 import { ProductModel } from "@/model/product.model";
-import { calculeSalePriceRange, formatPrice } from "@/uperp/common/productFormulas";
+import { calculeSalePriceRange, formatPrice } from "@/uperp/common/formulas/productFormulas";
 import { ICreateSaleForm } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
 import {
   Col,

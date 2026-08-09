@@ -5,7 +5,7 @@ import { InternCustomerModel } from "@/model/internCustomer.model";
 import { ProductModel } from "@/model/product.model";
 import { InternCustomerService } from "@/services/internCustomer.service";
 import { ProductService } from "@/services/product.service";
-import { calculeSalePriceRange } from "@/uperp/common/productFormulas";
+import { calculeSalePriceRange } from "@/uperp/common/formulas/productFormulas";
 import { Form, message, Space, Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
 import { TableProps } from "antd/lib/table";

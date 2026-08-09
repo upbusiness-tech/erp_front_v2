@@ -7,6 +7,7 @@ export enum PermissionModules {
   INTERN_CUSTOMER = "InternCustomer",
   REPORT = "Report",
   SIDEBAR = "SideBar",
+  INVOICE = "Invoice",
 }
 
 export const mapModuleName = (moduleName: PermissionModules) => {
@@ -27,6 +28,8 @@ export const mapModuleName = (moduleName: PermissionModules) => {
       return "Funcionários";
     case PermissionModules.SIDEBAR:
       return "Menu lateral";
+    case PermissionModules.INVOICE:
+      return "Mensalidades";
     default:
       return "Permissões";
   }

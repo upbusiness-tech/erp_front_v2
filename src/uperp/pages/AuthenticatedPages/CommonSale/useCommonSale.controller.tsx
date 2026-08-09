@@ -10,9 +10,9 @@ import {
   calculeSalePriceRange,
   calculeStockTotalByProductEspecification,
   formatPrice,
-} from "@/uperp/common/productFormulas";
-import { SALE_PAYMENT_LABEL, createSaleReceipt } from "@/uperp/common/saleReceipt";
-import { calculateTotalCartItems } from "@/uperp/common/saleFormulas";
+} from "@/uperp/common/formulas/productFormulas";
+import { SALE_PAYMENT_LABEL, createSaleReceipt } from "@/uperp/common/formulas/saleReceipt";
+import { calculateTotalCartItems } from "@/uperp/common/formulas/saleFormulas";
 import { Button, Form, message, Space, Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
 import { Receipt } from "lucide-react";

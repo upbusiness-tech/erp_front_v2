@@ -1,11 +1,11 @@
-import { formatPrice } from "@/uperp/common/productFormulas";
+import { formatPrice } from "@/uperp/common/formulas/productFormulas";
 import { CartSaleItem, DiscountInfo } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
 import { Button, Divider, Input, InputNumber, Modal, Row, Space, Tag, Typography } from "antd";
 import { Percent } from "lucide-react";
-import { useEffect, useState } from "react";
 import InputNumberFormatted from "../InputNumberFormated/InputNumberFormated";
+import { useItemDiscountModalController } from "./useItemDiscountModal.controller";
 
-const { Text, Title } = Typography;
+const { Text } = Typography;
 
 type ItemDiscountModalProps = {
   open: boolean;
@@ -15,10 +15,6 @@ type ItemDiscountModalProps = {
   onCancel: () => void;
 };
 
-type LastEdited = "%" | "R$" | null;
-
-const round2 = (n: number) => Math.round(n * 100) / 100;
-
 export const ItemDiscountModal = ({
   open,
   item,
@@ -26,77 +22,22 @@ export const ItemDiscountModal = ({
   onRemove,
   onCancel,
 }: ItemDiscountModalProps) => {
-  const [percentInput, setPercentInput] = useState<number | null>(null);
-  const [valueInput, setValueInput] = useState<number | null>(null);
-  const [reason, setReason] = useState("");
-  const [lastEdited, setLastEdited] = useState<LastEdited>(null);
-
-  const effectivePrice = item?.isEspecialPrice
-    ? Number(item.internCustomerPrice?.specialPrice ?? 0)
-    : Number(item?.productEspecification.salePrice ?? 0);
-
-  const quantity = Number(item?.quantitySold ?? 0);
-  const lineTotal = effectivePrice * quantity;
-  const maxDiscount = lineTotal;
-
-  const currentValue = valueInput ?? 0;
-  const totalAfterDiscount = Math.max(lineTotal - currentValue, 0);
-
-  useEffect(() => {
-    if (open && item) {
-      const existing = item.discountInfo;
-      if (existing?.value) {
-        setValueInput(existing.value);
-        setPercentInput(existing.percent ?? round2((existing.value / lineTotal) * 100));
-        setReason(existing.reason ?? "");
-        setLastEdited(null);
-      } else {
-        setPercentInput(null);
-        setValueInput(null);
-        setReason("");
-        setLastEdited(null);
-      }
-    }
-  }, [open, item, lineTotal]);
-
-  const handlePercentChange = (v: number | null) => {
-    if (v != null && (v < 0 || v > 100)) return;
-    setPercentInput(v);
-    if (v != null) {
-      setValueInput(round2((v / 100) * lineTotal));
-    } else {
-      setValueInput(null);
-    }
-    setLastEdited("%");
-  };
-
-  const handleValueChange = (v: number | null) => {
-    setValueInput(v);
-    if (v != null && lineTotal > 0) {
-      setPercentInput(round2((v / lineTotal) * 100));
-    } else {
-      setPercentInput(null);
-    }
-    setLastEdited("R$");
-  };
-
-  const handleApply = () => {
-    if (!item) return;
-    if (currentValue > maxDiscount) return;
-
-    onApply(item, {
-      value: currentValue > 0 ? currentValue : undefined,
-      percent: percentInput && percentInput > 0 ? percentInput : undefined,
-      reason: reason.trim() || undefined,
-    });
-  };
-
-  const handleRemove = () => {
-    if (!item) return;
-    onRemove(item);
-  };
-
-  if (!item) return null;
+  const {
+    handleRemove,
+    handleApply,
+    effectivePrice,
+    quantity,
+    lineTotal,
+    maxDiscount,
+    valueInput,
+    handleValueChange,
+    setLastEdited,
+    percentInput,
+    handlePercentChange,
+    reason,
+    setReason,
+    totalAfterDiscount,
+  } = useItemDiscountModalController({ open, item, onApply, onRemove });
 
   return (
     <Modal
@@ -109,7 +50,7 @@ export const ItemDiscountModal = ({
       }
       onCancel={onCancel}
       footer={[
-        item.discountInfo?.value ? (
+        item?.discountInfo?.value ? (
           <Button key="remove" danger onClick={handleRemove}>
             Remover desconto
           </Button>
@@ -126,14 +67,14 @@ export const ItemDiscountModal = ({
     >
       <div style={{ marginBottom: 16 }}>
         <Text strong style={{ fontSize: 16, display: "block" }}>
-          {item.product.name}
+          {item?.product.name}
         </Text>
         <Space size={4} style={{ marginTop: 4 }}>
-          {item.productEspecification.size && (
-            <Tag color="orange">Tam. {item.productEspecification.size}</Tag>
+          {item?.productEspecification.size && (
+            <Tag color="orange">Tam. {item?.productEspecification.size}</Tag>
           )}
-          {item.productEspecification.color && (
-            <Tag color="default">{item.productEspecification.color}</Tag>
+          {item?.productEspecification.color && (
+            <Tag color="default">{item?.productEspecification.color}</Tag>
           )}
         </Space>
       </div>

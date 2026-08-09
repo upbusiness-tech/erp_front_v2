@@ -20,7 +20,7 @@ const { Text } = Typography;
 const cashFlowTransaction = new CashFlowTransactionService();
 const cashFlowTransactionStatsService = new CashFlowTransactionService("stats");
 export function useCashFlowViewController() {
-  const { currentCashFlow, loadCurrentCashOpen } = useCashFlowStore();
+  const { currentCashFlow } = useCashFlowStore();
 
   const {
     data: transactions,
@@ -125,13 +125,8 @@ export function useCashFlowViewController() {
   ];
 
   useEffect(() => {
-    const load = async () => {
-      const result = await loadCurrentCashOpen();
-      if (!result) navigate(CashierPaths.OPEN);
-    };
-
-    if (!currentCashFlow) load();
-  }, [currentCashFlow, loadCurrentCashOpen]);
+    if (!currentCashFlow) navigate(CashierPaths.OPEN);
+  }, [currentCashFlow, navigate]);
 
   return {
     currentCashFlow,

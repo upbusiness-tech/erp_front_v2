@@ -14,7 +14,7 @@ import {
   calculateSpecialPriceSavings,
   calculateTotalCartItems,
   calculateTotalPayments,
-} from "@/uperp/common/saleFormulas";
+} from "@/uperp/common/formulas/saleFormulas";
 import { CartSaleItem, DiscountInfo } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
 import { message } from "antd";
 import { useMemo, useState } from "react";

@@ -3,7 +3,7 @@ import { TransactionOrigin } from "@/enums/cashFlow.enum";
 import {
   calculeCashFlowEstimetedAmount,
   calculeCashFlowTransactionAmount,
-} from "@/uperp/common/cashFlowFormulas";
+} from "@/uperp/common/formulas/cashFlowFormulas";
 import { formatIsoDateIntoDateTimeString } from "@/uperp/common/dates";
 import { Button, Card, Col, Row, Space, Statistic, Typography } from "antd";
 import {
@@ -22,7 +22,7 @@ import type { CashMovementType } from "../../../../types";
 import { CashFlowTransactionModal } from "./CashFlowTransactionModal/CashFlowTransactionModal";
 import { CloseCashFlowModal } from "./CloseCashFlowModal/CloseCashFlowModal";
 import { useCashFlowViewController } from "./useCashFlowView.controller";
-import { formatPrice } from "@/uperp/common/productFormulas";
+import { formatPrice } from "@/uperp/common/formulas/productFormulas";
 
 const { Title, Text } = Typography;
 

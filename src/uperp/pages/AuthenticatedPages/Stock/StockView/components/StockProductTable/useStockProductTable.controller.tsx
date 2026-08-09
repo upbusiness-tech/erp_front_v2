@@ -5,7 +5,7 @@ import { ProductService } from "@/services/product.service";
 import {
   calculeSalePriceRange,
   calculeStockTotalByProductEspecification,
-} from "@/uperp/common/productFormulas";
+} from "@/uperp/common/formulas/productFormulas";
 import { Button, Space, Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
 import { TableProps } from "antd/lib/table";

@@ -1,5 +1,5 @@
 import { InternCustomerSpecialPriceModel } from "@/model/internCustomerPrice.model";
-import { formatPrice } from "@/uperp/common/productFormulas";
+import { formatPrice } from "@/uperp/common/formulas/productFormulas";
 import { CartSaleItem } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
 import { Button, Divider, Modal, Row, Space, Tag, Typography } from "antd";
 import { Star } from "lucide-react";

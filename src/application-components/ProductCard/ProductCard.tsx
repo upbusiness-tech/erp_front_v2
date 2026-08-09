@@ -2,7 +2,7 @@ import { ProductModel } from "@/model/product.model";
 import {
   calculeSalePriceRange,
   calculeStockTotalByProductEspecification,
-} from "@/uperp/common/productFormulas";
+} from "@/uperp/common/formulas/productFormulas";
 import { Card, Image, Tag, Typography } from "antd";
 
 const { Text } = Typography;
