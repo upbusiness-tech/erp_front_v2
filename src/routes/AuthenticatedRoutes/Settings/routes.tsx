@@ -1,5 +1,5 @@
 import { BasicRoute } from "@/routes/-types";
-import { Configuracoes } from "@/uperp/pages/Configuracoes";
+import { Settings } from "@/uperp/pages/Settings/Settings";
 
 export enum SettingsPaths {
   PAGE = "/configuracoes",
@@ -8,6 +8,6 @@ export enum SettingsPaths {
 export const settingsBaseRoutes: BasicRoute[] = [
   {
     path: SettingsPaths.PAGE,
-    element: <Configuracoes />,
+    element: <Settings />,
   },
 ];

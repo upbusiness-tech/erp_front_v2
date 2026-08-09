@@ -85,19 +85,22 @@ export function useStockProductTableController() {
     {
       title: "Categoria",
       dataIndex: "productCategoryId",
-      render: (_, p: ProductModel) => (
-        <Space>
-          <div
-            style={{
-              width: 10,
-              height: 10,
-              borderRadius: "50%",
-              background: `${p.productCategory?.color || "#F26B1F"}`,
-            }}
-          />
-          <Text strong>{p.productCategory?.name || "-"}</Text>
-        </Space>
-      ),
+      render: (_, p: ProductModel) =>
+        p.productCategory ? (
+          <Space>
+            <div
+              style={{
+                width: 10,
+                height: 10,
+                borderRadius: "50%",
+                background: `${p.productCategory?.color || "#F26B1F"}`,
+              }}
+            />
+            <Text strong>{p.productCategory?.name || "-"}</Text>
+          </Space>
+        ) : (
+          <Text>—</Text>
+        ),
     },
     { title: "Un.", dataIndex: "unitOfMeasure", width: 70, render: (u: string) => u || "—" },
     { title: "Fornecedor", dataIndex: "supplierName", render: (u: string) => u || "—" },

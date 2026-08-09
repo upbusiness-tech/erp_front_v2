@@ -15,6 +15,7 @@ export interface IProductCreateFields {
 }
 
 export interface IProductVariantField {
+  id?: number;
   code: string;
   salePrice: number;
   costPrice: number;

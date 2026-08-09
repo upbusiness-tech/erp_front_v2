@@ -25,28 +25,14 @@ export const CashFlowOpen = () => {
     }
   };
 
-  // useEffect(() => {
-  //   loadCurrentCashOpen();
-  // }, [loadCurrentCashOpen]);
-
   useEffect(() => {
     if (currentCashFlow) navigate(CashierPaths.BASE);
-  }, [currentCashFlow, navigate]);
+  }, [currentCashFlow]);
 
   const { employeeName } = useAuthStore();
 
   return (
     <>
-      {/* {onBack && (
-        <Button
-          type="link"
-          icon={<ArrowLeft size={14} />}
-          onClick={onBack}
-          style={{ paddingLeft: 0, marginBottom: 8 }}
-        >
-          Voltar
-        </Button>
-      )} */}
       <Row justify="center">
         <Col xs={24} md={14} lg={10}>
           <Card style={{ borderTop: "4px solid #DC2626" }} styles={{ body: { padding: 32 } }}>

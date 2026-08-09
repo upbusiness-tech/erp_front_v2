@@ -3,6 +3,7 @@ import { CompanyDetailModel } from "@/model/company.model";
 import { CompanyService } from "@/services/company.service";
 import { useAuthStore } from "@/stores/auth.store";
 import { useCashFlowStore } from "@/stores/cashFlow.store";
+import { useCompanySettingsStore } from "@/stores/companySettings.store";
 import { useEffect } from "react";
 
 export function useBootstrapController() {
@@ -10,6 +11,7 @@ export function useBootstrapController() {
   const { data: company } = useGetAllWithParams<CompanyDetailModel>(companyService);
   const setCurrentCompany = useAuthStore((s) => s.setCurrentCompany);
   const loadCurrentCashOpen = useCashFlowStore((s) => s.loadCurrentCashOpen);
+  const loadSettings = useCompanySettingsStore((s) => s.loadSettings);
 
   useEffect(() => {
     if (company) setCurrentCompany(company);
@@ -18,4 +20,8 @@ export function useBootstrapController() {
   useEffect(() => {
     loadCurrentCashOpen();
   }, [loadCurrentCashOpen]);
+
+  useEffect(() => {
+    loadSettings();
+  }, [loadSettings]);
 }

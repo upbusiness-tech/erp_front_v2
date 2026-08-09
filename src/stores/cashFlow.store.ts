@@ -37,7 +37,8 @@ export const useCashFlowStore = create<CashFlowState>((set) => ({
   },
   handleOpenCashFlow: async (data: { initialBalance: number }) => {
     try {
-      await cashFlowService.openCashFlow(data);
+      const cashOpen = await cashFlowService.openCashFlow(data);
+      set({ currentCashFlow: cashOpen.data });
       return true;
     } catch (error) {
       return false;

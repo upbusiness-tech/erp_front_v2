@@ -44,8 +44,9 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
 
   const [file, setfile] = useState<File | undefined>(undefined);
 
-  const submitProduct = async (values: IProductCreateFields) => {
+  const submitProduct = async () => {
     try {
+      const values = form.getFieldsValue(true);
       if (file) {
         const url = await uploadToCloudinary(file);
         form.setFieldValue("productPicture", url);
@@ -54,9 +55,15 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
       if (isEdit && id) {
         const variants: IProductVariantField[] = values.variants.map((p) => {
           return {
-            ...p,
+            id: p.id,
             costPrice: Number(p.costPrice),
             salePrice: Number(p.salePrice),
+            code: p.code,
+            isStockControlled: p.isStockControlled,
+            stockQuantity: p.stockQuantity,
+            size: p.size,
+            color: p.color,
+            brand: p.brand,
           };
         });
         values.variants = variants;

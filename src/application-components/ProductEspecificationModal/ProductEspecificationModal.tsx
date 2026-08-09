@@ -1,6 +1,8 @@
 import { InternCustomerModel } from "@/model/internCustomer.model";
 import { ProductModel } from "@/model/product.model";
+import { useCompanySettingsStore } from "@/stores/companySettings.store";
 import { calculeSalePriceRange, formatPrice } from "@/uperp/common/formulas/productFormulas";
+import { SettingsRef } from "@/uperp/common/settings/consts/settings.ref";
 import { ICreateSaleForm } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
 import {
   Col,
@@ -57,6 +59,8 @@ export const ProductEspecificationModal = ({
     onClose,
     selectedCustomer,
   });
+
+  const { hasSettingActive } = useCompanySettingsStore();
 
   return (
     <Modal
@@ -160,14 +164,16 @@ export const ProductEspecificationModal = ({
                 />
               </Form.Item>
             ) : null}
-            <Input.TextArea
-              rows={2}
-              value={note ?? ""}
-              placeholder="Ex: Embalagem para presente"
-              maxLength={140}
-              showCount
-              onChange={(e) => setNote(e.target.value)}
-            />
+            {hasSettingActive(SettingsRef.Product.NoteOnProduct) && (
+              <Input.TextArea
+                rows={2}
+                value={note ?? ""}
+                placeholder="Ex: Embalagem para presente"
+                maxLength={140}
+                showCount
+                onChange={(e) => setNote(e.target.value)}
+              />
+            )}
           </Form>
         </>
       )}

@@ -8,6 +8,7 @@ import { cashierBaseRoutes } from "./Cashier/routes";
 import { employeesBaseRoutes } from "./Employees/routes";
 import { settingsBaseRoutes } from "./Settings/routes";
 import { plansBaseRoutes } from "./Plans/routes";
+import { maintenanceBaseRoutes } from "./Maintenance/routes";
 import { SideBar } from "@/application-components/SideBar/SideBar";
 import { AccessDenied } from "@/uperp/pages/AccessDenied/AccessDenied";
 import { PermissionGuard } from "@/application-components/PermissionGuard/PermissionGuard";
@@ -23,6 +24,7 @@ const allRoutes = [
   ...employeesBaseRoutes,
   ...settingsBaseRoutes,
   ...plansBaseRoutes,
+  ...maintenanceBaseRoutes,
 ];
 
 export const AuthenticatedRoutes = () => {
