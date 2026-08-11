@@ -36,6 +36,7 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
     handleGoBack,
     setfile,
     handleDeleteProduct,
+    loading,
   } = useStockProductController({ isEdit });
 
   const [previewUrl, setPreviewUrl] = useState<string | undefined>();
@@ -285,7 +286,7 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
 
         <Space style={{ marginTop: 20 }}>
           <Button onClick={handleGoBack}>Cancelar</Button>
-          <Button type="primary" htmlType="submit">
+          <Button type="primary" htmlType="submit" loading={loading}>
             {isEdit ? "Atualizar produto" : "Cadastrar produto"}
           </Button>
         </Space>
