@@ -43,9 +43,11 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
   };
 
   const [file, setfile] = useState<File | undefined>(undefined);
+  const [loading, setloading] = useState(false);
 
   const submitProduct = async () => {
     try {
+      setloading(true);
       const values = form.getFieldsValue(true);
       if (file) {
         const url = await uploadToCloudinary(file);
@@ -76,6 +78,8 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
       navigate(-1);
     } catch (error) {
       message.error(`Erro ao ${isEdit ? "atualizar" : "cadastrar"} produto.`);
+    } finally {
+      setloading(false);
     }
   };
 
@@ -113,5 +117,6 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
     handleDeleteProduct,
     isEdit: !!isEdit,
     id,
+    loading,
   };
 }
