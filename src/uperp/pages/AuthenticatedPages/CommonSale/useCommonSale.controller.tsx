@@ -1,30 +1,37 @@
 import { useGenericTableFetch } from "@/application-components/GenericTable/useGenericTableFetch";
+import { SearchBarOption } from "@/application-components/SearchBar/SearchBar";
 import { SaleType } from "@/enums/sale.enum";
+import { useCacheManager } from "@/hooks/useCacheManager";
+import { useGetAllWithParams } from "@/hooks/useGetAllWithParams";
 import { ProductModel } from "@/model/product.model";
+import { ProductCategoryModel } from "@/model/productCategory.model";
 import { SaleItemModel, SaleModel, SaleReceiptModel } from "@/model/sale.model";
+import { CashFlowTransactionService } from "@/services/cashFlowTransaction.service";
 import { ProductService } from "@/services/product.service";
+import { ProductCategoryService } from "@/services/productCategory.service";
+import { ProductDashboardService } from "@/services/productDashboard.service";
 import { SaleService } from "@/services/sale.service";
 import { useCashFlowStore } from "@/stores/cashFlow.store";
 import { useSalesStore } from "@/stores/sales.store";
+import { PaginatedResponse } from "@/types/crud.types";
+import { formatIsoDateIntoDateTimeString } from "@/uperp/common/dates";
 import {
   calculeSalePriceRange,
   calculeStockTotalByProductEspecification,
   formatPrice,
 } from "@/uperp/common/formulas/productFormulas";
-import { SALE_PAYMENT_LABEL, createSaleReceipt } from "@/uperp/common/formulas/saleReceipt";
 import { calculateTotalCartItems } from "@/uperp/common/formulas/saleFormulas";
+import { createSaleReceipt, SALE_PAYMENT_LABEL } from "@/uperp/common/formulas/saleReceipt";
 import { Button, Form, message, Space, Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
 import { Receipt } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ICreateSaleForm, IPaymentMethodField, ISaleItemField } from "./types";
-import { useCacheManager } from "@/hooks/useCacheManager";
-import { CashFlowTransactionService } from "@/services/cashFlowTransaction.service";
-import { ProductDashboardService } from "@/services/productDashboard.service";
 
 const { Text } = Typography;
 
 const productService = new ProductService();
+const productCategoryService = new ProductCategoryService();
 const saleService = new SaleService();
 const cashFlowTransaction = new CashFlowTransactionService();
 const productDashboardService = new ProductDashboardService("product-dashboard");
@@ -47,10 +54,30 @@ export function useCommonSaleController() {
   } = useSalesStore();
 
   const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
+  const handleCategoryFilterChange = (values: string | string[]) =>
+    setCategoryFilter(values as string[]);
 
-  const handleSearchChange = (value: string) => {
-    setSearch(value);
+  const handleSearchChange = (value: string | string[]) => {
+    setSearch(value as string);
   };
+
+  const { data: productCategories } =
+    useGetAllWithParams<PaginatedResponse<ProductCategoryModel>>(productCategoryService);
+
+  const productCategoriesOptions: SearchBarOption[] =
+    productCategories?.data.map((pc) => {
+      return { value: pc.id.toString(), label: pc.name };
+    }) ?? [];
+
+  const filter = useMemo(() => {
+    return [
+      ...(search ? [{ field: "code", operator: "$contL", value: search.trim() }] : []),
+      ...(categoryFilter.length > 0
+        ? [{ field: "productCategoryId", operator: "$in", value: categoryFilter }]
+        : []),
+    ];
+  }, [categoryFilter, search]);
 
   const {
     data: products,
@@ -65,9 +92,7 @@ export function useCommonSaleController() {
     service: productService,
     options: {
       sort: { field: "name", order: "ASC" },
-      filter: search.trim()
-        ? [{ field: "name", operator: "$contL", value: search.trim() }]
-        : undefined,
+      filter,
     },
   });
 
@@ -181,7 +206,7 @@ export function useCommonSaleController() {
       title: "Data",
       dataIndex: "createdAt",
       width: 130,
-      render: (v?: string) => (v ? new Date(v).toLocaleString("pt-BR") : "—"),
+      render: (v?: string) => (v ? formatIsoDateIntoDateTimeString(v) : "—"),
     },
     {
       title: "Tipo",
@@ -374,5 +399,8 @@ export function useCommonSaleController() {
     recentSalesColumns,
     handleViewRecentSale,
     resetSale,
+    categoryFilter,
+    handleCategoryFilterChange,
+    productCategoriesOptions,
   };
 }

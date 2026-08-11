@@ -1,45 +1,45 @@
-import { useMemo, useState } from "react";
 import {
+  Button,
   Card,
-  Row,
   Col,
+  DatePicker,
+  Empty,
+  Input,
+  List,
+  Progress,
+  Row,
+  Select,
+  Space,
   Statistic,
   Table,
-  Typography,
-  Progress,
   Tabs,
   Tag,
-  Space,
-  Select,
-  DatePicker,
-  Input,
-  Button,
-  Empty,
-  List,
+  Typography,
 } from "antd";
+import dayjs, { type Dayjs } from "dayjs";
 import {
-  TrendingUp,
-  DollarSign,
-  ShoppingBag,
   Award,
-  Search,
-  Download,
-  Wallet,
-  LockOpen,
-  Lock,
-  FileText,
   Calendar,
+  DollarSign,
+  Download,
+  FileText,
+  Lock,
+  LockOpen,
   Plus,
+  Search,
+  ShoppingBag,
+  TrendingUp,
+  Wallet,
 } from "lucide-react";
-import { useStore } from "../store";
+import { useMemo, useState } from "react";
+import { useStore } from "../../../../store";
 import {
   PAYMENT_LABEL,
   type CashMovementType,
   type ClosedCashSession,
   type PaymentMethod,
   type Sale,
-} from "../types";
-import dayjs, { type Dayjs } from "dayjs";
+} from "../../../../types";
 
 const { Text, Title } = Typography;
 const { RangePicker } = DatePicker;
@@ -51,7 +51,7 @@ const PAYMENT_COLORS: Record<PaymentMethod, string> = {
   dinheiro: "#7C3AED",
 };
 
-export function Financas() {
+export function FinanceBase() {
   const { sales, products, customers, cashHistory } = useStore();
 
   const today = new Date().toISOString().slice(0, 10);

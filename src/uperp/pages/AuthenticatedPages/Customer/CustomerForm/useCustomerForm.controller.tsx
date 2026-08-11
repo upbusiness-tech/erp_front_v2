@@ -51,8 +51,8 @@ export function useCustomerFormController({ isEdit }: { isEdit?: boolean }) {
     },
   });
 
-  const handleSearchChange = (value: string) => {
-    setSearch(value);
+  const handleSearchChange = (value: string | string[]) => {
+    setSearch(value as string);
     resetPage();
   };
 

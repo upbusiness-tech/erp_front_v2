@@ -2,8 +2,10 @@ import { getCookie } from "@/lib/cookie";
 import { COMPANY_TOKEN_KEY, EMPLOYEE_TOKEN_KEY } from "@/stores/auth.store";
 import axios from "axios";
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 export const api = axios.create({
-  baseURL: "http://localhost:3000",
+  baseURL: apiUrl,
   timeout: 10000,
 });
 

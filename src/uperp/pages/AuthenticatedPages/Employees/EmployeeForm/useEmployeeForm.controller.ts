@@ -27,9 +27,7 @@ export function useEmployeeFormController({ isEdit }: { isEdit?: boolean }) {
 
   const employeeType = Form.useWatch("type", form);
 
-  const permissionService = new PermissionService(
-    `avaliable-permissions?employeeType=${employeeType}`,
-  );
+  const permissionService = new PermissionService(`avaliable-permissions`);
 
   const { data: permissions } = useGetAllWithParams<AvaliablePermissions>(
     permissionService,

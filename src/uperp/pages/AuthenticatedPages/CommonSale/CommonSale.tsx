@@ -1,6 +1,6 @@
 import { CashFlowStatus } from "@/application-components/CashFlowStatus/CashFlowStatus";
-import { OrderContent } from "@/application-components/OrderContent/OrderContent";
 import { GenericTable } from "@/application-components/GenericTable/GenericTable";
+import { OrderContent } from "@/application-components/OrderContent/OrderContent";
 import { ProductCard } from "@/application-components/ProductCard/ProductCard";
 import { ProductEspecificationModal } from "@/application-components/ProductEspecificationModal/ProductEspecificationModal";
 import { RecentSalesModal } from "@/application-components/RecentSalesModal/RecentSalesModal";
@@ -65,6 +65,9 @@ export function CommonSale() {
     handleRecentSalesPageSizeChange,
     recentSalesColumns,
     handleViewRecentSale,
+    categoryFilter,
+    handleCategoryFilterChange,
+    productCategoriesOptions,
   } = useCommonSaleController();
 
   const { selectedCustomer } = useSalesStore();
@@ -92,6 +95,16 @@ export function CommonSale() {
                       value: search,
                       onChange: handleSearchChange,
                       placeholder: "Buscar por produto",
+                      size: "large",
+                    },
+                    {
+                      name: "productCategoryId",
+                      type: "select",
+                      value: categoryFilter,
+                      onChange: handleCategoryFilterChange,
+                      placeholder: "Categorias",
+                      options: productCategoriesOptions,
+                      maxWidth: 450,
                       size: "large",
                     },
                   ]}

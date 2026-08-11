@@ -14,8 +14,8 @@ const internCustomerService = new InternCustomerService();
 export function useCustomerViewController() {
   const [search, setSearch] = useState("");
 
-  const handleSearchChange = (value: string) => {
-    setSearch(value);
+  const handleSearchChange = (value: string | string[]) => {
+    setSearch(value as string);
   };
 
   const {

@@ -14,12 +14,12 @@ import { CashierPaths } from "@/routes/AuthenticatedRoutes/Cashier/routes";
 import { CompanyPaths } from "@/routes/AuthenticatedRoutes/Company/routes";
 import { CustomersPaths } from "@/routes/AuthenticatedRoutes/Customers/routes";
 import { EmployeesPaths } from "@/routes/AuthenticatedRoutes/Employees/routes";
-import { FinancialPaths } from "@/routes/AuthenticatedRoutes/Financial/routes";
 import { PlansPaths } from "@/routes/AuthenticatedRoutes/Plans/routes";
 import { SalesPaths } from "@/routes/AuthenticatedRoutes/Sales/routes";
 import { SettingsPaths } from "@/routes/AuthenticatedRoutes/Settings/routes";
 import { StockPaths } from "@/routes/AuthenticatedRoutes/Stock/routes";
 import { SideBarPermissions } from "@/uperp/common/permissions/const/keys/sidebar.permission";
+import { FinancePaths } from "@/routes/AuthenticatedRoutes/Finance/routes";
 
 export type PageKey =
   | "balcao"
@@ -64,7 +64,7 @@ export const pageKeyToPath: Record<PageKey, string> = {
   caixa: CashierPaths.BASE,
   servico: SalesPaths.SERVICE_SALE,
   estoque: StockPaths.BASE,
-  financas: FinancialPaths.DASHBOARD,
+  financas: FinancePaths.BASE,
   clientes: CustomersPaths.BASE,
   funcionarios: EmployeesPaths.LIST,
   empresa: CompanyPaths.BASE,
@@ -77,7 +77,7 @@ export const pathToPageKey: Record<string, PageKey> = {
   [CashierPaths.BASE]: "caixa",
   [SalesPaths.SERVICE_SALE]: "servico",
   [StockPaths.BASE]: "estoque",
-  [FinancialPaths.DASHBOARD]: "financas",
+  [FinancePaths.BASE]: "financas",
   [CustomersPaths.BASE]: "clientes",
   [EmployeesPaths.LIST]: "funcionarios",
   [CompanyPaths.BASE]: "empresa",
