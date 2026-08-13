@@ -1,17 +1,22 @@
 import { useGenericTableFetch } from "@/application-components/GenericTable/useGenericTableFetch";
 import { PaymentMethod } from "@/enums/payment.enum";
 import { SaleType } from "@/enums/sale.enum";
-import { SaleItemModel, SaleModel } from "@/model/sale.model";
+import { useDashboardPeriod } from "@/hooks/useDashboardPeriod";
+import { useGetAllWithParams } from "@/hooks/useGetAllWithParams";
+import { SaleItemModel, SaleModel, SaleReceiptModel } from "@/model/sale.model";
 import { SaleService } from "@/services/sale.service";
+import { StatsDashboardService } from "@/services/statsDashboard.service";
+import { SalesDashboardResponse } from "@/types/saleDashboard";
+import { formatDateFromApi } from "@/uperp/common/dates";
 import { formatPrice } from "@/uperp/common/formulas/productFormulas";
 import { calculateTotalCartItems } from "@/uperp/common/formulas/saleFormulas";
-import { SALE_PAYMENT_LABEL } from "@/uperp/common/formulas/saleReceipt";
-import { Button, Space, Tag } from "antd";
+import { createSaleReceipt, SALE_PAYMENT_LABEL } from "@/uperp/common/formulas/saleReceipt";
+import { Space, Tag } from "antd";
 import { ColumnsType } from "antd/es/table";
-import { Receipt } from "lucide-react";
 import { useMemo, useState } from "react";
 
 const saleService = new SaleService();
+const saleDashboardService = new StatsDashboardService("sales-dashboard");
 
 export const SALE_TYPE_OPTIONS = [
   { value: SaleType.NORMAL, label: "Balcão" },
@@ -25,6 +30,8 @@ export const SALE_PAYMENT_METHOD_OPTIONS = Object.values(PaymentMethod).map((m) 
 }));
 
 export function useSaleHistoryController() {
+  const { period, setPreset, setCustomRange } = useDashboardPeriod("this_month");
+
   const [search, setSearch] = useState("");
   const [searchCustomerName, setSearchCustomerName] = useState("");
   const [typeFilter, setTypeFilter] = useState<string[]>([]);
@@ -74,13 +81,30 @@ export function useSaleHistoryController() {
     },
   });
 
+  const {
+    data: saleDashboardData,
+    isLoading: loadingSaleDashboard,
+    isFetching,
+    isError,
+    error,
+  } = useGetAllWithParams<SalesDashboardResponse>(saleDashboardService, undefined, {
+    queryParams: {
+      from: period.from,
+      to: period.to,
+      ...(methodFilter.length ? { paymentType: methodFilter.join(",") } : {}),
+      ...(typeFilter.length ? { saleType: typeFilter.join(",") } : {}),
+      ...(searchCustomerName ? { customerName: searchCustomerName } : {}),
+      ...(search ? { saleCode: search } : {}),
+    },
+  });
+
   const salesColumns: ColumnsType<SaleModel> = [
     { title: "Código", dataIndex: "code", width: 110 },
     {
       title: "Data",
       dataIndex: "createdAt",
       width: 130,
-      render: (v?: string) => (v ? new Date(v).toLocaleString("pt-BR") : "—"),
+      render: (v?: string) => (v ? formatDateFromApi(v) : "—"),
     },
     {
       title: "Tipo",
@@ -132,25 +156,16 @@ export function useSaleHistoryController() {
         </strong>
       ),
     },
-    {
-      title: "Ações",
-      width: 90,
-      align: "center",
-      render: (_, sale: SaleModel) => (
-        <Button
-          size="small"
-          type="link"
-          icon={<Receipt size={14} />}
-          // onClick={(e) => {
-          //   e.stopPropagation();
-          //   handleViewRecentSale(sale);
-          // }}
-        >
-          Ver
-        </Button>
-      ),
-    },
   ];
+
+  const [receiptSale, setReceiptSale] = useState<SaleReceiptModel | null>(null);
+  const handleViewRecentSale = (sale: SaleModel) => {
+    setReceiptSale(createSaleReceipt(sale));
+  };
+
+  const handleCloseReceipt = () => {
+    setReceiptSale(null);
+  };
 
   return {
     sales,
@@ -169,5 +184,10 @@ export function useSaleHistoryController() {
     handleTypeFilterChange,
     methodFilter,
     handleMethodFilterChange,
+    receiptSale,
+    handleViewRecentSale,
+    handleCloseReceipt,
+    saleDashboardData,
+    loadingSaleDashboard,
   };
 }

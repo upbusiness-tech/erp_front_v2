@@ -19,13 +19,6 @@ import { CartSaleItem, DiscountInfo } from "@/uperp/pages/AuthenticatedPages/Com
 import { message } from "antd";
 import { useMemo, useState } from "react";
 
-export const PAYMENT_LABEL: Record<PaymentMethod, string> = {
-  PIX: "PIX",
-  DEBITO: "Débito",
-  CREDITO: "Crédito",
-  DINHEIRO: "Dinheiro",
-};
-
 export type OrderSteps = "items" | "payment";
 
 const internCustomerService = new InternCustomerService();

@@ -31,15 +31,17 @@ import { CustomerDetailsModal } from "../CustomerDetailsModal/CustomerDetailsMod
 import InputNumberFormatted from "../InputNumberFormated/InputNumberFormated";
 import { ItemDiscountModal } from "../ItemDiscountModal/ItemDiscountModal";
 import { OrderProductItem } from "../OrderProductItem/OrderProductItem";
-import { PAYMENT_LABEL, useOrderContentController } from "./useOrderContent.controller";
+import { useOrderContentController } from "./useOrderContent.controller";
+import { PAYMENT_LABEL } from "@/uperp/common/consts";
 
 const { Title, Text } = Typography;
 
 export type OrderContentProps = {
   handleSubmitSale: () => Promise<void>;
+  submitingSale: boolean;
 };
 
-export const OrderContent = ({ handleSubmitSale }: OrderContentProps) => {
+export const OrderContent = ({ handleSubmitSale, submitingSale }: OrderContentProps) => {
   const {
     saleItems,
     saleStep,
@@ -400,6 +402,7 @@ export const OrderContent = ({ handleSubmitSale }: OrderContentProps) => {
               icon={<CheckCircle2 size={16} />}
               disabled={paid < (total ?? 0) - 0.001}
               onClick={handleSubmitSale}
+              loading={submitingSale}
             >
               Finalizar Venda
             </Button>

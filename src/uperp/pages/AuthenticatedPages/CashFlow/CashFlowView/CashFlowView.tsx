@@ -1,10 +1,8 @@
 import { GenericTable } from "@/application-components/GenericTable/GenericTable";
 import { TransactionOrigin } from "@/enums/cashFlow.enum";
-import {
-  calculeCashFlowEstimetedAmount,
-  calculeCashFlowTransactionAmount,
-} from "@/uperp/common/formulas/cashFlowFormulas";
-import { formatIsoDateIntoDateTimeString } from "@/uperp/common/dates";
+import { formatDateFromApi } from "@/uperp/common/dates";
+import { calculeCashFlowEstimetedAmount } from "@/uperp/common/formulas/cashFlowFormulas";
+import { formatPrice } from "@/uperp/common/formulas/productFormulas";
 import { Button, Card, Col, Row, Space, Statistic, Typography } from "antd";
 import {
   ArrowDownCircle,
@@ -16,13 +14,9 @@ import {
   TrendingUp,
   Wallet,
 } from "lucide-react";
-import { useMemo } from "react";
-import { useStore } from "../../../../store";
-import type { CashMovementType } from "../../../../types";
 import { CashFlowTransactionModal } from "./CashFlowTransactionModal/CashFlowTransactionModal";
 import { CloseCashFlowModal } from "./CloseCashFlowModal/CloseCashFlowModal";
 import { useCashFlowViewController } from "./useCashFlowView.controller";
-import { formatPrice } from "@/uperp/common/formulas/productFormulas";
 
 const { Title, Text } = Typography;
 
@@ -84,7 +78,7 @@ export const CashFlowView = () => {
                   Operador: {currentCashFlow?.openedByUser.employee.name}
                 </Title>
                 <Text type="secondary" style={{ fontSize: 12 }}>
-                  Aberto em {formatIsoDateIntoDateTimeString(currentCashFlow?.createdAt || "")}
+                  Aberto em {formatDateFromApi(currentCashFlow?.createdAt || "")}
                 </Text>
               </div>
             </Space>

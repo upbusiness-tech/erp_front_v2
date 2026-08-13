@@ -9,7 +9,7 @@ import { CashierPaths } from "@/routes/AuthenticatedRoutes/Cashier/routes";
 import { CashFlowTransactionService } from "@/services/cashFlowTransaction.service";
 import { useCashFlowStore } from "@/stores/cashFlow.store";
 import { PaginatedResponse } from "@/types/crud.types";
-import { formatIsoDateIntoDateTimeString } from "@/uperp/common/dates";
+import { formatDateFromApi } from "@/uperp/common/dates";
 import { Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
 import { useEffect, useState } from "react";
@@ -90,7 +90,7 @@ export function useCashFlowViewController() {
       title: "Horário",
       dataIndex: "createdAt",
       width: 160,
-      render: (v: string) => formatIsoDateIntoDateTimeString(v),
+      render: (v: string) => formatDateFromApi(v),
     },
     {
       title: "Tipo",

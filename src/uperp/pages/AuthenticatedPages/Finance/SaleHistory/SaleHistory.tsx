@@ -1,7 +1,11 @@
 import { GenericTable } from "@/application-components/GenericTable/GenericTable";
+import { SaleReceiptModal } from "@/application-components/SaleReceiptModal/SaleReceiptModal";
 import { SearchBar } from "@/application-components/SearchBar/SearchBar";
-import { Button, Card, Col, DatePicker, Row, Statistic, Typography } from "antd";
+import { PaymentMethod } from "@/enums/payment.enum";
+import { formatPrice } from "@/uperp/common/formulas/productFormulas";
+import { Button, Card, Col, Row, Space, Statistic, Tag, Typography } from "antd";
 import { Download } from "lucide-react";
+import { PAYMENT_LABEL } from "../../../../common/consts";
 import {
   SALE_PAYMENT_METHOD_OPTIONS,
   SALE_TYPE_OPTIONS,
@@ -9,7 +13,6 @@ import {
 } from "./useSaleHistory.controller";
 
 const { Text } = Typography;
-const { RangePicker } = DatePicker;
 
 export const SaleHistory = () => {
   const {
@@ -29,21 +32,26 @@ export const SaleHistory = () => {
     handleTypeFilterChange,
     methodFilter,
     handleMethodFilterChange,
+    handleCloseReceipt,
+    handleViewRecentSale,
+    receiptSale,
+    loadingSaleDashboard,
+    saleDashboardData,
   } = useSaleHistoryController();
 
   return (
     <>
       <Row gutter={16} style={{ marginBottom: 16 }}>
         <Col xs={12} md={6}>
-          <Card>
-            <Statistic title="Vendas filtradas" value={sales.length} />
+          <Card loading={loadingSaleDashboard}>
+            <Statistic title="Vendas filtradas" value={saleDashboardData?.summary.filteredSales} />
           </Card>
         </Col>
         <Col xs={12} md={6}>
-          <Card>
+          <Card loading={loadingSaleDashboard}>
             <Statistic
               title="Total filtrado"
-              value={sales.length}
+              value={saleDashboardData?.summary.total}
               precision={2}
               prefix="R$"
               valueStyle={{ color: "#F26B1F" }}
@@ -51,17 +59,23 @@ export const SaleHistory = () => {
           </Card>
         </Col>
         <Col xs={24} md={12}>
-          <Card>
+          <Card loading={loadingSaleDashboard}>
             <Text type="secondary" style={{ fontSize: 12 }}>
               Recebido por forma de pagamento
             </Text>
-            {/* <Space wrap style={{ marginTop: 8 }}>
+            <Space wrap style={{ marginTop: 8 }}>
               {(Object.keys(PAYMENT_LABEL) as PaymentMethod[]).map((m) => (
                 <Tag key={m} color="orange" style={{ padding: "4px 8px" }}>
-                  {PAYMENT_LABEL[m]}: <strong>R$ {(byMethod[m] || 0).toFixed(2)}</strong>
+                  {PAYMENT_LABEL[m]}:{" "}
+                  <strong>
+                    R${" "}
+                    {formatPrice(
+                      saleDashboardData?.paymentBreakdown.find((p) => p.type === m)?.amount ?? 0,
+                    )}
+                  </strong>
                 </Tag>
               ))}
-            </Space> */}
+            </Space>
           </Card>
         </Col>
       </Row>
@@ -117,9 +131,11 @@ export const SaleHistory = () => {
           pageSize={salesPageSize}
           onPageChange={salesPageChange}
           onPageSizeChange={salesPageSizeChange}
-          // onRowClick={onRowClick}
+          onRowClick={handleViewRecentSale}
           locale={{ emptyText: "Nenhuma venda registrada" }}
         />
+
+        <SaleReceiptModal receiptSale={receiptSale} onClose={handleCloseReceipt} variant={"view"} />
 
         {/* <Table
           rowKey="id"

@@ -26,11 +26,11 @@ import {
   Star,
   TrendingUp,
 } from "lucide-react";
-import { ProductDashboardService } from "@/services/productDashboard.service";
+import { StatsDashboardService } from "@/services/statsDashboard.service";
 
 const { Text } = Typography;
 
-const productDashboardService = new ProductDashboardService("product-dashboard");
+const productDashboardService = new StatsDashboardService("product-dashboard");
 export const StockStatsOverview = () => {
   const { period, setPreset, setCustomRange } = useDashboardPeriod("this_month");
 

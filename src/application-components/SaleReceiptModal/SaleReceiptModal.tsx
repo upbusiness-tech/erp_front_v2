@@ -1,4 +1,5 @@
 import { SaleReceiptModel } from "@/model/sale.model";
+import { formatDateFromApi } from "@/uperp/common/dates";
 import { formatPrice } from "@/uperp/common/formulas/productFormulas";
 import { SALE_PAYMENT_LABEL } from "@/uperp/common/formulas/saleReceipt";
 import { Button, Divider, List, message, Modal, Row, Space, Tag, Typography } from "antd";
@@ -12,11 +13,6 @@ type SaleReceiptModalProps = {
   receiptSale: SaleReceiptModel | null;
   onClose: () => void;
   variant?: "success" | "view";
-};
-
-const formatDate = (value: string) => {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleString("pt-BR");
 };
 
 export const SaleReceiptModal = ({
@@ -88,7 +84,7 @@ export const SaleReceiptModal = ({
             }}
           >
             <Text type="secondary" style={{ display: "block" }}>
-              Venda {receiptSale.code} · {formatDate(receiptSale.date)}
+              Venda {receiptSale.code} · {formatDateFromApi(receiptSale.date)}
             </Text>
             <Title level={2} style={{ margin: "4px 0 0", color: "#15803D" }}>
               {formatPrice(receiptSale.total)}
