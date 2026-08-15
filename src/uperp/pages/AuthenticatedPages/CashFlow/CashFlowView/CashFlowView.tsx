@@ -41,22 +41,10 @@ export const CashFlowView = () => {
     handleCloseCashModal,
     openCloseCashFlowModal,
     setOpenCloseCashFlowModal,
-    generalTotal,
   } = useCashFlowViewController();
 
   return (
     <>
-      {/* {onBack && (
-        <Button
-          type="link"
-          icon={<ArrowLeft size={14} />}
-          onClick={onBack}
-          style={{ paddingLeft: 0, marginBottom: 8 }}
-        >
-          Voltar
-        </Button>
-      )} */}
-
       <CloseCashFlowModal
         isOpen={openCloseCashFlowModal}
         onClose={() => setOpenCloseCashFlowModal(false)}

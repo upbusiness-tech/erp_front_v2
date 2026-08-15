@@ -11,7 +11,7 @@ export interface CashFlowModel extends DefaultIdModel {
   isClosed: boolean;
   initialBalance: number;
   closingBalance: number;
-  closedAt: Date;
+  closedAt: string;
   informedValues: InformedValue[];
   openedByUserUid: string;
   openedByUser: UserModel;

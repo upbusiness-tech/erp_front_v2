@@ -1,12 +1,13 @@
 import { Tabs } from "antd";
 import { SaleHistory } from "../../../SaleHistory/SaleHistory";
+import { CashFlowHistory } from "../../../CashFlowHistory/CashFlowHistory";
 
 export const FinanceTab = () => {
   return (
     <Tabs
       defaultActiveKey="stats"
       items={[
-        { key: "stats", label: "Estatísticas", children: <></> },
+        // { key: "stats", label: "Estatísticas", children: <></> },
         {
           key: "history",
           label: "Histórico de Vendas",
@@ -15,8 +16,7 @@ export const FinanceTab = () => {
         {
           key: "cash",
           label: "Histórico de Caixas",
-          children: <></>,
-          // children: <CashHistory history={cashHistory} sales={sales} />,
+          children: <CashFlowHistory />,
         },
         // { key: "reports", label: "Relatórios", children: <Reports /> },
       ]}

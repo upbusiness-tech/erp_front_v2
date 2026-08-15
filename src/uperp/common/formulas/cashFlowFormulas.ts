@@ -1,3 +1,4 @@
+import { CashFlowModel } from "@/model/cashFlow.model";
 import {
   CashFlowTransactionModel,
   CashFlowTransactionStatsModel,
@@ -19,4 +20,18 @@ export const calculeCashFlowEstimetedAmount = (
   initialBalance: number,
 ) => {
   return initialBalance + salesAmount + replamentAmount - sangriaAmount;
+};
+
+export const calculateCashFlowDiff = (
+  cashFlow: CashFlowModel | undefined,
+  expectedAmount: number,
+) => {
+  if (!cashFlow) return expectedAmount;
+  let total = cashFlow.informedValues.reduce((acc, val) => {
+    return acc + val.value;
+  }, 0);
+
+  total += cashFlow.closingBalance;
+
+  return expectedAmount - total;
 };
