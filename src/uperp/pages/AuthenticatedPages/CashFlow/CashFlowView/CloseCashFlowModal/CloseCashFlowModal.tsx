@@ -24,6 +24,7 @@ type CloseCashFlowModalProps = {
 };
 
 const cashFlowService = new CashFlowService("open");
+const cashFlowServiceInvalidateQuery = new CashFlowService();
 export const CloseCashFlowModal = ({ isOpen, onClose }: CloseCashFlowModalProps) => {
   const [form] = Form.useForm<ICloseCashFlowForm>();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,7 +54,7 @@ export const CloseCashFlowModal = ({ isOpen, onClose }: CloseCashFlowModalProps)
       const values = await form.validateFields();
       const result = await handleCloseCashFlow(values);
       if (result) {
-        invalidateQuery(cashFlowService);
+        invalidateQuery(cashFlowServiceInvalidateQuery);
         navigate(CashierPaths.OPEN);
         onClose();
         form.resetFields();

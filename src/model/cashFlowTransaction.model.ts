@@ -1,6 +1,6 @@
 import { TransactionOrigin, TransactionType } from "@/enums/cashFlow.enum";
-import { PaymentMethod } from "@/uperp/types";
 import { DefaultIdModel } from "./base.model";
+import { PaymentMethod } from "@/enums/payment.enum";
 
 export interface CashFlowTransactionModel extends DefaultIdModel {
   amount: number;

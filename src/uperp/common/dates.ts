@@ -1,15 +1,15 @@
-export const formatIsoDateIntoDateTimeString = (isoDate: string): string => {
-  if (isoDate === "") return "";
-  const date = new Date(isoDate);
-  if (Number.isNaN(date.getTime())) return isoDate;
+const AMBIENT = import.meta.env.VITE_ENV_AMBIENT;
 
-  const adjusted = new Date(date.getTime() - 3 * 60 * 60 * 1000);
+export const formatDateFromApi = (value: string) => {
+  if (AMBIENT === "development") {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
 
-  const day = String(adjusted.getDate()).padStart(2, "0");
-  const month = String(adjusted.getMonth() + 1).padStart(2, "0");
-  const year = adjusted.getFullYear();
-  const hour = String(adjusted.getHours()).padStart(2, "0");
-  const minute = String(adjusted.getMinutes()).padStart(2, "0");
+    date.setHours(date.getHours() - 3);
 
-  return `${day}/${month}/${year} ${hour}:${minute}`;
+    return date.toLocaleString("pt-BR");
+  } else {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? value : date.toLocaleString("pt-BR");
+  }
 };

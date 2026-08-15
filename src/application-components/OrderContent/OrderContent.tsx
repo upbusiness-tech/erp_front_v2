@@ -31,15 +31,17 @@ import { CustomerDetailsModal } from "../CustomerDetailsModal/CustomerDetailsMod
 import InputNumberFormatted from "../InputNumberFormated/InputNumberFormated";
 import { ItemDiscountModal } from "../ItemDiscountModal/ItemDiscountModal";
 import { OrderProductItem } from "../OrderProductItem/OrderProductItem";
-import { PAYMENT_LABEL, useOrderContentController } from "./useOrderContent.controller";
+import { useOrderContentController } from "./useOrderContent.controller";
+import { PAYMENT_LABEL } from "@/uperp/common/consts";
 
 const { Title, Text } = Typography;
 
 export type OrderContentProps = {
   handleSubmitSale: () => Promise<void>;
+  submitingSale: boolean;
 };
 
-export const OrderContent = ({ handleSubmitSale }: OrderContentProps) => {
+export const OrderContent = ({ handleSubmitSale, submitingSale }: OrderContentProps) => {
   const {
     saleItems,
     saleStep,
@@ -292,9 +294,20 @@ export const OrderContent = ({ handleSubmitSale }: OrderContentProps) => {
         <>
           <div style={{ background: "#FFF7ED", padding: 12, borderRadius: 8, marginBottom: 12 }}>
             <Row justify="space-between">
+              <Text>Subtotal</Text>
+              <Text>{formatPrice(grossSubtotal)}</Text>
+            </Row>
+            <Row justify="space-between">
+              <Text>Desconto da venda</Text>
+              <Text type={saleDiscountValue > 0 ? "secondary" : undefined}>
+                {saleDiscountValue > 0 ? `-${formatPrice(saleDiscountValue)}` : "R$ 0,00"}
+              </Text>{" "}
+            </Row>
+            <Row justify="space-between">
               <Text>Total da venda</Text>
               <Text strong>{formatPrice(total)}</Text>
             </Row>
+
             <Row justify="space-between">
               <Text type="secondary">Pago</Text>
               <Text type="secondary">{formatPrice(paid)}</Text>
@@ -400,6 +413,7 @@ export const OrderContent = ({ handleSubmitSale }: OrderContentProps) => {
               icon={<CheckCircle2 size={16} />}
               disabled={paid < (total ?? 0) - 0.001}
               onClick={handleSubmitSale}
+              loading={submitingSale}
             >
               Finalizar Venda
             </Button>

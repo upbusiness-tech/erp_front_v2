@@ -9,12 +9,12 @@ import { SaleItemModel, SaleModel, SaleReceiptModel } from "@/model/sale.model";
 import { CashFlowTransactionService } from "@/services/cashFlowTransaction.service";
 import { ProductService } from "@/services/product.service";
 import { ProductCategoryService } from "@/services/productCategory.service";
-import { ProductDashboardService } from "@/services/productDashboard.service";
 import { SaleService } from "@/services/sale.service";
+import { StatsDashboardService } from "@/services/statsDashboard.service";
 import { useCashFlowStore } from "@/stores/cashFlow.store";
 import { useSalesStore } from "@/stores/sales.store";
 import { PaginatedResponse } from "@/types/crud.types";
-import { formatIsoDateIntoDateTimeString } from "@/uperp/common/dates";
+import { formatDateFromApi } from "@/uperp/common/dates";
 import {
   calculeSalePriceRange,
   calculeStockTotalByProductEspecification,
@@ -34,7 +34,7 @@ const productService = new ProductService();
 const productCategoryService = new ProductCategoryService();
 const saleService = new SaleService();
 const cashFlowTransaction = new CashFlowTransactionService();
-const productDashboardService = new ProductDashboardService("product-dashboard");
+const productDashboardService = new StatsDashboardService("product-dashboard");
 
 export function useCommonSaleController() {
   const { currentCashFlow } = useCashFlowStore();
@@ -72,7 +72,7 @@ export function useCommonSaleController() {
 
   const filter = useMemo(() => {
     return [
-      ...(search ? [{ field: "code", operator: "$contL", value: search.trim() }] : []),
+      ...(search ? [{ field: "name", operator: "$contL", value: search.trim() }] : []),
       ...(categoryFilter.length > 0
         ? [{ field: "productCategoryId", operator: "$in", value: categoryFilter }]
         : []),
@@ -206,7 +206,7 @@ export function useCommonSaleController() {
       title: "Data",
       dataIndex: "createdAt",
       width: 130,
-      render: (v?: string) => (v ? formatIsoDateIntoDateTimeString(v) : "—"),
+      render: (v?: string) => (v ? formatDateFromApi(v) : "—"),
     },
     {
       title: "Tipo",

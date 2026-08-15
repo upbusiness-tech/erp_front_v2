@@ -1,4 +1,5 @@
 import { Table } from "antd";
+import { SizeType } from "antd/es/config-provider/SizeContext";
 import type { ColumnsType, TablePaginationConfig, TableProps } from "antd/es/table";
 import { TableRowSelection } from "antd/es/table/interface";
 
@@ -16,6 +17,8 @@ type GenericTableProps<T> = {
   rowSelection?: TableRowSelection<T> | undefined;
   rowKey?: string;
   locale?: TableProps<T>["locale"];
+  size?: SizeType;
+  rowClassName?: any | undefined;
 };
 
 export const GenericTable = <T,>({
@@ -31,7 +34,9 @@ export const GenericTable = <T,>({
   onRowClick,
   rowSelection,
   rowKey = "id",
+  size = "large",
   locale,
+  rowClassName,
 }: GenericTableProps<T>) => {
   const handleTableChange = (pagination: TablePaginationConfig) => {
     if (pagination.current && pagination.current !== page) {
@@ -45,6 +50,8 @@ export const GenericTable = <T,>({
   return (
     <Table<T>
       dataSource={[...data]}
+      size={size}
+      rowClassName={rowClassName}
       pagination={{
         current: page,
         pageSize,

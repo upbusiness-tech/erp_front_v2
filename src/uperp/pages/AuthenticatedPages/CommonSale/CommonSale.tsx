@@ -68,6 +68,7 @@ export function CommonSale() {
     categoryFilter,
     handleCategoryFilterChange,
     productCategoriesOptions,
+    submiting,
   } = useCommonSaleController();
 
   const { selectedCustomer } = useSalesStore();
@@ -183,7 +184,7 @@ export function CommonSale() {
               style={{ flex: 1, display: "flex", flexDirection: "column" }}
               styles={{ body: { flex: 1, overflowY: "auto" } }}
             >
-              <OrderContent handleSubmitSale={handleSubmitSale} />
+              <OrderContent submitingSale={submiting} handleSubmitSale={handleSubmitSale} />
             </Card>
           </Col>
         )}
@@ -233,7 +234,7 @@ export function CommonSale() {
         onClose={() => setCartOpen(false)}
         width={Math.min(420, typeof window !== "undefined" ? window.innerWidth - 24 : 360)}
       >
-        <OrderContent handleSubmitSale={handleSubmitSale} />
+        <OrderContent submitingSale={submiting} handleSubmitSale={handleSubmitSale} />
       </Drawer>
 
       {/* modal de vendas recentes */}
