@@ -1,5 +1,7 @@
 import InputNumberFormatted from "@/application-components/InputNumberFormated/InputNumberFormated";
+import { useCacheManager } from "@/hooks/useCacheManager";
 import { CashierPaths } from "@/routes/AuthenticatedRoutes/Cashier/routes";
+import { CashFlowService } from "@/services/cashFlow.service";
 import { useAuthStore } from "@/stores/auth.store";
 import { useCashFlowStore } from "@/stores/cashFlow.store";
 import { Button, Card, Col, Form, Input, message, Row, Space, Typography } from "antd";
@@ -9,15 +11,18 @@ import { useNavigate } from "react-router-dom";
 
 const { Title, Text } = Typography;
 
+const cashFlowService = new CashFlowService();
 export const CashFlowOpen = () => {
   const [openForm] = Form.useForm<{ initialBalance: number }>();
 
   const { currentCashFlow, handleOpenCashFlow } = useCashFlowStore();
+  const { invalidateQuery } = useCacheManager();
   const navigate = useNavigate();
 
   const handleOpen = async () => {
     const values = openForm.getFieldsValue();
     const result = await handleOpenCashFlow(values);
+    invalidateQuery(cashFlowService);
     if (result) {
       navigate(CashierPaths.BASE);
     } else {

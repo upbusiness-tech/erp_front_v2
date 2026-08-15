@@ -41,6 +41,10 @@ export function useCashFlowHistoryController() {
           field: "openedByUser.employee",
         },
       ],
+      sort: {
+        field: "createdAt",
+        order: "DESC",
+      },
     },
   });
 
@@ -76,7 +80,7 @@ export function useCashFlowHistoryController() {
   const generalTotal = selectedCashFlowStats?.data?.find((st) => st.origin === "Total Geral");
 
   const tableColumns: ColumnsType<CashFlowModel> = [
-    { title: "ID", dataIndex: "id", width: 90 },
+    { title: "ID", dataIndex: "code", width: 90 },
     {
       title: "Abertura",
       dataIndex: "createdAt",
@@ -88,13 +92,6 @@ export function useCashFlowHistoryController() {
       render: (v: string) => formatDateFromApi(v),
     },
     { title: "Operador", render: (_, v: CashFlowModel) => v.openedByUser.employee.name },
-    // {
-    //   title: "Saldo",
-    //   dataIndex: ["totals", "saldo"],
-    //   width: 120,
-    //   align: "right",
-    //   render: (v: number) => <strong style={{ color: "#F26B1F" }}>R$ {v.toFixed(2)}</strong>,
-    // },
   ];
 
   return {

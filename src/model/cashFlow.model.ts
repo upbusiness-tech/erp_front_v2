@@ -8,6 +8,7 @@ export type InformedValue = {
 };
 
 export interface CashFlowModel extends DefaultIdModel {
+  code: string;
   isClosed: boolean;
   initialBalance: number;
   closingBalance: number;

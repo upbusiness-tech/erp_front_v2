@@ -115,7 +115,7 @@ export const CashFlowHistory = () => {
               title={
                 <Space>
                   <Wallet size={16} color="#F26B1F" />
-                  Detalhes — {cashFlowselected.id}
+                  Detalhes — {cashFlowselected.code}
                 </Space>
               }
             >

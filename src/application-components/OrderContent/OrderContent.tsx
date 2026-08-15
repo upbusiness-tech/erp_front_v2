@@ -294,9 +294,20 @@ export const OrderContent = ({ handleSubmitSale, submitingSale }: OrderContentPr
         <>
           <div style={{ background: "#FFF7ED", padding: 12, borderRadius: 8, marginBottom: 12 }}>
             <Row justify="space-between">
+              <Text>Subtotal</Text>
+              <Text>{formatPrice(grossSubtotal)}</Text>
+            </Row>
+            <Row justify="space-between">
+              <Text>Desconto da venda</Text>
+              <Text type={saleDiscountValue > 0 ? "secondary" : undefined}>
+                {saleDiscountValue > 0 ? `-${formatPrice(saleDiscountValue)}` : "R$ 0,00"}
+              </Text>{" "}
+            </Row>
+            <Row justify="space-between">
               <Text>Total da venda</Text>
               <Text strong>{formatPrice(total)}</Text>
             </Row>
+
             <Row justify="space-between">
               <Text type="secondary">Pago</Text>
               <Text type="secondary">{formatPrice(paid)}</Text>
