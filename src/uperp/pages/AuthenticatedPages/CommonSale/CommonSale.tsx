@@ -114,7 +114,8 @@ export function CommonSale() {
               <Col>
                 <Segmented
                   size="medium"
-                  value={productsView}
+                  default
+                  value={Number(productsView)}
                   onChange={(v) => setProductsView(v)}
                   options={[
                     { value: EProductView.CARDS, icon: <AppstoreOutlined /> },

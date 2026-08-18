@@ -361,7 +361,7 @@ export function useCommonSaleController() {
   return {
     search,
     handleSearchChange,
-    productsView,
+    productsView: Number(productsView),
     setProductsView,
     products,
     total,
