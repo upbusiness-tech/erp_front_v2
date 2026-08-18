@@ -2,6 +2,8 @@ import { create } from "zustand";
 import { getCookie, setCookie, removeCookie } from "@/lib/cookie";
 import type { EmployeeLoginResponse } from "@/services/auth.service";
 import { CompanyDetailModel } from "@/model/company.model";
+import { signOut } from "firebase/auth";
+import { auth } from "@/config/firebase.config";
 
 export const COMPANY_TOKEN_KEY = "company-token";
 const COMPANY_NAME_KEY = "company-name";
@@ -33,9 +35,11 @@ interface AuthState {
   isEmployeeAuthenticated: boolean;
   hasCredentials: boolean;
   login: (token: string, companyName: string) => void;
+  setCompanyToken: (token: string) => void;
   setEmployee: (response: EmployeeLoginResponse) => void;
   logout: () => void;
   employeeLogout: () => void;
+  clearCompanySession: () => void;
   currentCompany: CompanyDetailModel | undefined;
   setCurrentCompany: (company: CompanyDetailModel | undefined) => void;
 }
@@ -70,6 +74,15 @@ export const useAuthStore = create<AuthState>((set) => ({
     });
   },
 
+  setCompanyToken: (companyToken) => {
+    setCookie(COMPANY_TOKEN_KEY, companyToken);
+
+    set({
+      companyToken,
+      isCompanyAuthenticated: true,
+    });
+  },
+
   setEmployee: (response) => {
     setCookie(EMPLOYEE_NAME_KEY, response.name);
     setCookie(EMPLOYEE_TOKEN_KEY, response.accessToken);
@@ -86,13 +99,14 @@ export const useAuthStore = create<AuthState>((set) => ({
     });
   },
 
-  logout: () => {
+  logout: async () => {
     removeCookie(COMPANY_TOKEN_KEY);
     removeCookie(COMPANY_NAME_KEY);
     removeCookie(EMPLOYEE_PERMISSIONS_KEY);
     removeCookie(EMPLOYEE_NAME_KEY);
     removeCookie(EMPLOYEE_TOKEN_KEY);
     removeCookie(EMPLOYEE_USERNAME_KEY);
+    await signOut(auth);
 
     set({
       companyToken: null,
@@ -117,6 +131,26 @@ export const useAuthStore = create<AuthState>((set) => ({
       permissions: [],
       employeeName: null,
       isEmployeeAuthenticated: false,
+      hasCredentials: false,
+    });
+  },
+
+  clearCompanySession: () => {
+    const state = useAuthStore.getState();
+
+    if (!state.companyToken && !state.isCompanyAuthenticated) {
+      return;
+    }
+
+    removeCookie(COMPANY_TOKEN_KEY);
+    removeCookie(COMPANY_NAME_KEY);
+
+    state.employeeLogout();
+
+    set({
+      companyToken: null,
+      companyName: null,
+      isCompanyAuthenticated: false,
       hasCredentials: false,
     });
   },

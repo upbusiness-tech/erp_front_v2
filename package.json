@@ -55,6 +55,7 @@
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.21",
     "embla-carousel-react": "^8.6.0",
+    "firebase": "^12.17.1",
     "input-otp": "^1.4.2",
     "lucide-react": "^1.21.0",
     "react": "^19.2.0",

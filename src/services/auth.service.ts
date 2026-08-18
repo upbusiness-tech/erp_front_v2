@@ -1,5 +1,7 @@
 import { api } from "@/config/axios.config";
+import { auth } from "@/config/firebase.config";
 import { useAuthStore } from "@/stores/auth.store";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { BaseService } from "./common/base.service";
 
 export interface LoginCompanyRB {
@@ -36,12 +38,10 @@ export class AuthService extends BaseService {
   }
 
   async loginCompany(requestBody: LoginCompanyRB) {
-    const response = await api.post<LoginResponse>(`${this.BASE_PATH}/login/company`, requestBody);
+    const result = await signInWithEmailAndPassword(auth, requestBody.email, requestBody.password);
+    const token = await result.user.getIdToken();
 
-    const { accessToken, name } = response.data;
-    useAuthStore.getState().login(accessToken, name);
-
-    return response;
+    useAuthStore.getState().login(token, "template company");
   }
 
   async loginEmployee(requestBody: LoginEmployeeRB) {
