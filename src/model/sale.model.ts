@@ -42,6 +42,7 @@ export interface SaleModel extends DefaultIdModel {
   soldByUser?: SaleUserModel | null;
   cashFlowId: number;
   companyUid: string;
+  canceledByUserUid: string;
   items: SaleItemModel[];
   payments: SalePaymentModel[];
   services?: unknown[];

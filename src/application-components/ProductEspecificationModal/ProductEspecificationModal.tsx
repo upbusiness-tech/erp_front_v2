@@ -8,6 +8,7 @@ import {
   Col,
   Form,
   FormInstance,
+  Image,
   Input,
   InputNumber,
   Modal,
@@ -76,22 +77,35 @@ export const ProductEspecificationModal = ({
         <>
           <Row gutter={12} style={{ marginBottom: 16 }}>
             <Col>
-              <div
-                style={{
-                  width: 64,
-                  height: 64,
-                  borderRadius: 8,
-                  background: "linear-gradient(135deg, #fff3e8, #ffe0c2)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontWeight: 700,
-                  color: "#F26B1F",
-                  fontSize: 24,
-                }}
-              >
-                {product?.name.charAt(0)}
-              </div>
+              {product.productPicture ? (
+                <Image
+                  style={{
+                    height: 64,
+                    borderRadius: 8,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                  src={product.productPicture}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: 64,
+                    height: 64,
+                    borderRadius: 8,
+                    background: "linear-gradient(135deg, #fff3e8, #ffe0c2)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: 700,
+                    color: "#F26B1F",
+                    fontSize: 24,
+                  }}
+                >
+                  {product?.name.charAt(0)}
+                </div>
+              )}
             </Col>
             <Col flex="auto">
               <Text strong style={{ display: "block" }}>
@@ -106,7 +120,7 @@ export const ProductEspecificationModal = ({
                     ? `${formatPrice(findSpecification()?.salePrice || 0)}`
                     : calculeSalePriceRange(product?.productEspecifications || [])}
                 </Text>
-                <Tag style={{ marginLeft: 8 }} color={stock > 5 ? "green" : "orange"}>
+                <Tag style={{ marginLeft: 8 }} color={(stock ?? 0 > 5) ? "green" : "orange"}>
                   {stock} em estoque
                 </Tag>
               </div>

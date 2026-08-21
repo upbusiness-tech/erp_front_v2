@@ -25,8 +25,6 @@ export function useProductEspecificationModalController({
   const [selectedSize, setSelectedSize] = useState<string | undefined>(undefined);
   const [selectedColor, setSelectedColor] = useState<string | undefined>(undefined);
 
-  const stock = calculeStockTotalByProductEspecification(product?.productEspecifications || []);
-
   const sizes = Array.from(
     new Set(product?.productEspecifications?.filter((pe) => pe.size).map((pe) => pe.size) ?? []),
   );
@@ -47,6 +45,10 @@ export function useProductEspecificationModalController({
         (colors.length === 0 || pe.color === selectedColor),
     );
   };
+
+  const stock = findSpecification()
+    ? findSpecification()?.stockQuantity
+    : calculeStockTotalByProductEspecification(product?.productEspecifications || []);
 
   const specialPriceForSpec = useMemo(() => {
     const spec = product?.productEspecifications.find(

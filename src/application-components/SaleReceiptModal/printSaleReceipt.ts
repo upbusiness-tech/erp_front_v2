@@ -15,7 +15,7 @@ const formatDate = (value: string) => {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString("pt-BR");
 };
 
-const createReceiptHtml = (receipt: SaleReceiptModel) => {
+export const createReceiptHtml = (receipt: SaleReceiptModel) => {
   const items = receipt.items
     .map(
       (item) => `

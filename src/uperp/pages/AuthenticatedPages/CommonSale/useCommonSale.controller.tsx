@@ -1,30 +1,29 @@
 import { useGenericTableFetch } from "@/application-components/GenericTable/useGenericTableFetch";
+import { printSaleReceipt } from "@/application-components/SaleReceiptModal/printSaleReceipt";
 import { SearchBarOption } from "@/application-components/SearchBar/SearchBar";
 import { SaleType } from "@/enums/sale.enum";
 import { useCacheManager } from "@/hooks/useCacheManager";
 import { useGetAllWithParams } from "@/hooks/useGetAllWithParams";
 import { ProductModel } from "@/model/product.model";
 import { ProductCategoryModel } from "@/model/productCategory.model";
-import { SaleItemModel, SaleModel, SaleReceiptModel } from "@/model/sale.model";
+import { SaleModel, SaleReceiptModel } from "@/model/sale.model";
 import { CashFlowTransactionService } from "@/services/cashFlowTransaction.service";
 import { ProductService } from "@/services/product.service";
 import { ProductCategoryService } from "@/services/productCategory.service";
 import { SaleService } from "@/services/sale.service";
 import { StatsDashboardService } from "@/services/statsDashboard.service";
 import { useCashFlowStore } from "@/stores/cashFlow.store";
+import { useCompanySettingsStore } from "@/stores/companySettings.store";
 import { useSalesStore } from "@/stores/sales.store";
 import { PaginatedResponse } from "@/types/crud.types";
-import { formatDateFromApi } from "@/uperp/common/dates";
 import {
   calculeSalePriceRange,
   calculeStockTotalByProductEspecification,
-  formatPrice,
 } from "@/uperp/common/formulas/productFormulas";
-import { calculateTotalCartItems } from "@/uperp/common/formulas/saleFormulas";
-import { createSaleReceipt, SALE_PAYMENT_LABEL } from "@/uperp/common/formulas/saleReceipt";
-import { Button, Form, message, Space, Tag, Typography } from "antd";
+import { createSaleReceipt } from "@/uperp/common/formulas/saleReceipt";
+import { SettingsRef } from "@/uperp/common/settings/consts/settings.ref";
+import { Form, message, Space, Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
-import { Receipt } from "lucide-react";
 import { useMemo, useState } from "react";
 import { ICreateSaleForm, IPaymentMethodField, ISaleItemField } from "./types";
 
@@ -41,6 +40,8 @@ export function useCommonSaleController() {
   const isCashFlowOpen = Boolean(currentCashFlow && !currentCashFlow.isClosed);
 
   const [cartOpen, setCartOpen] = useState(false);
+
+  const { hasSettingActive } = useCompanySettingsStore();
 
   const {
     productsView,
@@ -200,84 +201,6 @@ export function useCommonSaleController() {
     setReceiptSale(createSaleReceipt(sale));
   };
 
-  const recentSalesColumns: ColumnsType<SaleModel> = [
-    { title: "Código", dataIndex: "code", width: 110 },
-    {
-      title: "Data",
-      dataIndex: "createdAt",
-      width: 130,
-      render: (v?: string) => (v ? formatDateFromApi(v) : "—"),
-    },
-    {
-      title: "Tipo",
-      dataIndex: "type",
-      width: 100,
-      render: (t: SaleType) => {
-        const map: Record<SaleType, { label: string; color: string }> = {
-          [SaleType.NORMAL]: { label: "Balcão", color: "orange" },
-          [SaleType.SERVICE]: { label: "Serviço", color: "blue" },
-          [SaleType.PDV]: { label: "PDV", color: "purple" },
-        };
-        const { label, color } = map[t] || { label: t, color: "default" };
-        return <Tag color={color}>{label}</Tag>;
-      },
-    },
-    {
-      title: "Cliente",
-      render: (_, sale: SaleModel) => sale.internCustomer?.name || "—",
-    },
-    {
-      title: "Itens",
-      dataIndex: "items",
-      width: 70,
-      align: "center",
-      render: (items: SaleItemModel[]) => items?.length ?? 0,
-    },
-    {
-      title: "Pagamentos",
-      render: (_, sale: SaleModel) =>
-        sale.payments?.length ? (
-          <Space size={4} wrap>
-            {sale.payments.map((p) => (
-              <Tag key={p.id} style={{ margin: 0 }}>
-                {SALE_PAYMENT_LABEL[p.type] || p.type}
-              </Tag>
-            ))}
-          </Space>
-        ) : (
-          "—"
-        ),
-    },
-    {
-      title: "Total",
-      width: 110,
-      align: "right",
-      render: (_, sale: SaleModel) => (
-        <strong style={{ color: "#F26B1F" }}>
-          {formatPrice(calculateTotalCartItems(sale.items, sale.discount))}
-        </strong>
-      ),
-    },
-    {
-      title: "Ações",
-      width: 90,
-      align: "center",
-      render: (_, sale: SaleModel) => (
-        <Button
-          size="small"
-          type="link"
-          icon={<Receipt size={14} />}
-          onClick={(e) => {
-            e.stopPropagation();
-            handleViewRecentSale(sale);
-          }}
-        >
-          Ver
-        </Button>
-      ),
-    },
-  ];
-
   const [openProductModal, setOpenProductModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<ProductModel | undefined>(undefined);
   const handleOpenProductModal = (p: ProductModel) => {
@@ -343,6 +266,10 @@ export function useCommonSaleController() {
       setReceiptSale(createSaleReceipt(sale));
       resetSale();
       setCartOpen(false);
+
+      if (hasSettingActive(SettingsRef.Sale.GenerateSaleProofDocument)) {
+        await printSaleReceipt(createSaleReceipt(sale));
+      }
       message.success("Venda realizada com sucesso!");
     } catch (error) {
       message.error("Ocorreu um erro ao realizar a venda");
@@ -396,7 +323,6 @@ export function useCommonSaleController() {
     recentSalesPageSize,
     handleRecentSalesPageChange,
     handleRecentSalesPageSizeChange,
-    recentSalesColumns,
     handleViewRecentSale,
     resetSale,
     categoryFilter,
