@@ -11,6 +11,7 @@ import {
   pathToPageKey,
   PageKey,
 } from "./SideBar.consts";
+import { LoginPaths } from "@/routes/UnauthenticatedRoutes/Login/routes";
 
 const { useBreakpoint } = Grid;
 
@@ -19,7 +20,7 @@ export function useSideBarController() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { token } = antdTheme.useToken();
   const { settings } = useStore();
-  const { employeeName, logout, permissions } = useAuthStore();
+  const { employeeName, logout, permissions, employeeLogout } = useAuthStore();
   const screens = useBreakpoint();
   const navigate = useNavigate();
   const location = useLocation();
@@ -57,6 +58,11 @@ export function useSideBarController() {
     [permissions],
   );
 
+  const handleChangeEmployee = () => {
+    employeeLogout();
+    navigate(LoginPaths.EMPLOYEE_LOGIN);
+  };
+
   return {
     collapsed,
     setCollapsed,
@@ -70,5 +76,6 @@ export function useSideBarController() {
     handleMenuClick,
     handleLogout,
     menuItems,
+    handleChangeEmployee,
   };
 }

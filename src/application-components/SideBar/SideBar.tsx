@@ -1,5 +1,5 @@
 import { Avatar, Button, Drawer, Dropdown, Layout, Menu, Space, Typography } from "antd";
-import { ChevronDown, LogOut, Menu as MenuIcon, Settings } from "lucide-react";
+import { ChevronDown, LogOut, Menu as MenuIcon, Settings, Users } from "lucide-react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { BrandHeader } from "./BrandHeader";
 import { titles, PageKey } from "./SideBar.consts";
@@ -22,6 +22,7 @@ export function SideBar() {
     handleMenuClick,
     handleLogout,
     menuItems,
+    handleChangeEmployee,
   } = useSideBarController();
 
   const navigate = useNavigate();
@@ -103,6 +104,12 @@ export function SideBar() {
           <Dropdown
             menu={{
               items: [
+                {
+                  key: "change_employee",
+                  label: "Trocar funcionário",
+                  icon: <Users size={14} />,
+                  onClick: handleChangeEmployee,
+                },
                 {
                   key: "settings",
                   label: "Configurações",

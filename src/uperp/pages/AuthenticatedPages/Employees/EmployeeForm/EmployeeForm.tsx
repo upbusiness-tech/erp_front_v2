@@ -1,6 +1,7 @@
 import { EmployeeType } from "@/enums/employee.enum";
 import { EmployeesPaths } from "@/routes/AuthenticatedRoutes/Employees/routes";
 import {
+  Alert,
   Button,
   Card,
   Checkbox,
@@ -22,8 +23,20 @@ import { useEmployeeFormController } from "./useEmployeeForm.controller";
 const { Text } = Typography;
 
 export const EmployeeForm = ({ isEdit }: { isEdit?: boolean }) => {
-  const { form, handleSubmit, groupedPermissions, navigate, isSubmitting } =
+  const { form, handleSubmit, groupedPermissions, navigate, isSubmitting, employeeToEdit } =
     useEmployeeFormController({ isEdit });
+
+  const allPermissionIds = Array.from(groupedPermissions.values()).flatMap((permissions) =>
+    permissions.map((p) => p.id),
+  );
+
+  const handleMarkAll = () => {
+    form.setFieldsValue({ permissions: allPermissionIds });
+  };
+
+  const handleClearAll = () => {
+    form.setFieldsValue({ permissions: [] });
+  };
 
   return (
     <Card
@@ -41,13 +54,26 @@ export const EmployeeForm = ({ isEdit }: { isEdit?: boolean }) => {
       }
       extra={
         <Space>
-          <Button type="primary" loading={isSubmitting} onClick={handleSubmit}>
+          <Button
+            disabled={employeeToEdit?.isPrimaryEmployee}
+            type="primary"
+            loading={isSubmitting}
+            onClick={handleSubmit}
+          >
             {isEdit ? "Atualizar" : "Cadastrar"} funcionário
           </Button>
         </Space>
       }
     >
+      {employeeToEdit?.isPrimaryEmployee && (
+        <Alert
+          showIcon
+          type="warning"
+          description="O funcionário primário da empresa não é elegível a sofrer atualizações."
+        />
+      )}
       <Form
+        disabled={employeeToEdit?.isPrimaryEmployee}
         form={form}
         layout="vertical"
         onFinish={handleSubmit}
@@ -124,8 +150,20 @@ export const EmployeeForm = ({ isEdit }: { isEdit?: boolean }) => {
                       Marque as ações que este funcionário poderá executar
                     </Text>
                     <Space>
-                      <Button size="small">Marcar tudo</Button>
-                      <Button size="small">Limpar</Button>
+                      <Button
+                        size="small"
+                        disabled={employeeToEdit?.isPrimaryEmployee}
+                        onClick={handleMarkAll}
+                      >
+                        Marcar tudo
+                      </Button>
+                      <Button
+                        size="small"
+                        disabled={employeeToEdit?.isPrimaryEmployee}
+                        onClick={handleClearAll}
+                      >
+                        Limpar
+                      </Button>
                     </Space>
                   </Space>
                   <Form.Item name="permissions" noStyle>
