@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import { CustomerDetailsModal } from "@/application-components/CustomerDetailsModal/CustomerDetailsModal";
 import { useCustomerViewController } from "./useCustomerView.controller";
 import { SearchBar } from "@/application-components/SearchBar/SearchBar";
+import { NoPermission } from "@/application-components/NoPermission/NoPermission";
 
 export function CustomerView() {
   const {
@@ -23,6 +24,8 @@ export function CustomerView() {
     handleGoToCreate,
     handleSearchChange,
     search,
+    canCreateInternCustomer,
+    canViewInternCustomer,
   } = useCustomerViewController();
 
   return (
@@ -30,7 +33,12 @@ export function CustomerView() {
       <Card
         title="Clientes"
         extra={
-          <Button type="primary" icon={<Plus size={14} />} onClick={handleGoToCreate}>
+          <Button
+            disabled={!canCreateInternCustomer}
+            type="primary"
+            icon={<Plus size={14} />}
+            onClick={handleGoToCreate}
+          >
             Novo Cliente
           </Button>
         }
@@ -45,16 +53,20 @@ export function CustomerView() {
             },
           ]}
         />
-        <GenericTable<InternCustomerModel>
-          data={customers || []}
-          columns={tableColumns}
-          isLoading={isLoading}
-          page={page}
-          pageSize={pageSize}
-          total={total}
-          onPageChange={handlePageChange}
-          onPageSizeChange={handlePageSizeChange}
-        />
+        {canViewInternCustomer ? (
+          <GenericTable<InternCustomerModel>
+            data={customers || []}
+            columns={tableColumns}
+            isLoading={isLoading}
+            page={page}
+            pageSize={pageSize}
+            total={total}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+          />
+        ) : (
+          <NoPermission />
+        )}
       </Card>
 
       <CustomerDetailsModal

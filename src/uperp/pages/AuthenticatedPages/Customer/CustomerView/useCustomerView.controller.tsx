@@ -1,17 +1,22 @@
 import { useGenericTableFetch } from "@/application-components/GenericTable/useGenericTableFetch";
+import { useHasPermission } from "@/hooks/useHasPermission";
 import { InternCustomerModel } from "@/model/internCustomer.model";
 import { CustomersPaths } from "@/routes/AuthenticatedRoutes/Customers/routes";
 import { InternCustomerService } from "@/services/internCustomer.service";
+import { PermissionsRef } from "@/uperp/common/permissions/const/permissions.ref";
 import { Avatar, Button, Space, Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
 import { Eye, Pencil } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const { Text } = Typography;
-
 const internCustomerService = new InternCustomerService();
 export function useCustomerViewController() {
+  const canEditInternCustomer = useHasPermission(PermissionsRef.InternCustomer.Update.name);
+  const canDeleteInternCustomer = useHasPermission(PermissionsRef.InternCustomer.Delete.name);
+  const canCreateInternCustomer = useHasPermission(PermissionsRef.InternCustomer.Create.name);
+  const canViewInternCustomer = useHasPermission(PermissionsRef.InternCustomer.Read.name);
+
   const [search, setSearch] = useState("");
 
   const handleSearchChange = (value: string | string[]) => {
@@ -33,6 +38,7 @@ export function useCustomerViewController() {
         ? [{ field: "name", operator: "$contL", value: search.trim() }]
         : undefined,
     },
+    enabled: canViewInternCustomer,
   });
 
   const navigate = useNavigate();
@@ -74,7 +80,7 @@ export function useCustomerViewController() {
       ),
     },
     { title: "Tipo", dataIndex: "type" },
-    { title: "Telefone", dataIndex: "phoneNumber" },
+    { title: "Endereço", dataIndex: "address" },
     {
       title: "Preços especiais",
       render: (_, c: InternCustomerModel) => (
@@ -87,7 +93,9 @@ export function useCustomerViewController() {
       render: (_, c: InternCustomerModel) => (
         <Space>
           <Button size="small" icon={<Eye size={14} onClick={() => handleOpenViewModal(c)} />} />
-          <Button size="small" icon={<Pencil size={14} />} onClick={() => handleGoToEdit(c.id)} />
+          {canEditInternCustomer && (
+            <Button size="small" icon={<Pencil size={14} />} onClick={() => handleGoToEdit(c.id)} />
+          )}
         </Space>
       ),
     },
@@ -110,5 +118,9 @@ export function useCustomerViewController() {
     handleGoToCreate,
     handleSearchChange,
     search,
+    canEditInternCustomer,
+    canDeleteInternCustomer,
+    canCreateInternCustomer,
+    canViewInternCustomer,
   };
 }

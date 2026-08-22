@@ -13,6 +13,7 @@ export interface UseGenericTableFetchOptions<TItem> {
   options?: Omit<CreateQueryParams, "page" | "limit">;
   /** Quantidade inicial de itens por página (default: 8) */
   initialPageSize?: number;
+  enabled?: boolean;
 }
 
 export interface UseGenericTableFetchReturn<TItem> {
@@ -63,15 +64,20 @@ export function useGenericTableFetch<TItem>({
   service,
   options: extraOptions = {},
   initialPageSize = 8,
+  enabled = true,
 }: UseGenericTableFetchOptions<TItem>): UseGenericTableFetchReturn<TItem> {
   const { page, pageSize, handlePageChange, handlePageSizeChange, resetPage } =
     useGenericTable(initialPageSize);
 
-  const { data, isLoading, isFetching } = useGetAllWithParams<PaginatedResponse<TItem>>(service, {
-    ...extraOptions,
-    page,
-    limit: pageSize,
-  });
+  const { data, isLoading, isFetching } = useGetAllWithParams<PaginatedResponse<TItem>>(
+    service,
+    {
+      ...extraOptions,
+      page,
+      limit: pageSize,
+    },
+    { enabled },
+  );
 
   return {
     data: data?.data ?? [],
