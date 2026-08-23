@@ -1,8 +1,8 @@
 import { DefaultIdModel } from "./base.model";
-import { ProductModel } from "./product.model";
-
+import { ProductSupplierModel } from "./productSupplier.model";
 export interface ProductEspecificationModel extends DefaultIdModel {
   code: string;
+  barcode: string;
   salePrice: number;
   costPrice: number;
   isStockControlled: boolean;
@@ -10,4 +10,6 @@ export interface ProductEspecificationModel extends DefaultIdModel {
   size: string;
   color: string;
   brand: string;
+  productSupplierId?: number;
+  productSupplier?: ProductSupplierModel;
 }

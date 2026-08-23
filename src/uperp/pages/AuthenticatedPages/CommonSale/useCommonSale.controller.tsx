@@ -124,7 +124,6 @@ export function useCommonSaleController() {
   });
 
   const tableColumns: ColumnsType<ProductModel> = [
-    { title: "Id", dataIndex: "id", width: 110 },
     {
       title: "Produto",
       dataIndex: "name",
@@ -167,7 +166,6 @@ export function useCommonSaleController() {
         ),
     },
     { title: "Un.", dataIndex: "unitOfMeasure", width: 70, render: (u: string) => u || "—" },
-    { title: "Fornecedor", dataIndex: "supplierName", render: (u: string) => u || "—" },
     {
       title: "Preço",
       dataIndex: "salePrice",

@@ -20,6 +20,8 @@ import { useState } from "react";
 import { ProductUnitOfMeasure } from "./types";
 import { useStockProductController } from "./useStockProduct.controller";
 import InputNumberFormatted from "@/application-components/InputNumberFormated/InputNumberFormated";
+import { useCompanySettingsStore } from "@/stores/companySettings.store";
+import { SettingsRef } from "@/uperp/common/settings/consts/settings.ref";
 
 const { Text, Title } = Typography;
 
@@ -37,7 +39,11 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
     setfile,
     handleDeleteProduct,
     loading,
+    isLoadingSuppliers,
+    suppliers,
   } = useStockProductController({ isEdit });
+
+  const { hasSettingActive } = useCompanySettingsStore();
 
   const [previewUrl, setPreviewUrl] = useState<string | undefined>();
 
@@ -138,11 +144,6 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
               />
             </Form.Item>
           </Col>
-          <Col xs={12} md={3}>
-            <Form.Item name="supplierName" label="Fornecedor">
-              <Input placeholder="Opcional" />
-            </Form.Item>
-          </Col>
         </Row>
 
         <Title level={5} style={{ marginTop: 8 }}>
@@ -184,6 +185,24 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
                     <Col xs={12} md={3}>
                       <Form.Item name={[field.name, "code"]} label="Código">
                         <Input placeholder="Código" />
+                      </Form.Item>
+                    </Col>
+                    {hasSettingActive(SettingsRef.Product.ScanProductByCode) && (
+                      <Col xs={12} md={3}>
+                        <Form.Item name={[field.name, "barcode"]} label="Código de barras">
+                          <Input placeholder="Código de barras" />
+                        </Form.Item>
+                      </Col>
+                    )}
+                    <Col xs={12} md={3}>
+                      <Form.Item name={[field.name, "productSupplierId"]} label="Fornecedor">
+                        <Select
+                          allowClear
+                          placeholder="Selecione"
+                          fieldNames={{ value: "id", label: "name" }}
+                          options={suppliers?.data}
+                          loading={isLoadingSuppliers}
+                        />
                       </Form.Item>
                     </Col>
                     <Col xs={12} md={3}>
