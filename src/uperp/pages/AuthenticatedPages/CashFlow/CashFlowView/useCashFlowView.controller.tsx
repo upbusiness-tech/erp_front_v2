@@ -1,6 +1,7 @@
 import { useGenericTableFetch } from "@/application-components/GenericTable/useGenericTableFetch";
 import { TransactionOrigin } from "@/enums/cashFlow.enum";
 import { useGetAllWithParams } from "@/hooks/useGetAllWithParams";
+import { useHasPermission } from "@/hooks/useHasPermission";
 import {
   CashFlowTransactionModel,
   CashFlowTransactionStatsModel,
@@ -10,6 +11,7 @@ import { CashFlowTransactionService } from "@/services/cashFlowTransaction.servi
 import { useCashFlowStore } from "@/stores/cashFlow.store";
 import { PaginatedResponse } from "@/types/crud.types";
 import { formatDateFromApi } from "@/uperp/common/dates";
+import { PermissionsRef } from "@/uperp/common/permissions/const/permissions.ref";
 import { Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
 import { useEffect, useState } from "react";
@@ -20,7 +22,10 @@ const { Text } = Typography;
 const cashFlowTransaction = new CashFlowTransactionService();
 const cashFlowTransactionStatsService = new CashFlowTransactionService("stats");
 export function useCashFlowViewController() {
-  const { currentCashFlow } = useCashFlowStore();
+  const canCloseCashFlow = useHasPermission(PermissionsRef.CashFlow.Close.name);
+  const canCreateTransaction = useHasPermission(PermissionsRef.InternCustomer.Create.name);
+
+  const { currentCashFlow, loadCurrentCashOpen } = useCashFlowStore();
 
   const {
     data: transactions,
@@ -125,8 +130,18 @@ export function useCashFlowViewController() {
   ];
 
   useEffect(() => {
-    if (!currentCashFlow) navigate(CashierPaths.OPEN);
-  }, [currentCashFlow, navigate]);
+    if (currentCashFlow) return;
+
+    // Estado perdido (HMR/F5): tenta recarregar o caixa aberto antes de redirecionar.
+    // Só vai para a tela de abrir caixa se realmente não houver caixa aberto.
+    let cancelled = false;
+    loadCurrentCashOpen({ silent: true }).then((ok) => {
+      if (!cancelled && !ok) navigate(CashierPaths.OPEN);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [currentCashFlow, loadCurrentCashOpen, navigate]);
 
   return {
     currentCashFlow,
@@ -149,5 +164,7 @@ export function useCashFlowViewController() {
     openCloseCashFlowModal,
     setOpenCloseCashFlowModal,
     generalTotal,
+    canCloseCashFlow,
+    canCreateTransaction,
   };
 }

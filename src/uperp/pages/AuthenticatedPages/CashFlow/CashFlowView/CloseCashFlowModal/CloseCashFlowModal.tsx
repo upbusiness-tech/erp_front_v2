@@ -1,13 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import InputNumberFormatted from "@/application-components/InputNumberFormated/InputNumberFormated";
 import { PaymentMethod } from "@/enums/payment.enum";
-import { Form, message, Modal, Typography } from "antd";
-import { useEffect, useMemo, useState } from "react";
-import { ICloseCashFlowForm } from "./types";
-import { useCashFlowStore } from "@/stores/cashFlow.store";
-import { useNavigate } from "react-router-dom";
-import { CashierPaths } from "@/routes/AuthenticatedRoutes/Cashier/routes";
-import { CashFlowService } from "@/services/cashFlow.service";
-import { useCacheManager } from "@/hooks/useCacheManager";
+import { DownOutlined, RightOutlined } from "@ant-design/icons";
+import { Alert, Divider, Form, Modal, Tag, Typography } from "antd";
+import { useState } from "react";
+import { calculateActualCashFromSales, formatBRL, formatSigned } from "./const";
+import { CashBreakdown } from "./types";
+import { useCloseCashFlowModalController } from "./useCloseCashFlowModal.controller";
 
 const { Text } = Typography;
 
@@ -21,52 +20,23 @@ const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
 type CloseCashFlowModalProps = {
   isOpen: boolean;
   onClose: VoidFunction;
+  cashBreakdown: CashBreakdown;
 };
 
-const cashFlowService = new CashFlowService("open");
-const cashFlowServiceInvalidateQuery = new CashFlowService();
-export const CloseCashFlowModal = ({ isOpen, onClose }: CloseCashFlowModalProps) => {
-  const [form] = Form.useForm<ICloseCashFlowForm>();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+export const CloseCashFlowModal = ({ isOpen, onClose, cashBreakdown }: CloseCashFlowModalProps) => {
+  const {
+    closeCashFlowStatsToCompare,
+    handleSubmit,
+    isSubmitting,
+    form,
+    paymentMethods,
+    informedValues,
+    estimatedBalance,
+    userEstimatedBalance,
+    totalDifference,
+  } = useCloseCashFlowModalController({ isOpen, onClose });
 
-  const { invalidateQuery } = useCacheManager();
-
-  const { handleCloseCashFlow } = useCashFlowStore();
-  const navigate = useNavigate();
-
-  const paymentMethods = useMemo(() => Object.values(PaymentMethod), []);
-
-  useEffect(() => {
-    if (isOpen) {
-      form.setFieldsValue({
-        closingBalance: 0,
-        informedValues: paymentMethods.map((method) => ({
-          method,
-          value: 0,
-        })),
-      });
-    }
-  }, [isOpen, form, paymentMethods]);
-
-  const handleSubmit = async () => {
-    try {
-      setIsSubmitting(true);
-      const values = await form.validateFields();
-      const result = await handleCloseCashFlow(values);
-      if (result) {
-        invalidateQuery(cashFlowServiceInvalidateQuery);
-        navigate(CashierPaths.OPEN);
-        onClose();
-        form.resetFields();
-      } else {
-        message.error(error.message || "Erro ao encerrar o caixa.");
-      }
-    } catch (error: any) {
-      return error;
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const [isCashOpen, setIsCashOpen] = useState(false);
 
   return (
     <Modal
@@ -79,14 +49,6 @@ export const CloseCashFlowModal = ({ isOpen, onClose }: CloseCashFlowModalProps)
       confirmLoading={isSubmitting}
     >
       <Form layout="vertical" form={form}>
-        <Form.Item
-          name="closingBalance"
-          label="Valor no Caixa (R$)"
-          rules={[{ required: true, message: "Informe o valor no caixa" }]}
-        >
-          <InputNumberFormatted min={0} step={1} style={{ width: "100%" }} prefix="R$" />
-        </Form.Item>
-
         <Text strong style={{ marginBottom: 8, display: "block" }}>
           Valores Informados
         </Text>
@@ -95,6 +57,11 @@ export const CloseCashFlowModal = ({ isOpen, onClose }: CloseCashFlowModalProps)
           {(fields) =>
             fields.map(({ key, name }) => {
               const method = paymentMethods[name];
+              const systemValue = closeCashFlowStatsToCompare?.[method] ?? 0;
+              const informedValue = informedValues?.[name]?.value ?? 0;
+              const diff = systemValue - informedValue;
+              const hasDiff = diff !== 0;
+
               return (
                 <div key={key}>
                   <Form.Item name={[name, "method"]} hidden>
@@ -102,21 +69,186 @@ export const CloseCashFlowModal = ({ isOpen, onClose }: CloseCashFlowModalProps)
                   </Form.Item>
                   <Form.Item
                     label={PAYMENT_METHOD_LABELS[method]}
-                    name={[name, "value"]}
-                    rules={[
-                      {
-                        required: true,
-                        message: `Informe o valor de ${PAYMENT_METHOD_LABELS[method]}`,
-                      },
-                    ]}
+                    required
+                    style={{ marginBottom: hasDiff ? 4 : 16 }}
                   >
-                    <InputNumberFormatted min={0} step={1} style={{ width: "100%" }} prefix="R$" />
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <Form.Item
+                        name={[name, "value"]}
+                        noStyle
+                        rules={[
+                          {
+                            required: true,
+                            message: `Informe o valor de ${PAYMENT_METHOD_LABELS[method]}`,
+                          },
+                        ]}
+                      >
+                        <InputNumberFormatted
+                          min={0}
+                          step={1}
+                          style={{ width: "100%" }}
+                          prefix="R$"
+                        />
+                      </Form.Item>
+                      <Text type="secondary" style={{ whiteSpace: "nowrap" }}>
+                        Sistema: {formatBRL(systemValue)}
+                      </Text>
+                    </div>
                   </Form.Item>
+
+                  {hasDiff && (
+                    <Text
+                      type="danger"
+                      style={{ display: "block", marginTop: 8, marginBottom: 16, fontSize: 12 }}
+                    >
+                      Diferença: {formatBRL(diff)}
+                    </Text>
+                  )}
                 </div>
               );
             })
           }
         </Form.List>
+
+        <Divider style={{ margin: "12px 0" }} />
+
+        <Text strong style={{ marginBottom: 8, display: "block" }}>
+          Composição do Saldo Esperado
+        </Text>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 12 }}>
+          {paymentMethods.map((method) => {
+            if (method === PaymentMethod.CASH) {
+              return (
+                <div key={method}>
+                  <div
+                    onClick={() => setIsCashOpen((prev) => !prev)}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      cursor: "pointer",
+                      userSelect: "none",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      {isCashOpen ? (
+                        <DownOutlined style={{ fontSize: 10 }} />
+                      ) : (
+                        <RightOutlined style={{ fontSize: 10 }} />
+                      )}
+                      <Text type="secondary">{PAYMENT_METHOD_LABELS[method]}:</Text>
+                    </div>
+                    <Text>{formatBRL(closeCashFlowStatsToCompare?.[method])}</Text>
+                  </div>
+
+                  {isCashOpen && cashBreakdown && (
+                    <div
+                      style={{
+                        marginTop: 6,
+                        marginBottom: 4,
+                        marginLeft: 18,
+                        paddingLeft: 10,
+                        borderLeft: "2px solid #f0f0f0",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 4,
+                      }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <Text type="secondary" style={{ fontSize: 13 }}>
+                          Valor inicial
+                        </Text>
+                        <Text style={{ fontSize: 13 }}>
+                          {formatSigned(cashBreakdown.initialBalance)}
+                        </Text>
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <Text type="secondary" style={{ fontSize: 13 }}>
+                          Vendas
+                        </Text>
+                        <Text style={{ fontSize: 13 }}>
+                          {formatSigned(
+                            calculateActualCashFromSales(
+                              Number(cashBreakdown.sales),
+                              closeCashFlowStatsToCompare,
+                            ),
+                          )}
+                        </Text>
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <Text type="secondary" style={{ fontSize: 13 }}>
+                          Reposições
+                        </Text>
+                        <Text style={{ fontSize: 13 }}>
+                          {formatSigned(cashBreakdown.replacement)}
+                        </Text>
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <Text type="secondary" style={{ fontSize: 13 }}>
+                          Sangria
+                        </Text>
+                        <Text style={{ fontSize: 13 }}>
+                          {formatSigned(-Math.abs(cashBreakdown.sagrias))}
+                        </Text>
+                      </div>
+                      <Divider style={{ margin: "4px 0" }} />
+                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <Text strong style={{ fontSize: 13 }}>
+                          Total
+                        </Text>
+                        <Text strong style={{ fontSize: 13 }}>
+                          {formatBRL(closeCashFlowStatsToCompare?.[method])}
+                        </Text>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
+            return (
+              <div key={method} style={{ display: "flex", justifyContent: "space-between" }}>
+                <Text type="secondary">{PAYMENT_METHOD_LABELS[method]}:</Text>
+                <Text>{formatBRL(closeCashFlowStatsToCompare?.[method])}</Text>
+              </div>
+            );
+          })}
+
+          <Divider style={{ margin: "4px 0" }} />
+
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <Text strong>Saldo estimado</Text>
+              <Tag color="blue" style={{ marginInlineEnd: 0 }}>
+                Sistema
+              </Tag>
+            </div>
+            <Text strong>{formatBRL(estimatedBalance)}</Text>
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <Text strong>Saldo estimado</Text>
+              <Tag color="gold" style={{ marginInlineEnd: 0 }}>
+                Usuário
+              </Tag>
+            </div>
+            <Text strong>{formatBRL(userEstimatedBalance)}</Text>
+          </div>
+        </div>
+
+        {totalDifference !== 0 && (
+          <Alert
+            type="warning"
+            showIcon
+            message={`Há uma diferença de ${formatBRL(
+              Math.abs(totalDifference),
+            )} entre o saldo estimado pelo sistema e o valor informado.`}
+            description="Essa diferença não impede o fechamento do caixa."
+            style={{ marginBottom: 16 }}
+          />
+        )}
       </Form>
     </Modal>
   );

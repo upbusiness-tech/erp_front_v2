@@ -64,13 +64,6 @@ export function useCashFlowHistorySalesTableController({ cashFlowId }: { cashFlo
       },
     },
     {
-      title: "Itens",
-      dataIndex: "items",
-      align: "center",
-      width: 50,
-      render: (items: SaleItemModel[]) => items?.length ?? 0,
-    },
-    {
       title: "Total",
       align: "right",
       width: 50,

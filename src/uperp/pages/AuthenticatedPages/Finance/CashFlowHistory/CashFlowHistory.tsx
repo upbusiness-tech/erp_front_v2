@@ -6,8 +6,10 @@ import {
   calculeCashFlowEstimetedAmount,
 } from "@/uperp/common/formulas/cashFlowFormulas";
 import { formatPrice } from "@/uperp/common/formulas/productFormulas";
-import { Card, Col, Empty, Row, Space, Tabs, Typography } from "antd";
-import { Lock, LockOpen, Wallet } from "lucide-react";
+import { Card, Col, Empty, Row, Space, Tabs, Typography, Button } from "antd";
+import { Lock, LockOpen, Wallet, Maximize2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { CashierPaths } from "@/routes/AuthenticatedRoutes/Cashier/routes";
 import { CashFlowHistorySalesTable } from "./CashFlowHistorySalesTable/CashFlowHistorySalesTable";
 import { CashFlowHistoryTransactionTable } from "./CashFlowHistoryTransactionTable/CashFlowHistoryTransactionTable";
 import { useCashFlowHistoryController } from "./useCashFlowHistory.controller";
@@ -39,6 +41,8 @@ export const CashFlowHistory = () => {
   );
 
   const diff = calculateCashFlowDiff(cashFlowselected, expectedAmount);
+
+  const navigate = useNavigate();
 
   return (
     <>
@@ -118,6 +122,17 @@ export const CashFlowHistory = () => {
                   Detalhes — {cashFlowselected.code}
                 </Space>
               }
+              extra={
+                cashFlowselected.closedAt ? (
+                  <Button
+                    type="primary"
+                    icon={<Maximize2 size={14} />}
+                    onClick={() => navigate(`${CashierPaths.HISTORY}/${cashFlowselected.id}`)}
+                  >
+                    Ver mais detalhes
+                  </Button>
+                ) : undefined
+              }
             >
               <Space direction="vertical" size={4} style={{ width: "100%" }}>
                 <Row justify="space-between">
@@ -182,7 +197,7 @@ export const CashFlowHistory = () => {
                 <div style={{ borderTop: "1px dashed #FED7AA", margin: "8px 0" }} />
                 <Row justify="space-between">
                   <Title level={5} style={{ margin: 0 }}>
-                    Saldo esperado
+                    Saldo estimado (Sistema)
                   </Title>
                   <Title level={5} style={{ margin: 0, color: "#F26B1F" }}>
                     {formatPrice(expectedAmount)}
@@ -191,13 +206,13 @@ export const CashFlowHistory = () => {
                 {cashFlowselected.closingBalance != null && (
                   <>
                     <Row justify="space-between" style={{ marginTop: 4 }}>
-                      <Text>Valor informado</Text>
+                      <Text>Saldo informado (Usuário)</Text>
                       <Text strong>{formatPrice(cashFlowselected.closingBalance)}</Text>
                     </Row>
                     <Row justify="space-between">
                       <Text>Diferença</Text>
                       <Text strong style={{ color: (diff ?? 0) < 0 ? "#DC2626" : "#16A34A" }}>
-                        {formatPrice(diff)}
+                        {formatPrice(expectedAmount - cashFlowselected.closingBalance)}
                       </Text>
                     </Row>
                   </>
@@ -209,14 +224,14 @@ export const CashFlowHistory = () => {
                 style={{ marginTop: 8 }}
                 items={[
                   {
-                    key: "mov",
-                    label: `Movimentações`,
-                    children: <CashFlowHistoryTransactionTable cashFlowId={cashFlowselected.id} />,
-                  },
-                  {
                     key: "sales",
                     label: `Vendas`,
                     children: <CashFlowHistorySalesTable cashFlowId={cashFlowselected.id} />,
+                  },
+                  {
+                    key: "mov",
+                    label: `Movimentações`,
+                    children: <CashFlowHistoryTransactionTable cashFlowId={cashFlowselected.id} />,
                   },
                 ]}
               />
