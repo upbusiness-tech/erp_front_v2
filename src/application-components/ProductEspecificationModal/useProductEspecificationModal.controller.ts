@@ -3,7 +3,9 @@ import { ProductModel } from "@/model/product.model";
 import { ProductEspecificationModel } from "@/model/productEspecification.model";
 import { useSalesStore } from "@/stores/sales.store";
 import { calculeStockTotalByProductEspecification } from "@/uperp/common/formulas/productFormulas";
+import { getUnitSoldFormat } from "@/uperp/common/formulas/saleReceipt";
 import { CartSaleItem } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
+import { ProductUnitOfMeasure } from "@/uperp/pages/AuthenticatedPages/Stock/StockProduct/types";
 import { message } from "antd";
 import { useEffect, useMemo, useState } from "react";
 
@@ -21,9 +23,11 @@ export function useProductEspecificationModalController({
   selectedCustomer,
 }: ProductEspecificationModalControllerProps) {
   const [qty, setQty] = useState(1);
+  const [unitSold, setUnitSold] = useState(1);
   const [note, setNote] = useState<string | undefined>(undefined);
   const [selectedSize, setSelectedSize] = useState<string | undefined>(undefined);
   const [selectedColor, setSelectedColor] = useState<string | undefined>(undefined);
+  const [selectedBrand, setSelectedBrand] = useState<string | undefined>(undefined);
 
   const sizes = Array.from(
     new Set(product?.productEspecifications?.filter((pe) => pe.size).map((pe) => pe.size) ?? []),
@@ -38,11 +42,23 @@ export function useProductEspecificationModalController({
     new Set(colorOptions.map((pe) => pe.color).filter(Boolean)),
   ) as string[];
 
+  const brandOptions =
+    product?.productEspecifications?.filter(
+      (pe) =>
+        (sizes.length === 0 || pe.size === selectedSize) &&
+        (colors.length === 0 || pe.color === selectedColor),
+    ) ?? [];
+
+  const brands = Array.from(
+    new Set(brandOptions.map((pe) => pe.brand).filter(Boolean)),
+  ) as string[];
+
   const findSpecification = (): ProductEspecificationModel | undefined => {
     return product?.productEspecifications.find(
       (pe) =>
         (sizes.length === 0 || pe.size === selectedSize) &&
-        (colors.length === 0 || pe.color === selectedColor),
+        (colors.length === 0 || pe.color === selectedColor) &&
+        (brands.length === 0 || pe.brand === selectedBrand),
     );
   };
 
@@ -50,17 +66,29 @@ export function useProductEspecificationModalController({
     ? findSpecification()?.stockQuantity
     : calculeStockTotalByProductEspecification(product?.productEspecifications || []);
 
+  const isNotStandardUnitOfMeasurement = product?.unitOfMeasure != ProductUnitOfMeasure.UNIT;
+
   const specialPriceForSpec = useMemo(() => {
     const spec = product?.productEspecifications.find(
       (pe) =>
         (sizes.length === 0 || pe.size === selectedSize) &&
-        (colors.length === 0 || pe.color === selectedColor),
+        (colors.length === 0 || pe.color === selectedColor) &&
+        (brands.length === 0 || pe.brand === selectedBrand),
     );
     if (!spec || !selectedCustomer?.internCustomerPrices) return null;
     return selectedCustomer.internCustomerPrices.find(
       (sp) => sp.productEspecificationId === spec.id,
     );
-  }, [selectedSize, selectedColor, selectedCustomer, product, sizes, colors]);
+  }, [
+    selectedSize,
+    selectedColor,
+    selectedBrand,
+    selectedCustomer,
+    product,
+    sizes,
+    colors,
+    brands,
+  ]);
 
   const { saleItems, setSaleItems } = useSalesStore();
 
@@ -68,8 +96,12 @@ export function useProductEspecificationModalController({
     if (!product) return;
     if (sizes.length > 0 && !selectedSize) return message.error("Selecione o tamanho");
     if (colors.length > 0 && !selectedColor) return message.error("Selecione a cor");
+    if (brands.length > 0 && !selectedBrand) return message.error("Selecione a marca");
 
     const specification = findSpecification();
+    if (isNotStandardUnitOfMeasurement && unitSold <= 0) {
+      return message.error("Informe um valor pesado/medido.");
+    }
     if (specification?.isStockControlled) {
       if (specification.stockQuantity === 0) {
         message.warning("Sem estoque suficiente!");
@@ -99,6 +131,8 @@ export function useProductEspecificationModalController({
         quantitySold: qty,
         product,
         productEspecification: specification,
+        unitSold: isNotStandardUnitOfMeasurement ? unitSold : 1,
+        unitOfMeasure: product.unitOfMeasure,
       };
       setSaleItems([...saleItems, specificationSelected]);
     }
@@ -108,8 +142,10 @@ export function useProductEspecificationModalController({
   useEffect(() => {
     if (openProductEspecificationModal) {
       setQty(1);
+      setUnitSold(0);
       setSelectedSize(undefined);
       setSelectedColor(undefined);
+      setSelectedBrand(undefined);
       setNote(undefined);
     }
   }, [openProductEspecificationModal, product?.id]);
@@ -121,12 +157,18 @@ export function useProductEspecificationModalController({
     specialPriceForSpec,
     qty,
     setQty,
+    unitSold,
+    setUnitSold,
+    isNotStandardUnitOfMeasurement,
     sizes,
     selectedSize,
     selectedColor,
     setSelectedSize,
     setSelectedColor,
     colors,
+    brands,
+    selectedBrand,
+    setSelectedBrand,
     setNote,
     note,
   };

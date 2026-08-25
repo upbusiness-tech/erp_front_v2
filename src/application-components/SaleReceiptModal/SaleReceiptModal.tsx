@@ -9,7 +9,7 @@ import { SaleService } from "@/services/sale.service";
 import { StatsDashboardService } from "@/services/statsDashboard.service";
 import { formatDateFromApi } from "@/uperp/common/dates";
 import { formatPrice } from "@/uperp/common/formulas/productFormulas";
-import { SALE_PAYMENT_LABEL } from "@/uperp/common/formulas/saleReceipt";
+import { SALE_PAYMENT_LABEL, formatUnitSoldAmount } from "@/uperp/common/formulas/saleReceipt";
 import { PermissionsRef } from "@/uperp/common/permissions/const/permissions.ref";
 import { Button, Divider, List, message, Modal, Row, Space, Tag, Typography } from "antd";
 import { CheckCircle2, CreditCard, Percent, Printer, Share2, Star } from "lucide-react";
@@ -216,7 +216,9 @@ export const SaleReceiptModal = ({
                     description={
                       <Space direction="vertical" size={0}>
                         <Text type="secondary" style={{ fontSize: 12 }}>
-                          {item.quantity} × {formatPrice(item.unitPrice)}
+                          {formatUnitSoldAmount(item.unitOfMeasure, item.unitSold) ??
+                            item.quantity}{" "}
+                          × {formatPrice(item.unitPrice)}
                           {item.size ? ` · Tam. ${item.size}` : ""}
                           {item.color ? ` · ${item.color}` : ""}
                         </Text>

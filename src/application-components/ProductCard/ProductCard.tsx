@@ -3,6 +3,8 @@ import {
   calculeSalePriceRange,
   calculeStockTotalByProductEspecification,
 } from "@/uperp/common/formulas/productFormulas";
+import { productUnitFormat } from "@/uperp/common/util/productForm";
+import { ProductUnitOfMeasure } from "@/uperp/pages/AuthenticatedPages/Stock/StockProduct/types";
 import { Card, Image, Tag, Typography } from "antd";
 
 const { Text } = Typography;
@@ -64,7 +66,8 @@ export const ProductCard = ({ product, onClickProduct }: ProductCardProps) => {
           {calculeSalePriceRange(product.productEspecifications)}
         </Text>
         <Tag color={stock > 5 ? "green" : stock > 0 ? "orange" : "red"} style={{ margin: 0 }}>
-          {stock}
+          {product.unitOfMeasure != ProductUnitOfMeasure.UNIT ? stock.toFixed(3) : stock}
+          {productUnitFormat(product.unitOfMeasure as ProductUnitOfMeasure)?.suffix}
         </Tag>
       </div>
     </Card>

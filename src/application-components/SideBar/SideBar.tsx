@@ -11,7 +11,7 @@ const { Title, Text } = Typography;
 export function SideBar() {
   const {
     collapsed,
-    setCollapsed,
+    handleCollapsed,
     drawerOpen,
     setDrawerOpen,
     token,
@@ -44,7 +44,7 @@ export function SideBar() {
         <Sider
           collapsible
           collapsed={collapsed}
-          onCollapse={setCollapsed}
+          onCollapse={handleCollapsed}
           theme={dark ? "dark" : "light"}
           width={240}
         >

@@ -237,8 +237,10 @@ export function useCommonSaleController() {
           productEspecificationId: s.productEspecificationId,
           productId: s.productId,
           quantitySold: s.quantitySold,
+          unitSold: s.unitSold,
           internCustomerPriceId: s.internCustomerPriceId,
           discountInfo: s.discountInfo,
+          unitOfMeasure: s.unitOfMeasure,
         };
       });
 

@@ -1,6 +1,8 @@
 import { InternCustomerSpecialPriceModel } from "@/model/internCustomerPrice.model";
-import { formatPrice } from "@/uperp/common/formulas/productFormulas";
+import { calculateOrderItem, formatPrice } from "@/uperp/common/formulas/productFormulas";
+import { productUnitFormat } from "@/uperp/common/util/productForm";
 import { CartSaleItem } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
+import { ProductUnitOfMeasure } from "@/uperp/pages/AuthenticatedPages/Stock/StockProduct/types";
 import { Button, InputNumber, List, Row, Space, Tag, Typography } from "antd";
 import { ChevronDown, ChevronRight, Percent, Star, Trash2, X } from "lucide-react";
 import { useState } from "react";
@@ -31,7 +33,7 @@ export const OrderProductItem = ({
   const hasSpecial = item.isEspecialPrice;
   const hasDiscount = item.discountInfo?.value != null && item.discountInfo.value > 0;
   const discountValue = Number(item.discountInfo?.value ?? 0);
-  const lineTotal = Math.max(itemPrice * Number(item.quantitySold) - discountValue, 0);
+  const lineTotal = calculateOrderItem(item);
 
   const discountPercent = specialPriceAvailable
     ? (
@@ -106,6 +108,11 @@ export const OrderProductItem = ({
             {item.note && (
               <Text type="secondary" italic style={{ fontSize: 13 }}>
                 "{item.note}"
+              </Text>
+            )}
+            {item.unitSold && item.product.unitOfMeasure != ProductUnitOfMeasure.UNIT && (
+              <Text type="secondary" italic style={{ fontSize: 13 }}>
+                {`${item.unitSold.toFixed(3)}${productUnitFormat(item.product.unitOfMeasure as ProductUnitOfMeasure)?.suffix}`}
               </Text>
             )}
             {hasSpecial && (

@@ -5,7 +5,12 @@ export const round2 = (n: number) => Math.round(n * 100) / 100;
 
 export const calculateGrossSubtotal = (items: CartSaleItem[] | SaleItemModel[]) => {
   return items.reduce((acc, item) => {
-    return acc + Number(item.productEspecification.salePrice) * Number(item.quantitySold);
+    return (
+      acc +
+      Number(item.productEspecification.salePrice) *
+        Number(item.quantitySold) *
+        Number(item.unitSold)
+    );
   }, 0);
 };
 
@@ -14,7 +19,7 @@ export const calculateSpecialPriceSavings = (items: CartSaleItem[] | SaleItemMod
     if (!item.isEspecialPrice || !item.internCustomerPrice?.specialPrice) return acc;
     const normal = Number(item.productEspecification.salePrice);
     const special = Number(item.internCustomerPrice.specialPrice);
-    return acc + (normal - special) * Number(item.quantitySold);
+    return acc + (normal - special) * Number(item.quantitySold) * Number(item.unitSold);
   }, 0);
 };
 

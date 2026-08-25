@@ -1,9 +1,12 @@
+import InputNumberFormatted from "@/application-components/InputNumberFormated/InputNumberFormated";
 import { InternCustomerModel } from "@/model/internCustomer.model";
 import { ProductModel } from "@/model/product.model";
 import { useCompanySettingsStore } from "@/stores/companySettings.store";
 import { calculeSalePriceRange, formatPrice } from "@/uperp/common/formulas/productFormulas";
 import { SettingsRef } from "@/uperp/common/settings/consts/settings.ref";
+import { productUnitFormat } from "@/uperp/common/util/productForm";
 import { ICreateSaleForm } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
+import { ProductUnitOfMeasure } from "@/uperp/pages/AuthenticatedPages/Stock/StockProduct/types";
 import {
   Col,
   Form,
@@ -46,12 +49,18 @@ export const ProductEspecificationModal = ({
     specialPriceForSpec,
     qty,
     setQty,
+    unitSold,
+    setUnitSold,
+    isNotStandardUnitOfMeasurement,
     sizes,
     selectedSize,
     selectedColor,
     setSelectedSize,
     setSelectedColor,
     colors,
+    brands,
+    selectedBrand,
+    setSelectedBrand,
     setNote,
     note,
   } = useProductEspecificationModalController({
@@ -139,15 +148,33 @@ export const ProductEspecificationModal = ({
           </Row>
 
           <Form layout="vertical" style={{ paddingBottom: 15 }}>
-            <Form.Item label="Quantidade" required>
-              <InputNumber
-                min={1}
-                max={stock}
-                value={qty}
-                onChange={(v) => setQty(v || 1)}
-                style={{ width: "100%" }}
-              />
-            </Form.Item>
+            {isNotStandardUnitOfMeasurement ? (
+              <Form.Item label="Peso/medida do produto" required>
+                <InputNumberFormatted
+                  min={0}
+                  precision={
+                    productUnitFormat(product.unitOfMeasure as ProductUnitOfMeasure)?.precision
+                  }
+                  suffix={productUnitFormat(product.unitOfMeasure as ProductUnitOfMeasure)?.suffix}
+                  placeholder={
+                    productUnitFormat(product.unitOfMeasure as ProductUnitOfMeasure)?.placeholder
+                  }
+                  value={unitSold}
+                  onChange={(v) => setUnitSold(v)}
+                  style={{ width: "100%" }}
+                />
+              </Form.Item>
+            ) : (
+              <Form.Item label="Quantidade" required>
+                <InputNumber
+                  min={1}
+                  max={stock}
+                  value={qty}
+                  onChange={(v) => setQty(v || 1)}
+                  style={{ width: "100%" }}
+                />
+              </Form.Item>
+            )}
 
             {sizes.length > 0 ? (
               <Form.Item label="Tamanho" required>
@@ -157,6 +184,7 @@ export const ProductEspecificationModal = ({
                   onChange={(e) => {
                     setSelectedSize(e.target.value);
                     setSelectedColor(undefined);
+                    setSelectedBrand(undefined);
                   }}
                 >
                   {sizes.map((s) => (
@@ -173,8 +201,22 @@ export const ProductEspecificationModal = ({
                 <Select
                   placeholder="Selecione a cor"
                   value={selectedColor}
-                  onChange={setSelectedColor}
+                  onChange={(c) => {
+                    setSelectedColor(c);
+                    setSelectedBrand(undefined);
+                  }}
                   options={colors.map((c) => ({ value: c, label: c }))}
+                />
+              </Form.Item>
+            ) : null}
+
+            {brands.length > 0 ? (
+              <Form.Item label="Marca" required>
+                <Select
+                  placeholder="Selecione a marca"
+                  value={selectedBrand}
+                  onChange={setSelectedBrand}
+                  options={brands.map((b) => ({ value: b, label: b }))}
                 />
               </Form.Item>
             ) : null}

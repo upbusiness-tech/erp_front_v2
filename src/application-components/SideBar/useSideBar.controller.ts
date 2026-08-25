@@ -16,7 +16,13 @@ import { LoginPaths } from "@/routes/UnauthenticatedRoutes/Login/routes";
 const { useBreakpoint } = Grid;
 
 export function useSideBarController() {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(
+    localStorage.getItem("sideBarCollapsed") === "collapsed",
+  );
+  const handleCollapsed = (v: boolean) => {
+    localStorage.setItem("sideBarCollapsed", v ? "collapsed" : "not-collapsed");
+    setCollapsed(v);
+  };
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { token } = antdTheme.useToken();
   const { settings } = useStore();
@@ -65,7 +71,7 @@ export function useSideBarController() {
 
   return {
     collapsed,
-    setCollapsed,
+    handleCollapsed,
     drawerOpen,
     setDrawerOpen,
     token,

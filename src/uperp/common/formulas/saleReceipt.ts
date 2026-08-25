@@ -20,6 +20,24 @@ export const SALE_PAYMENT_LABEL: Record<PaymentMethod, string> = {
 
 const toNumber = (value: string | number | null | undefined) => Number(value ?? 0);
 
+type UnitSoldFormat = { precision: number; suffix: string; divisor: number };
+
+// divisor converte a unidade de exibição (g/cm/ml) para a unidade comercial do preço (kg/m/l)
+const UNIT_SOLD_FORMAT: Record<string, UnitSoldFormat> = {
+  Gramas: { precision: 3, suffix: "g", divisor: 1000 },
+  Metro: { precision: 2, suffix: "cm", divisor: 100 },
+  Litro: { precision: 2, suffix: "ml", divisor: 1000 },
+};
+
+export const getUnitSoldFormat = (unitOfMeasure?: string): UnitSoldFormat | null =>
+  (unitOfMeasure && UNIT_SOLD_FORMAT[unitOfMeasure]) || null;
+
+export const formatUnitSoldAmount = (unitOfMeasure?: string, unitSold?: number): string | null => {
+  const format = getUnitSoldFormat(unitOfMeasure);
+  if (!format || unitSold == null) return null;
+  return Number(unitSold).toFixed(format.precision).replace(".", ",") + format.suffix;
+};
+
 const getItemUnitPrice = (item: SaleItemModel): number => {
   const normalPrice = toNumber(item.productEspecification.salePrice);
   const specialPrice = toNumber(item.internCustomerPrice?.specialPrice);
@@ -51,6 +69,7 @@ export const createSaleReceipt = (sale: SaleModel): SaleReceiptModel => {
       color: item.productEspecification.color || undefined,
       brand: item.productEspecification.brand || undefined,
       unitOfMeasure: item.product.unitOfMeasure || undefined,
+      unitSold: toNumber(item.unitSold) || 1,
       note: item.note || undefined,
       discountValue: itemDiscount > 0 ? itemDiscount : undefined,
     };

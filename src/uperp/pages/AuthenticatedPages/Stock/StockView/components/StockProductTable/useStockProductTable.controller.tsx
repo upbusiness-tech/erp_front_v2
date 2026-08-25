@@ -10,6 +10,7 @@ import { ProductSupplierService } from "@/services/productSupplier.service";
 import {
   calculeSalePriceRange,
   calculeStockTotalByProductEspecification,
+  showStockTotalByProductEspecification,
 } from "@/uperp/common/formulas/productFormulas";
 import { ProductUnitOfMeasure } from "@/uperp/pages/AuthenticatedPages/Stock/StockProduct/types";
 import { Button, Space, Tag, Typography } from "antd";
@@ -219,7 +220,7 @@ export function useStockProductTableController() {
                 : "red"
           }
         >
-          {calculeStockTotalByProductEspecification(v.productEspecifications)} un.
+          {showStockTotalByProductEspecification(v, v.productEspecifications)}
         </Tag>
       ),
     },

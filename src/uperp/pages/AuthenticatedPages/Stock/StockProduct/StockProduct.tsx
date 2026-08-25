@@ -47,6 +47,24 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
 
   const [previewUrl, setPreviewUrl] = useState<string | undefined>();
 
+  const unitOfMeasure = Form.useWatch("unitOfMeasure", form);
+
+  const priceSuffixMap: Partial<Record<ProductUnitOfMeasure, string>> = {
+    [ProductUnitOfMeasure.GRAM]: "Por kg",
+    [ProductUnitOfMeasure.METER]: "Por metro",
+    [ProductUnitOfMeasure.LITER]: "Por litro",
+  };
+  const priceSuffix = (unitOfMeasure && priceSuffixMap[unitOfMeasure]) || "Unidade";
+
+  const stockFormatMap: Partial<
+    Record<ProductUnitOfMeasure, { precision: number; suffix: string; placeholder: string }>
+  > = {
+    [ProductUnitOfMeasure.GRAM]: { precision: 3, suffix: "g", placeholder: "0,000g" },
+    [ProductUnitOfMeasure.METER]: { precision: 2, suffix: "cm", placeholder: "0,00cm" },
+    [ProductUnitOfMeasure.LITER]: { precision: 2, suffix: "ml", placeholder: "0,00ml" },
+  };
+  const stockFormat = (unitOfMeasure && stockFormatMap[unitOfMeasure]) || null;
+
   return (
     <Card
       title={
@@ -223,7 +241,7 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
                     <Col xs={12} md={3}>
                       <Form.Item
                         name={[field.name, "salePrice"]}
-                        label="Preço venda"
+                        label={`Preço venda (${priceSuffix})`}
                         rules={[{ required: true, message: "Preço" }]}
                       >
                         <InputNumberFormatted
@@ -236,7 +254,10 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
                       </Form.Item>
                     </Col>
                     <Col xs={12} md={3}>
-                      <Form.Item name={[field.name, "costPrice"]} label="Preço custo">
+                      <Form.Item
+                        name={[field.name, "costPrice"]}
+                        label={`Preço custo (${priceSuffix})`}
+                      >
                         <InputNumberFormatted
                           min={0}
                           step={0.5}
@@ -252,7 +273,17 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
                         label="Estoque"
                         rules={[{ required: true, message: "Estoque" }]}
                       >
-                        <InputNumber min={0} placeholder="0" style={{ width: "100%" }} />
+                        {stockFormat ? (
+                          <InputNumberFormatted
+                            min={0}
+                            precision={stockFormat.precision}
+                            suffix={stockFormat.suffix}
+                            placeholder={stockFormat.placeholder}
+                            style={{ width: "100%" }}
+                          />
+                        ) : (
+                          <InputNumber min={0} placeholder="0" style={{ width: "100%" }} />
+                        )}
                       </Form.Item>
                     </Col>
                     <Col xs={12} md={3}>
