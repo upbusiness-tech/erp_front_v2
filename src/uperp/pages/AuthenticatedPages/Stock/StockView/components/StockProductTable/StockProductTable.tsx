@@ -1,9 +1,25 @@
 import { GenericTable } from "@/application-components/GenericTable/GenericTable";
 import { SearchBar } from "@/application-components/SearchBar/SearchBar";
+import type { ProductModel } from "@/model/product.model";
+import { useState } from "react";
+import { ProductStatsModal } from "../ProductStatsModal/ProductStatsModal";
 import { useStockProductTableController } from "./useStockProductTable.controller";
 import { STOCK_STATUS_OPTIONS, UNIT_OF_MEASURE_OPTIONS } from "./consts";
 
 export const StockProductTable = () => {
+  const [selectedProduct, setSelectedProduct] = useState<ProductModel | null>(null);
+  const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
+
+  const handleRowClick = (record: ProductModel) => {
+    setSelectedProduct(record);
+    setIsStatsModalOpen(true);
+  };
+
+  const handleCloseStatsModal = () => {
+    setIsStatsModalOpen(false);
+    setSelectedProduct(null);
+  };
+
   const {
     tableColumns,
     data,
@@ -25,7 +41,9 @@ export const StockProductTable = () => {
     handleStockStatusFilterChange,
     categoryOptions,
     supplierOptions,
-  } = useStockProductTableController();
+  } = useStockProductTableController({
+    onViewStats: handleRowClick,
+  });
 
   return (
     <>
@@ -84,6 +102,11 @@ export const StockProductTable = () => {
         pageSize={pageSize}
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
+      />
+      <ProductStatsModal
+        product={selectedProduct}
+        open={isStatsModalOpen}
+        onClose={handleCloseStatsModal}
       />
     </>
   );

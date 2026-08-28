@@ -19,15 +19,19 @@ export const showStockTotalByProductEspecification = (
 ) => {
   const total = calculeStockTotalByProductEspecification(variants);
 
+  return extractStockFormatByProduct(product, total);
+};
+
+export const extractStockFormatByProduct = (product: ProductModel, value: number) => {
   switch (product.unitOfMeasure) {
     case ProductUnitOfMeasure.GRAM:
-      return `${total} kg`;
+      return `${value.toFixed(3)} g`;
     case ProductUnitOfMeasure.LITER:
-      return `${total} l`;
+      return `${value.toFixed(3)} l`;
     case ProductUnitOfMeasure.METER:
-      return `${total} m`;
+      return `${value.toFixed(3)} m`;
     case ProductUnitOfMeasure.UNIT:
-      return `${total} un.`;
+      return `${value} un.`;
     default:
       return "";
   }

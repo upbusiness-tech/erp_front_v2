@@ -7,26 +7,29 @@ import { StockPaths } from "@/routes/AuthenticatedRoutes/Stock/routes";
 import { ProductService } from "@/services/product.service";
 import { ProductCategoryService } from "@/services/productCategory.service";
 import { ProductSupplierService } from "@/services/productSupplier.service";
+import type { PaginatedResponse } from "@/types/crud.types";
 import {
   calculeSalePriceRange,
   calculeStockTotalByProductEspecification,
   showStockTotalByProductEspecification,
 } from "@/uperp/common/formulas/productFormulas";
-import { ProductUnitOfMeasure } from "@/uperp/pages/AuthenticatedPages/Stock/StockProduct/types";
 import { Button, Space, Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
 import { TableProps } from "antd/lib/table";
-import { Pencil } from "lucide-react";
+import { Eye, Pencil } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import type { PaginatedResponse } from "@/types/crud.types";
 const { Text } = Typography;
 
 const productService = new ProductService();
 const productCategoryService = new ProductCategoryService();
 const productSupplierService = new ProductSupplierService();
 
-export function useStockProductTableController() {
+export function useStockProductTableController({
+  onViewStats,
+}: {
+  onViewStats?: (product: ProductModel) => void;
+} = {}) {
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
   const [supplierFilter, setSupplierFilter] = useState<string[]>([]);
@@ -108,6 +111,7 @@ export function useStockProductTableController() {
   } = useGenericTableFetch<ProductModel>({
     service: productService,
     options: {
+      join: [{ field: "createByUser" }, { field: "createByUser.employee" }],
       sort: { field: "name", order: "ASC" },
       filter,
     },
@@ -229,6 +233,7 @@ export function useStockProductTableController() {
       width: 110,
       render: (_, p) => (
         <Space>
+          <Button size="small" icon={<Eye size={14} />} onClick={() => onViewStats?.(p)} />
           <Button
             size="small"
             icon={<Pencil size={14} />}

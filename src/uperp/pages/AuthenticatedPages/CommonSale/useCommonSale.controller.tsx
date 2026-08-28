@@ -19,6 +19,7 @@ import { PaginatedResponse } from "@/types/crud.types";
 import {
   calculeSalePriceRange,
   calculeStockTotalByProductEspecification,
+  showStockTotalByProductEspecification,
 } from "@/uperp/common/formulas/productFormulas";
 import { createSaleReceipt } from "@/uperp/common/formulas/saleReceipt";
 import { SettingsRef } from "@/uperp/common/settings/consts/settings.ref";
@@ -184,7 +185,7 @@ export function useCommonSaleController() {
                 : "red"
           }
         >
-          {calculeStockTotalByProductEspecification(v.productEspecifications)} un.
+          {showStockTotalByProductEspecification(v, v.productEspecifications)}
         </Tag>
       ),
     },

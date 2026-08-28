@@ -1,6 +1,8 @@
 import { DefaultIdModel } from "./base.model";
 import { ProductCategoryModel } from "./productCategory.model";
 import { ProductEspecificationModel } from "./productEspecification.model";
+import { SaleModel } from "./sale.model";
+import { UserModel } from "./user.model";
 
 export interface ProductExpandedViewModel extends DefaultIdModel {
   name: string;
@@ -22,6 +24,22 @@ export interface ProductModel extends DefaultIdModel {
   unitOfMeasure: string;
   createByUserUid: string;
   productPicture: string;
-  supplierName: string;
   productEspecifications: ProductEspecificationModel[];
+  createByUser: UserModel;
+}
+
+export interface ProductTransactionRecord extends DefaultIdModel {
+  type: ProductTransactionType;
+  value: number;
+  saleId: number;
+  sale: SaleModel;
+  productEspecificationId: number;
+  productEspecification: ProductEspecificationModel;
+  createdByUserUid: string;
+  createdByUser: UserModel;
+}
+
+export enum ProductTransactionType {
+  PLUS = "Adição",
+  SUBTRACTION = "Subtração",
 }
