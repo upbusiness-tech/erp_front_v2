@@ -1,5 +1,6 @@
 import { InternCustomerModel } from "@/model/internCustomer.model";
 import { InternCustomerSpecialPriceModel } from "@/model/internCustomerPrice.model";
+import { formatPrice } from "@/uperp/common/formulas/productFormulas";
 import { Button, Descriptions, Empty, Modal, Space, Table, Tabs, Tag, Typography } from "antd";
 import { Pencil } from "lucide-react";
 const { Text } = Typography;
@@ -51,6 +52,7 @@ export const CustomerViewModal = ({
                     {customer.phoneNumber || "—"}
                   </Descriptions.Item>
                   <Descriptions.Item label="Tipo">{customer.type || "—"}</Descriptions.Item>
+                  <Descriptions.Item label="Total em vendas">{formatPrice(3974)}</Descriptions.Item>
                 </Descriptions>
               ),
             },

@@ -89,7 +89,7 @@ export function useCashFlowHistoryController() {
     {
       title: "Fechamento",
       dataIndex: "closedAt",
-      render: (v: string) => formatDateFromApi(v),
+      render: (v: string) => (v ? formatDateFromApi(v) : "-"),
     },
     { title: "Operador", render: (_, v: CashFlowModel) => v.openedByUser.employee.name },
   ];

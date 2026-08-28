@@ -2,6 +2,7 @@ import { ProductModel } from "@/model/product.model";
 import {
   calculeSalePriceRange,
   calculeStockTotalByProductEspecification,
+  showStockTotalByProductEspecification,
 } from "@/uperp/common/formulas/productFormulas";
 import { Card, Image, Tag, Typography } from "antd";
 
@@ -64,7 +65,7 @@ export const ProductCard = ({ product, onClickProduct }: ProductCardProps) => {
           {calculeSalePriceRange(product.productEspecifications)}
         </Text>
         <Tag color={stock > 5 ? "green" : stock > 0 ? "orange" : "red"} style={{ margin: 0 }}>
-          {stock}
+          {showStockTotalByProductEspecification(product, product.productEspecifications)}
         </Tag>
       </div>
     </Card>

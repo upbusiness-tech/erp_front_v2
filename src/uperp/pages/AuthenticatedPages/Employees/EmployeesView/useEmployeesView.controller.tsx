@@ -1,12 +1,14 @@
 import { useCacheManager } from "@/hooks/useCacheManager";
 import { useGetAllWithParams } from "@/hooks/useGetAllWithParams";
+import { useHasPermission } from "@/hooks/useHasPermission";
 import { EmployeeModel } from "@/model/employee.model";
 import { EmployeesPaths } from "@/routes/AuthenticatedRoutes/Employees/routes";
 import { EmployeeService } from "@/services/employee.service";
 import { PaginatedResponse } from "@/types/crud.types";
+import { PermissionsRef } from "@/uperp/common/permissions/const/permissions.ref";
 import { Avatar, Button, message, Popconfirm, Space, Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
-import { Eye, Pencil, Trash2 } from "lucide-react";
+import { Eye, Pencil, Star, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -15,6 +17,11 @@ const { Text } = Typography;
 const employeeService = new EmployeeService();
 
 export default function useEmployeesViewController() {
+  const canEditEmployee = useHasPermission(PermissionsRef.Employee.Update.name);
+  const canDeleteEmployee = useHasPermission(PermissionsRef.Employee.Delete.name);
+  const canCreateEmployee = useHasPermission(PermissionsRef.Employee.Create.name);
+  const canViewEmployee = useHasPermission(PermissionsRef.Employee.Read.name);
+
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(8);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -40,17 +47,21 @@ export default function useEmployeesViewController() {
 
   const { data: employeesPaginated, isLoading } = useGetAllWithParams<
     PaginatedResponse<EmployeeModel>
-  >(employeeService, {
-    page,
-    limit,
-    sort: {
-      field: "name",
-      order: "ASC",
+  >(
+    employeeService,
+    {
+      page,
+      limit,
+      sort: {
+        field: "name",
+        order: "ASC",
+      },
+      filter: search.trim()
+        ? [{ field: "name", operator: "$contL", value: search.trim() }]
+        : undefined,
     },
-    filter: search.trim()
-      ? [{ field: "name", operator: "$contL", value: search.trim() }]
-      : undefined,
-  });
+    { enabled: canViewEmployee },
+  );
 
   const handlePageChange = (newPage: number) => setPage(newPage);
 
@@ -79,10 +90,27 @@ export default function useEmployeesViewController() {
     {
       title: "Nome",
       dataIndex: "name",
-      render: (n) => (
+      render: (_, e: EmployeeModel) => (
         <Space>
-          <Avatar style={{ background: "#F26B1F" }}>{n.charAt(0)}</Avatar>
-          {n}
+          <Avatar style={{ background: "#F26B1F" }}>{e.name.charAt(0)}</Avatar>
+          {e.isPrimaryEmployee ? (
+            <Space>
+              {e.name}{" "}
+              <Tag
+                style={{
+                  display: "flex",
+                  gap: 5,
+                  alignItems: "center",
+                }}
+                icon={<Star size={13} />}
+                color="gold"
+              >
+                Funcionário primário
+              </Tag>
+            </Space>
+          ) : (
+            e.name
+          )}
         </Space>
       ),
     },
@@ -107,15 +135,25 @@ export default function useEmployeesViewController() {
       render: (_, e: EmployeeModel) => (
         <Space>
           <Button size="small" icon={<Eye size={14} />} onClick={() => openModal(e)} />
-          <Button
-            size="small"
-            icon={<Pencil size={14} />}
-            onClick={() => navigate(EmployeesPaths.EDIT.replace(":uid", e.uid))}
-          />
           {!e.isPrimaryEmployee && (
-            <Popconfirm title="Remover funcionário?" onConfirm={() => handleDeleteEmployee(e.uid)}>
-              <Button loading={isDeleting} size="small" danger icon={<Trash2 size={14} />} />
-            </Popconfirm>
+            <Space>
+              {canEditEmployee && (
+                <Button
+                  size="small"
+                  icon={<Pencil size={14} />}
+                  onClick={() => navigate(EmployeesPaths.EDIT.replace(":uid", e.uid))}
+                />
+              )}
+
+              {canDeleteEmployee && (
+                <Popconfirm
+                  title="Remover funcionário?"
+                  onConfirm={() => handleDeleteEmployee(e.uid)}
+                >
+                  <Button loading={isDeleting} size="small" danger icon={<Trash2 size={14} />} />
+                </Popconfirm>
+              )}
+            </Space>
           )}
         </Space>
       ),
@@ -137,5 +175,7 @@ export default function useEmployeesViewController() {
     handlePageSizeChange,
     handleSearchChange,
     search,
+    canCreateEmployee,
+    canViewEmployee,
   };
 }

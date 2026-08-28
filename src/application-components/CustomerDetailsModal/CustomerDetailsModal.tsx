@@ -1,8 +1,15 @@
+import { useGetAllWithParams } from "@/hooks/useGetAllWithParams";
 import { InternCustomerModel } from "@/model/internCustomer.model";
 import { InternCustomerSpecialPriceModel } from "@/model/internCustomerPrice.model";
+import { InternCustomerService } from "@/services/internCustomer.service";
+import { formatPrice } from "@/uperp/common/formulas/productFormulas";
 import { Button, Descriptions, Empty, Modal, Space, Table, Tabs, Tag, Typography } from "antd";
 import { Pencil } from "lucide-react";
 const { Text } = Typography;
+
+type SalesTotalByInternCustomer = {
+  salesTotal: number;
+};
 
 type CustomerDetailsModalProps = {
   isOpen: boolean;
@@ -17,6 +24,14 @@ export const CustomerDetailsModal = ({
   onClose,
   onEdit,
 }: CustomerDetailsModalProps) => {
+  const internCustomerService = new InternCustomerService(`${customer?.id}/sales-total`);
+
+  const { data: salesTotal } = useGetAllWithParams<SalesTotalByInternCustomer>(
+    internCustomerService,
+    {},
+    { enabled: !!customer },
+  );
+
   return (
     <Modal
       open={isOpen}
@@ -53,6 +68,9 @@ export const CustomerDetailsModal = ({
                     {customer.phoneNumber || "—"}
                   </Descriptions.Item>
                   <Descriptions.Item label="Tipo">{customer.type || "—"}</Descriptions.Item>
+                  <Descriptions.Item label="Total em vendas">
+                    <Tag color={"green"}>{formatPrice(salesTotal?.salesTotal ?? 0)}</Tag>
+                  </Descriptions.Item>
                 </Descriptions>
               ),
             },

@@ -1,8 +1,25 @@
 import { GenericTable } from "@/application-components/GenericTable/GenericTable";
 import { SearchBar } from "@/application-components/SearchBar/SearchBar";
+import type { ProductModel } from "@/model/product.model";
+import { useState } from "react";
+import { ProductStatsModal } from "../ProductStatsModal/ProductStatsModal";
 import { useStockProductTableController } from "./useStockProductTable.controller";
+import { STOCK_STATUS_OPTIONS, UNIT_OF_MEASURE_OPTIONS } from "./consts";
 
 export const StockProductTable = () => {
+  const [selectedProduct, setSelectedProduct] = useState<ProductModel | null>(null);
+  const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
+
+  const handleRowClick = (record: ProductModel) => {
+    setSelectedProduct(record);
+    setIsStatsModalOpen(true);
+  };
+
+  const handleCloseStatsModal = () => {
+    setIsStatsModalOpen(false);
+    setSelectedProduct(null);
+  };
+
   const {
     tableColumns,
     data,
@@ -14,7 +31,19 @@ export const StockProductTable = () => {
     handlePageSizeChange,
     search,
     handleSearchChange,
-  } = useStockProductTableController();
+    categoryFilter,
+    handleCategoryFilterChange,
+    supplierFilter,
+    handleSupplierFilterChange,
+    unitFilter,
+    handleUnitFilterChange,
+    stockStatusFilter,
+    handleStockStatusFilterChange,
+    categoryOptions,
+    supplierOptions,
+  } = useStockProductTableController({
+    onViewStats: handleRowClick,
+  });
 
   return (
     <>
@@ -25,6 +54,42 @@ export const StockProductTable = () => {
             value: search,
             onChange: handleSearchChange,
             placeholder: "Buscar por nome",
+          },
+          {
+            name: "category",
+            type: "select",
+            value: categoryFilter,
+            onChange: handleCategoryFilterChange,
+            placeholder: "Categoria",
+            options: categoryOptions,
+            maxWidth: 200,
+          },
+          {
+            name: "supplier",
+            type: "select",
+            value: supplierFilter,
+            onChange: handleSupplierFilterChange,
+            placeholder: "Fornecedor",
+            options: supplierOptions,
+            maxWidth: 220,
+          },
+          {
+            name: "unit",
+            type: "select",
+            value: unitFilter,
+            onChange: handleUnitFilterChange,
+            placeholder: "Unidade de medida",
+            options: UNIT_OF_MEASURE_OPTIONS,
+            maxWidth: 180,
+          },
+          {
+            name: "stockStatus",
+            type: "select",
+            value: stockStatusFilter,
+            onChange: handleStockStatusFilterChange,
+            placeholder: "Status de estoque",
+            options: STOCK_STATUS_OPTIONS,
+            maxWidth: 200,
           },
         ]}
       />
@@ -37,6 +102,11 @@ export const StockProductTable = () => {
         pageSize={pageSize}
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
+      />
+      <ProductStatsModal
+        product={selectedProduct}
+        open={isStatsModalOpen}
+        onClose={handleCloseStatsModal}
       />
     </>
   );

@@ -1,11 +1,12 @@
 import { GenericTable } from "@/application-components/GenericTable/GenericTable";
+import { NoPermission } from "@/application-components/NoPermission/NoPermission";
+import { SearchBar } from "@/application-components/SearchBar/SearchBar";
 import { EmployeeModel } from "@/model/employee.model";
 import { EmployeesPaths } from "@/routes/AuthenticatedRoutes/Employees/routes";
 import { Button, Card } from "antd";
 import { Plus } from "lucide-react";
 import { EmployeeViewModal } from "./components/EmployeeViewModal/EmployeeViewModal";
 import useEmployeesViewController from "./useEmployeesView.controller";
-import { SearchBar } from "@/application-components/SearchBar/SearchBar";
 
 export function EmployeesView() {
   const {
@@ -23,6 +24,8 @@ export function EmployeesView() {
     handlePageSizeChange,
     handleSearchChange,
     search,
+    canCreateEmployee,
+    canViewEmployee,
   } = useEmployeesViewController();
 
   return (
@@ -34,6 +37,7 @@ export function EmployeesView() {
             onClick={() => navigate(EmployeesPaths.CREATE)}
             type="primary"
             icon={<Plus size={14} />}
+            disabled={!canCreateEmployee}
           >
             Novo Funcionário
           </Button>
@@ -49,16 +53,20 @@ export function EmployeesView() {
             },
           ]}
         />
-        <GenericTable<EmployeeModel>
-          data={employees || []}
-          columns={tableColumns}
-          isLoading={isLoading}
-          page={page}
-          pageSize={pageSize}
-          total={total}
-          onPageChange={handlePageChange}
-          onPageSizeChange={handlePageSizeChange}
-        />
+        {canViewEmployee ? (
+          <GenericTable<EmployeeModel>
+            data={employees || []}
+            columns={tableColumns}
+            isLoading={isLoading}
+            page={page}
+            pageSize={pageSize}
+            total={total}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+          />
+        ) : (
+          <NoPermission />
+        )}
 
         {isDetailModalOpen && (
           <EmployeeViewModal employee={selectedEmployee} onCancel={closeModal} />

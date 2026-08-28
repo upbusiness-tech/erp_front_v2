@@ -8,7 +8,6 @@ export enum ProductUnitOfMeasure {
 export interface IProductCreateFields {
   name: string;
   unitOfMeasure: ProductUnitOfMeasure;
-  supplierName: string;
   productPicture: string;
   productCategoryId: number;
   variants: IProductVariantField[];
@@ -17,11 +16,13 @@ export interface IProductCreateFields {
 export interface IProductVariantField {
   id?: number;
   code: string;
+  barcode?: string;
   salePrice: number;
   costPrice: number;
   isStockControlled: boolean;
   stockQuantity: number;
-  size: string;
-  color: string;
-  brand: string;
+  size?: string;
+  color?: string;
+  brand?: string;
+  productSupplierId?: number;
 }

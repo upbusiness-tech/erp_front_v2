@@ -20,6 +20,8 @@ import { useState } from "react";
 import { ProductUnitOfMeasure } from "./types";
 import { useStockProductController } from "./useStockProduct.controller";
 import InputNumberFormatted from "@/application-components/InputNumberFormated/InputNumberFormated";
+import { useCompanySettingsStore } from "@/stores/companySettings.store";
+import { SettingsRef } from "@/uperp/common/settings/consts/settings.ref";
 
 const { Text, Title } = Typography;
 
@@ -37,9 +39,31 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
     setfile,
     handleDeleteProduct,
     loading,
+    isLoadingSuppliers,
+    suppliers,
   } = useStockProductController({ isEdit });
 
+  const { hasSettingActive } = useCompanySettingsStore();
+
   const [previewUrl, setPreviewUrl] = useState<string | undefined>();
+
+  const unitOfMeasure = Form.useWatch("unitOfMeasure", form);
+
+  const priceSuffixMap: Partial<Record<ProductUnitOfMeasure, string>> = {
+    [ProductUnitOfMeasure.GRAM]: "Por kg",
+    [ProductUnitOfMeasure.METER]: "Por metro",
+    [ProductUnitOfMeasure.LITER]: "Por litro",
+  };
+  const priceSuffix = (unitOfMeasure && priceSuffixMap[unitOfMeasure]) || "Unidade";
+
+  const stockFormatMap: Partial<
+    Record<ProductUnitOfMeasure, { precision: number; suffix: string; placeholder: string }>
+  > = {
+    [ProductUnitOfMeasure.GRAM]: { precision: 3, suffix: "g", placeholder: "0,000g" },
+    [ProductUnitOfMeasure.METER]: { precision: 2, suffix: "cm", placeholder: "0,00cm" },
+    [ProductUnitOfMeasure.LITER]: { precision: 2, suffix: "ml", placeholder: "0,00ml" },
+  };
+  const stockFormat = (unitOfMeasure && stockFormatMap[unitOfMeasure]) || null;
 
   return (
     <Card
@@ -138,11 +162,6 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
               />
             </Form.Item>
           </Col>
-          <Col xs={12} md={3}>
-            <Form.Item name="supplierName" label="Fornecedor">
-              <Input placeholder="Opcional" />
-            </Form.Item>
-          </Col>
         </Row>
 
         <Title level={5} style={{ marginTop: 8 }}>
@@ -186,6 +205,24 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
                         <Input placeholder="Código" />
                       </Form.Item>
                     </Col>
+                    {hasSettingActive(SettingsRef.Product.ScanProductByCode) && (
+                      <Col xs={12} md={3}>
+                        <Form.Item name={[field.name, "barcode"]} label="Código de barras">
+                          <Input placeholder="Código de barras" />
+                        </Form.Item>
+                      </Col>
+                    )}
+                    <Col xs={12} md={3}>
+                      <Form.Item name={[field.name, "productSupplierId"]} label="Fornecedor">
+                        <Select
+                          allowClear
+                          placeholder="Selecione"
+                          fieldNames={{ value: "id", label: "name" }}
+                          options={suppliers?.data}
+                          loading={isLoadingSuppliers}
+                        />
+                      </Form.Item>
+                    </Col>
                     <Col xs={12} md={3}>
                       <Form.Item name={[field.name, "size"]} label="Tamanho">
                         <Input placeholder="Tam." />
@@ -204,7 +241,7 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
                     <Col xs={12} md={3}>
                       <Form.Item
                         name={[field.name, "salePrice"]}
-                        label="Preço venda"
+                        label={`Preço venda (${priceSuffix})`}
                         rules={[{ required: true, message: "Preço" }]}
                       >
                         <InputNumberFormatted
@@ -217,7 +254,10 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
                       </Form.Item>
                     </Col>
                     <Col xs={12} md={3}>
-                      <Form.Item name={[field.name, "costPrice"]} label="Preço custo">
+                      <Form.Item
+                        name={[field.name, "costPrice"]}
+                        label={`Preço custo (${priceSuffix})`}
+                      >
                         <InputNumberFormatted
                           min={0}
                           step={0.5}
@@ -233,7 +273,17 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
                         label="Estoque"
                         rules={[{ required: true, message: "Estoque" }]}
                       >
-                        <InputNumber min={0} placeholder="0" style={{ width: "100%" }} />
+                        {stockFormat ? (
+                          <InputNumberFormatted
+                            min={0}
+                            precision={stockFormat.precision}
+                            suffix={stockFormat.suffix}
+                            placeholder={stockFormat.placeholder}
+                            style={{ width: "100%" }}
+                          />
+                        ) : (
+                          <InputNumber min={0} placeholder="0" style={{ width: "100%" }} />
+                        )}
                       </Form.Item>
                     </Col>
                     <Col xs={12} md={3}>

@@ -4,8 +4,10 @@ import { useGetOneWithParams } from "@/hooks/useGetOneWithParams";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { ProductModel } from "@/model/product.model";
 import { ProductCategoryModel } from "@/model/productCategory.model";
+import { ProductSupplierModel } from "@/model/productSupplier.model";
 import { ProductService } from "@/services/product.service";
 import { ProductCategoryService } from "@/services/productCategory.service";
+import { ProductSupplierService } from "@/services/productSupplier.service";
 import { PaginatedResponse } from "@/types/crud.types";
 import { Form, message } from "antd";
 import { useEffect, useState } from "react";
@@ -13,6 +15,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { IProductCreateFields, IProductVariantField, ProductUnitOfMeasure } from "./types";
 
 const productCategoryService = new ProductCategoryService();
+const productSupplierService = new ProductSupplierService();
 const productService = new ProductService();
 
 export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
@@ -21,6 +24,9 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
 
   const { data: categories, isLoading: isLoadingCategories } =
     useGetAllWithParams<PaginatedResponse<ProductCategoryModel>>(productCategoryService);
+
+  const { data: suppliers, isLoading: isLoadingSuppliers } =
+    useGetAllWithParams<PaginatedResponse<ProductSupplierModel>>(productSupplierService);
 
   const { invalidateQuery } = useCacheManager();
 
@@ -58,6 +64,7 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
         const variants: IProductVariantField[] = values.variants.map((p) => {
           return {
             id: p.id,
+            barcode: p.barcode,
             costPrice: Number(p.costPrice),
             salePrice: Number(p.salePrice),
             code: p.code,
@@ -66,6 +73,7 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
             size: p.size,
             color: p.color,
             brand: p.brand,
+            productSupplierId: p.productSupplierId,
           };
         });
         values.variants = variants;
@@ -100,7 +108,6 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
         name: productToEdit.name,
         productCategoryId: productToEdit.productCategoryId,
         productPicture: productToEdit.productPicture,
-        supplierName: productToEdit.supplierName,
         unitOfMeasure: productToEdit.unitOfMeasure as ProductUnitOfMeasure,
         variants,
       });
@@ -118,5 +125,7 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
     isEdit: !!isEdit,
     id,
     loading,
+    suppliers,
+    isLoadingSuppliers,
   };
 }

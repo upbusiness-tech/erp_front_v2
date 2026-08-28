@@ -13,6 +13,7 @@ export type ApiMoney = string | number | null;
 export interface SaleItemModel extends DefaultIdModel {
   note: string;
   quantitySold: number;
+  unitSold: number;
   isEspecialPrice: boolean;
   discountInfo?: DiscountInfo;
   internCustomerPriceId?: number | null;
@@ -42,6 +43,7 @@ export interface SaleModel extends DefaultIdModel {
   soldByUser?: SaleUserModel | null;
   cashFlowId: number;
   companyUid: string;
+  canceledByUserUid: string;
   items: SaleItemModel[];
   payments: SalePaymentModel[];
   services?: unknown[];
@@ -59,6 +61,7 @@ export interface SaleReceiptItemModel {
   color?: string;
   brand?: string;
   unitOfMeasure?: string;
+  unitSold?: number;
   note?: string;
   discountValue?: number;
 }

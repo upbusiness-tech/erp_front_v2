@@ -1,9 +1,10 @@
 import { Button, Space, Tabs } from "antd";
-import { Archive, BarChart3, Plus, TagIcon } from "lucide-react";
+import { Archive, BarChart3, Plus, TagIcon, Truck } from "lucide-react";
 import { StockCategoriesOverview } from "../StockCategoriesOverview/StockCategoriesOverview";
 import { StockProductTable } from "../StockProductTable/StockProductTable";
 import { StockStatsOverview } from "../StockStatsOverview/StockStatsOverview";
 import { EStockViewTab } from "./types";
+import { StockSupplierOverview } from "../StockSuppliersOverview/StockSuppliersOverview";
 
 type StockTabProps = {
   onNewProduct: VoidFunction;
@@ -48,6 +49,15 @@ export const StockTab = ({ onNewProduct }: StockTabProps) => {
             </Space>
           ),
           children: <StockCategoriesOverview />,
+        },
+        {
+          key: EStockViewTab.SUPPLIERS,
+          label: (
+            <Space size={SPACE_SIZE}>
+              <Truck size={ICON_SIZE} /> Fornecedores
+            </Space>
+          ),
+          children: <StockSupplierOverview />,
         },
       ]}
     />

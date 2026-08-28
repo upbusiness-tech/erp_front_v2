@@ -1,14 +1,12 @@
-import { Button, ColorPicker, Input, message, Popconfirm, Space, Table, Typography } from "antd";
+import { Button, ColorPicker, Input, Popconfirm, Space, Table, Typography } from "antd";
 
 import { ProductCategoryModel } from "@/model/productCategory.model";
-import { ProductCategoryService } from "@/services/productCategory.service";
 import { Pencil, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
 import { EditCategoryModal } from "./components/EditCategoryModal/EditCategoryModal";
 import { useStockCategoriesOverviewController } from "./useStockCategoriesOverview.controller";
+import { StockCategoryStats } from "../StockCategoryStats/StockCategoryStats";
 
 const { Text } = Typography;
-const productCategoryService = new ProductCategoryService();
 
 export const StockCategoriesOverview = () => {
   const {
@@ -27,6 +25,8 @@ export const StockCategoriesOverview = () => {
 
   return (
     <>
+      <StockCategoryStats />
+
       <Space.Compact style={{ width: "100%", maxWidth: 560, marginBottom: 16 }}>
         <ColorPicker
           value={color}

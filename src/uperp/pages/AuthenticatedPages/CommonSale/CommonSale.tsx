@@ -20,6 +20,7 @@ import {
   Row,
   Segmented,
   Space,
+  Spin,
 } from "antd";
 import { ShoppingCart } from "lucide-react";
 import { useCommonSaleController } from "./useCommonSale.controller";
@@ -63,7 +64,6 @@ export function CommonSale() {
     recentSalesPageSize,
     handleRecentSalesPageChange,
     handleRecentSalesPageSizeChange,
-    recentSalesColumns,
     handleViewRecentSale,
     categoryFilter,
     handleCategoryFilterChange,
@@ -126,29 +126,36 @@ export function CommonSale() {
             </Row>
 
             {productsView === EProductView.CARDS ? (
-              <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-                <div style={{ flex: 1 }}>
-                  <Row gutter={[12, 12]}>
-                    {products.map((p) => (
-                      <Col key={p.id} xs={12} sm={8} md={6}>
-                        <ProductCard onClickProduct={() => handleOpenProductModal(p)} product={p} />
-                      </Col>
-                    ))}
-                    {products.length === 0 && <Empty style={{ width: "100%", padding: 32 }} />}
-                  </Row>
+              isLoading ? (
+                <Spin />
+              ) : (
+                <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+                  <div style={{ flex: 1 }}>
+                    <Row gutter={[12, 12]}>
+                      {products.map((p) => (
+                        <Col key={p.id} xs={12} sm={8} md={6}>
+                          <ProductCard
+                            onClickProduct={() => handleOpenProductModal(p)}
+                            product={p}
+                          />
+                        </Col>
+                      ))}
+                      {products.length === 0 && <Empty style={{ width: "100%", padding: 32 }} />}
+                    </Row>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
+                    <Pagination
+                      current={page}
+                      pageSize={pageSize}
+                      total={total}
+                      showSizeChanger
+                      pageSizeOptions={[8, 12, 16, 24]}
+                      onChange={handlePageChange}
+                      onShowSizeChange={(_, size) => handlePageSizeChange(size)}
+                    />
+                  </div>
                 </div>
-                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
-                  <Pagination
-                    current={page}
-                    pageSize={pageSize}
-                    total={total}
-                    showSizeChanger
-                    pageSizeOptions={[8, 12, 16, 24]}
-                    onChange={handlePageChange}
-                    onShowSizeChange={(_, size) => handlePageSizeChange(size)}
-                  />
-                </div>
-              </div>
+              )
             ) : (
               <GenericTable
                 rowKey="id"
@@ -242,7 +249,7 @@ export function CommonSale() {
       <RecentSalesModal
         open={recentOpen}
         onClose={() => setRecentOpen(false)}
-        columns={recentSalesColumns}
+        handleViewRecentSale={handleViewRecentSale}
         data={recentSales}
         isLoading={recentSalesLoading}
         total={recentSalesTotal}

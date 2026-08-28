@@ -41,11 +41,19 @@ export const CashFlowView = () => {
     handleCloseCashModal,
     openCloseCashFlowModal,
     setOpenCloseCashFlowModal,
+    canCloseCashFlow,
+    canCreateTransaction,
   } = useCashFlowViewController();
 
   return (
     <>
       <CloseCashFlowModal
+        cashBreakdown={{
+          initialBalance: currentCashFlow?.initialBalance ?? 0,
+          replacement: replacementData?.amount ?? 0,
+          sales: salesData?.amount ?? 0,
+          sagrias: sangriasData?.amount ?? 0,
+        }}
         isOpen={openCloseCashFlowModal}
         onClose={() => setOpenCloseCashFlowModal(false)}
       />
@@ -72,7 +80,12 @@ export const CashFlowView = () => {
             </Space>
           </Col>
           <Col>
-            <Button danger icon={<Lock size={14} />} onClick={handleCloseCashModal}>
+            <Button
+              disabled={!canCloseCashFlow}
+              danger
+              icon={<Lock size={14} />}
+              onClick={handleCloseCashModal}
+            >
               Fechar Caixa
             </Button>
           </Col>
@@ -84,7 +97,7 @@ export const CashFlowView = () => {
           <Card>
             <Statistic
               title="Valor inicial"
-              value={currentCashFlow?.initialBalance}
+              value={formatPrice(currentCashFlow?.initialBalance ?? 0)}
               precision={2}
               prefix={<Wallet size={16} />}
             />
@@ -94,7 +107,7 @@ export const CashFlowView = () => {
           <Card>
             <Statistic
               title="Vendas"
-              value={salesData?.amount}
+              value={formatPrice(salesData?.amount ?? 0)}
               precision={2}
               valueStyle={{ color: "#16A34A" }}
               prefix={<TrendingUp size={16} />}
@@ -104,8 +117,8 @@ export const CashFlowView = () => {
         <Col xs={12} md={6}>
           <Card>
             <Statistic
-              title="Entradas / Reposições"
-              value={replacementData?.amount}
+              title="Reposições"
+              value={formatPrice(replacementData?.amount ?? 0)}
               precision={2}
               valueStyle={{ color: "#2563EB" }}
               prefix={<ArrowDownCircle size={16} />}
@@ -116,7 +129,7 @@ export const CashFlowView = () => {
           <Card>
             <Statistic
               title="Sangrias"
-              value={sangriasData?.amount}
+              value={formatPrice(sangriasData?.amount ?? 0)}
               precision={2}
               valueStyle={{ color: "#DC2626" }}
               prefix={<TrendingDown size={16} />}
@@ -128,7 +141,7 @@ export const CashFlowView = () => {
       <Card style={{ marginBottom: 16, background: "#FFF7ED", borderColor: "#FED7AA" }}>
         <Row align="middle" justify="space-between">
           <Col>
-            <Text type="secondary">Saldo estimado em caixa</Text>
+            <Text type="secondary">Saldo estimado</Text>
             <Title level={2} style={{ margin: 0, color: "#F26B1F" }}>
               {formatPrice(
                 calculeCashFlowEstimetedAmount(
@@ -143,12 +156,14 @@ export const CashFlowView = () => {
           <Col>
             <Space wrap>
               <Button
+                disabled={!canCreateTransaction}
                 icon={<PlusCircle size={14} />}
                 onClick={() => handleOpenModal(TransactionOrigin.REPLACEMENT)}
               >
                 Reposição
               </Button>
               <Button
+                disabled={!canCreateTransaction}
                 icon={<ArrowUpCircle size={14} />}
                 danger
                 onClick={() => handleOpenModal(TransactionOrigin.SANGRIA)}

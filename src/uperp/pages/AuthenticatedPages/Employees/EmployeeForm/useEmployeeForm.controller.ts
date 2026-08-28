@@ -106,5 +106,13 @@ export function useEmployeeFormController({ isEdit }: { isEdit?: boolean }) {
     }
   }, [employeeToEdit, form, isEdit, uid]);
 
-  return { permissions, form, handleSubmit, groupedPermissions, navigate, isSubmitting };
+  return {
+    permissions,
+    form,
+    handleSubmit,
+    groupedPermissions,
+    navigate,
+    isSubmitting,
+    employeeToEdit,
+  };
 }

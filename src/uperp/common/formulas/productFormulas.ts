@@ -1,4 +1,7 @@
+import { ProductModel } from "@/model/product.model";
 import { ProductEspecificationModel } from "@/model/productEspecification.model";
+import { CartSaleItem } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
+import { ProductUnitOfMeasure } from "@/uperp/pages/AuthenticatedPages/Stock/StockProduct/types";
 
 export const calculeStockTotalByProductEspecification = (
   variants: ProductEspecificationModel[],
@@ -8,6 +11,30 @@ export const calculeStockTotalByProductEspecification = (
     return acc + 0;
   }, 0);
   return total || 0;
+};
+
+export const showStockTotalByProductEspecification = (
+  product: ProductModel,
+  variants: ProductEspecificationModel[],
+) => {
+  const total = calculeStockTotalByProductEspecification(variants);
+
+  return extractStockFormatByProduct(product, total);
+};
+
+export const extractStockFormatByProduct = (product: ProductModel, value: number) => {
+  switch (product.unitOfMeasure) {
+    case ProductUnitOfMeasure.GRAM:
+      return `${value.toFixed(3)} g`;
+    case ProductUnitOfMeasure.LITER:
+      return `${value.toFixed(3)} l`;
+    case ProductUnitOfMeasure.METER:
+      return `${value.toFixed(3)} m`;
+    case ProductUnitOfMeasure.UNIT:
+      return `${value} un.`;
+    default:
+      return "";
+  }
 };
 
 export const calculeSalePriceRange = (variants: ProductEspecificationModel[]): string => {
@@ -29,4 +56,16 @@ export const calculeSalePriceRange = (variants: ProductEspecificationModel[]): s
 
 export const formatPrice = (v: string | number) => {
   return `R$ ${Number(v).toFixed(2).replace(".", ",")}`;
+};
+
+export const calculateOrderItem = (item: CartSaleItem) => {
+  const itemPrice = item.isEspecialPrice
+    ? item.internCustomerPrice?.specialPrice
+    : item.productEspecification.salePrice;
+
+  const itemUnitSold = item.unitSold;
+
+  const itemQuantitySold = item.quantitySold;
+
+  return (itemPrice ?? 0) * itemUnitSold * itemQuantitySold;
 };

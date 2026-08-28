@@ -11,15 +11,22 @@ import {
   pathToPageKey,
   PageKey,
 } from "./SideBar.consts";
+import { LoginPaths } from "@/routes/UnauthenticatedRoutes/Login/routes";
 
 const { useBreakpoint } = Grid;
 
 export function useSideBarController() {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(
+    localStorage.getItem("sideBarCollapsed") === "collapsed",
+  );
+  const handleCollapsed = (v: boolean) => {
+    localStorage.setItem("sideBarCollapsed", v ? "collapsed" : "not-collapsed");
+    setCollapsed(v);
+  };
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { token } = antdTheme.useToken();
   const { settings } = useStore();
-  const { employeeName, logout, permissions } = useAuthStore();
+  const { employeeName, logout, permissions, employeeLogout } = useAuthStore();
   const screens = useBreakpoint();
   const navigate = useNavigate();
   const location = useLocation();
@@ -57,9 +64,14 @@ export function useSideBarController() {
     [permissions],
   );
 
+  const handleChangeEmployee = () => {
+    employeeLogout();
+    navigate(LoginPaths.EMPLOYEE_LOGIN);
+  };
+
   return {
     collapsed,
-    setCollapsed,
+    handleCollapsed,
     drawerOpen,
     setDrawerOpen,
     token,
@@ -70,5 +82,6 @@ export function useSideBarController() {
     handleMenuClick,
     handleLogout,
     menuItems,
+    handleChangeEmployee,
   };
 }
