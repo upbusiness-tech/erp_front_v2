@@ -4,6 +4,7 @@ import { ProductCategoryModel } from "@/model/productCategory.model";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { EditCategoryModal } from "./components/EditCategoryModal/EditCategoryModal";
 import { useStockCategoriesOverviewController } from "./useStockCategoriesOverview.controller";
+import { StockCategoryStats } from "../StockCategoryStats/StockCategoryStats";
 
 const { Text } = Typography;
 
@@ -24,6 +25,8 @@ export const StockCategoriesOverview = () => {
 
   return (
     <>
+      <StockCategoryStats />
+
       <Space.Compact style={{ width: "100%", maxWidth: 560, marginBottom: 16 }}>
         <ColorPicker
           value={color}
