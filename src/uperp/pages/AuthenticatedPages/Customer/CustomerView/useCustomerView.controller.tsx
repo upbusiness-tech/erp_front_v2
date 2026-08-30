@@ -92,7 +92,7 @@ export function useCustomerViewController() {
       width: 160,
       render: (_, c: InternCustomerModel) => (
         <Space>
-          <Button size="small" icon={<Eye size={14} onClick={() => handleOpenViewModal(c)} />} />
+          <Button size="small" icon={<Eye size={14} />} onClick={() => handleOpenViewModal(c)} />
           {canEditInternCustomer && (
             <Button size="small" icon={<Pencil size={14} />} onClick={() => handleGoToEdit(c.id)} />
           )}

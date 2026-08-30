@@ -43,7 +43,7 @@ export function EmployeeLogin() {
           <Title level={3} style={{ margin: 0 }}>
             Acesso do Funcionário
           </Title>
-          <Text type="secondary">Minha Loja Demo Ltda</Text>
+          {/* <Text type="secondary">Minha Loja Demo Ltda</Text> */}
         </div>
 
         <Form layout="vertical" onFinish={handleLoginWithEmployee}>

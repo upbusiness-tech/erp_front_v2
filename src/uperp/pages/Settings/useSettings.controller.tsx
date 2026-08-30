@@ -7,7 +7,7 @@ import { SettingsRef } from "@/uperp/common/settings/consts/settings.ref";
 import { useStore } from "@/uperp/store";
 import { useQueryClient } from "@tanstack/react-query";
 import { message } from "antd";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 const moduleTitles: Record<string, string> = {
   Sale: "Vendas",
@@ -74,13 +74,21 @@ export function useSettingsController() {
     }));
   }, [mergedSettings]);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const handleToggle = useCallback(
     async (id: number) => {
-      const ok = await toggleSetting(id);
-      if (ok) {
-        queryClient.invalidateQueries({ queryKey: [service.BASE_PATH] });
-        await loadSettings();
-        message.success("Preferência atualizada");
+      try {
+        setIsSubmitting(true);
+        const ok = await toggleSetting(id);
+        if (ok) {
+          queryClient.invalidateQueries({ queryKey: [service.BASE_PATH] });
+          await loadSettings();
+          message.success("Preferência atualizada");
+        }
+      } catch (error) {
+        message.error("Ocorreu um erro ao atualizar a configuração.");
+      } finally {
+        setIsSubmitting(false);
       }
     },
     [toggleSetting, queryClient, service.BASE_PATH],
@@ -100,5 +108,6 @@ export function useSettingsController() {
     handleToggle,
     darkSidebar: legacySettings.darkSidebar,
     handleDarkSidebarToggle,
+    isSubmitting,
   };
 }

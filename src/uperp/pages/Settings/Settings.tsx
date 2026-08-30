@@ -1,12 +1,18 @@
-import { Card, Row, Col, Switch, Typography, Space, Divider } from "antd";
+import { Card, Col, Divider, Row, Space, Switch, Typography } from "antd";
 import { Palette } from "lucide-react";
 import { useSettingsController } from "./useSettings.controller";
 
 const { Title, Text } = Typography;
 
 export function Settings() {
-  const { groupedSettings, isLoading, handleToggle, darkSidebar, handleDarkSidebarToggle } =
-    useSettingsController();
+  const {
+    groupedSettings,
+    isLoading,
+    isSubmitting,
+    handleToggle,
+    darkSidebar,
+    handleDarkSidebarToggle,
+  } = useSettingsController();
 
   return (
     <Row gutter={[16, 16]}>
@@ -50,7 +56,8 @@ export function Settings() {
                   <Col>
                     <Switch
                       checked={item.value}
-                      loading={isLoading}
+                      loading={isSubmitting}
+                      disabled={isSubmitting}
                       onChange={() => handleToggle(item.id)}
                     />
                   </Col>

@@ -39,7 +39,7 @@ export function SideBar() {
   );
 
   return (
-    <Layout style={{ minHeight: "100vh" }}>
+    <Layout style={{ height: "100vh", overflow: "hidden" }}>
       {!isMobile && (
         <Sider
           collapsible
@@ -47,6 +47,7 @@ export function SideBar() {
           onCollapse={handleCollapsed}
           theme={dark ? "dark" : "light"}
           width={240}
+          style={{ overflow: "auto", height: "100vh", flexShrink: 0 }}
         >
           <BrandHeader dark={dark} collapsed={collapsed} />
           {renderMenu()}
@@ -69,7 +70,7 @@ export function SideBar() {
         </Drawer>
       )}
 
-      <Layout>
+      <Layout style={{ overflow: "hidden", flex: 1, minHeight: 0 }}>
         <Header
           style={{
             background: "#fff",
@@ -79,6 +80,7 @@ export function SideBar() {
             justifyContent: "space-between",
             borderBottom: "1px solid #f0f0f0",
             gap: 8,
+            flexShrink: 0,
           }}
         >
           <Space size={8} style={{ minWidth: 0, flex: 1 }}>
@@ -148,6 +150,7 @@ export function SideBar() {
             padding: isMobile ? 12 : 24,
             background: token.colorBgLayout,
             minWidth: 0,
+            overflow: "auto",
           }}
         >
           <Outlet />

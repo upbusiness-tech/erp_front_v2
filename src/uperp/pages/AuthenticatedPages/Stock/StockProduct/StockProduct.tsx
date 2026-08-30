@@ -168,8 +168,8 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
           Variações
         </Title>
         <Text type="secondary" style={{ display: "block", marginBottom: 12 }}>
-          Cada variação tem código, preço e estoque próprios. Nome, categoria, unidade e fornecedor
-          são compartilhados.
+          Cada variação tem código, preço e estoque próprios. Nome, categoria, unidade são
+          compartilhados.
         </Text>
 
         <Form.List
@@ -199,7 +199,7 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
                     marginBottom: 12,
                   }}
                 >
-                  <Row gutter={8} align="middle">
+                  <Row gutter={8} align="top">
                     <Col xs={12} md={3}>
                       <Form.Item name={[field.name, "code"]} label="Código">
                         <Input placeholder="Código" />
@@ -257,6 +257,9 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
                       <Form.Item
                         name={[field.name, "costPrice"]}
                         label={`Preço custo (${priceSuffix})`}
+                        help={
+                          "O preço de custo do produto é necessário para cálculos de faturamento líquido."
+                        }
                       >
                         <InputNumberFormatted
                           min={0}
@@ -291,6 +294,9 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
                         name={[field.name, "isStockControlled"]}
                         label="Controlar estoque"
                         valuePropName="checked"
+                        help={
+                          "Ao desativar essa opção, as vendas não refletirão no estoque dessa variação do produto."
+                        }
                       >
                         <Switch defaultChecked />
                       </Form.Item>
