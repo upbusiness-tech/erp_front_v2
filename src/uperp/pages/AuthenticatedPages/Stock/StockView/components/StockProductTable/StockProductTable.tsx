@@ -1,12 +1,19 @@
 import { GenericTable } from "@/application-components/GenericTable/GenericTable";
+import { ProductCardList } from "@/application-components/ProductCardList/ProductCardList";
 import { SearchBar } from "@/application-components/SearchBar/SearchBar";
 import type { ProductModel } from "@/model/product.model";
+import { Grid } from "antd";
 import { useState } from "react";
 import { ProductStatsModal } from "../ProductStatsModal/ProductStatsModal";
 import { useStockProductTableController } from "./useStockProductTable.controller";
 import { STOCK_STATUS_OPTIONS, UNIT_OF_MEASURE_OPTIONS } from "./consts";
 
+const { useBreakpoint } = Grid;
+
 export const StockProductTable = () => {
+  const screens = useBreakpoint();
+  const isMobile = !screens.sm;
+
   const [selectedProduct, setSelectedProduct] = useState<ProductModel | null>(null);
   const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
 
@@ -93,16 +100,29 @@ export const StockProductTable = () => {
           },
         ]}
       />
-      <GenericTable
-        columns={tableColumns}
-        data={data}
-        total={total}
-        isLoading={isLoading}
-        page={page}
-        pageSize={pageSize}
-        onPageChange={handlePageChange}
-        onPageSizeChange={handlePageSizeChange}
-      />
+      {isMobile ? (
+        <ProductCardList
+          products={data}
+          total={total}
+          page={page}
+          pageSize={pageSize}
+          isLoading={isLoading}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+          onClickProduct={handleRowClick}
+        />
+      ) : (
+        <GenericTable
+          columns={tableColumns}
+          data={data}
+          total={total}
+          isLoading={isLoading}
+          page={page}
+          pageSize={pageSize}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+        />
+      )}
       <ProductStatsModal
         product={selectedProduct}
         open={isStatsModalOpen}
