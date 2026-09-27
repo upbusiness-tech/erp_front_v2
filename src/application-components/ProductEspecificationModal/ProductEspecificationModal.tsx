@@ -2,7 +2,11 @@ import InputNumberFormatted from "@/application-components/InputNumberFormated/I
 import { InternCustomerModel } from "@/model/internCustomer.model";
 import { ProductModel } from "@/model/product.model";
 import { useCompanySettingsStore } from "@/stores/companySettings.store";
-import { calculeSalePriceRange, formatPrice } from "@/uperp/common/formulas/productFormulas";
+import {
+  calculeSalePriceRange,
+  formatPrice,
+  showStockTotalByProductEspecification,
+} from "@/uperp/common/formulas/productFormulas";
 import { SettingsRef } from "@/uperp/common/settings/consts/settings.ref";
 import { productUnitFormat } from "@/uperp/common/util/productForm";
 import { ICreateSaleForm } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
@@ -130,7 +134,17 @@ export const ProductEspecificationModal = ({
                     : calculeSalePriceRange(product?.productEspecifications || [])}
                 </Text>
                 <Tag style={{ marginLeft: 8 }} color={(stock ?? 0 > 5) ? "green" : "orange"}>
-                  {stock} em estoque
+                  {findSpecification()
+                    ? showStockTotalByProductEspecification(
+                        product,
+                        product.productEspecifications,
+                        findSpecification()?.stockQuantity,
+                      )
+                    : showStockTotalByProductEspecification(
+                        product,
+                        product.productEspecifications,
+                      )}{" "}
+                  em estoque
                 </Tag>
               </div>
               {specialPriceForSpec && (
@@ -150,19 +164,31 @@ export const ProductEspecificationModal = ({
           <Form layout="vertical" style={{ paddingBottom: 15 }}>
             {isNotStandardUnitOfMeasurement ? (
               <Form.Item label="Peso/medida do produto" required>
-                <InputNumberFormatted
-                  min={0}
-                  precision={
-                    productUnitFormat(product.unitOfMeasure as ProductUnitOfMeasure)?.precision
-                  }
-                  suffix={productUnitFormat(product.unitOfMeasure as ProductUnitOfMeasure)?.suffix}
-                  placeholder={
-                    productUnitFormat(product.unitOfMeasure as ProductUnitOfMeasure)?.placeholder
-                  }
-                  value={unitSold}
-                  onChange={(v) => setUnitSold(v)}
-                  style={{ width: "100%" }}
-                />
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <InputNumberFormatted
+                    min={0}
+                    max={stock}
+                    precision={
+                      productUnitFormat(product.unitOfMeasure as ProductUnitOfMeasure)?.precision
+                    }
+                    placeholder={
+                      productUnitFormat(product.unitOfMeasure as ProductUnitOfMeasure)?.placeholder
+                    }
+                    value={unitSold}
+                    onChange={(v) => setUnitSold(v)}
+                    style={{ flex: 1 }}
+                  />
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      color: "#F26B1F",
+                      fontWeight: 500,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {productUnitFormat(product.unitOfMeasure as ProductUnitOfMeasure)?.suffix}
+                  </Text>
+                </div>
               </Form.Item>
             ) : (
               <Form.Item label="Quantidade" required>
