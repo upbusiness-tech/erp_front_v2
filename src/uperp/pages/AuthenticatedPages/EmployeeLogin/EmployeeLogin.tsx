@@ -1,4 +1,4 @@
-import { Button, Card, Form, Input, Select, Typography } from "antd";
+import { Alert, Button, Card, Form, Input, Select, Skeleton, Space, Typography } from "antd";
 import { ArrowLeft, UserCircle2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEmployeeLoginController } from "./useEmployeeLogin.controller";
@@ -8,8 +8,14 @@ const { Title, Text } = Typography;
 
 export function EmployeeLogin() {
   const navigate = useNavigate();
-  const { avaliableEmployees, isLoading, handleLoginWithEmployee, isSubmitting } =
-    useEmployeeLoginController();
+  const {
+    avaliableEmployees,
+    isLoading,
+    loadError,
+    retryLoadAvaliableEmployees,
+    handleLoginWithEmployee,
+    isSubmitting,
+  } = useEmployeeLoginController();
 
   const { logout } = useAuthStore();
 
@@ -43,29 +49,54 @@ export function EmployeeLogin() {
           <Title level={3} style={{ margin: 0 }}>
             Acesso do Funcionário
           </Title>
-          {/* <Text type="secondary">Minha Loja Demo Ltda</Text> */}
         </div>
 
-        <Form layout="vertical" onFinish={handleLoginWithEmployee}>
-          <Form.Item name="username" label="Funcionário" rules={[{ required: true }]}>
-            <Select
-              loading={isLoading}
-              size="large"
-              options={avaliableEmployees.map((ae) => {
-                return {
-                  value: ae.username,
-                  label: `${ae.employee.name} (${ae.employee.type})`,
-                };
-              })}
+        {isLoading ? (
+          <Space direction="vertical" style={{ width: "100%" }} size={16}>
+            <Text type="secondary">Carregando funcionários...</Text>
+            <Skeleton.Input active style={{ width: "100%", height: 40 }} />
+            <Skeleton.Input active style={{ width: "100%", height: 40 }} />
+            <Skeleton.Button active style={{ width: "100%", height: 40 }} />
+          </Space>
+        ) : loadError ? (
+          <div>
+            <Alert
+              type="error"
+              showIcon
+              message="Não foi possível carregar os funcionários"
+              description={loadError}
             />
-          </Form.Item>
-          <Form.Item name="password" label="Senha" rules={[{ required: true }]}>
-            <Input.Password placeholder="••••••" size="large" />
-          </Form.Item>
-          <Button type="primary" htmlType="submit" block size="large" loading={isSubmitting}>
-            Entrar no Sistema
-          </Button>
-        </Form>
+            <Button
+              type="primary"
+              block
+              onClick={retryLoadAvaliableEmployees}
+              style={{ marginTop: 16 }}
+            >
+              Tentar novamente
+            </Button>
+          </div>
+        ) : (
+          <Form layout="vertical" onFinish={handleLoginWithEmployee}>
+            <Form.Item name="username" label="Funcionário" rules={[{ required: true }]}>
+              <Select
+                loading={isLoading}
+                size="large"
+                options={avaliableEmployees.map((ae) => {
+                  return {
+                    value: ae.username,
+                    label: `${ae.employee.name} (${ae.employee.type})`,
+                  };
+                })}
+              />
+            </Form.Item>
+            <Form.Item name="password" label="Senha" rules={[{ required: true }]}>
+              <Input.Password placeholder="••••••" size="large" />
+            </Form.Item>
+            <Button type="primary" htmlType="submit" block size="large" loading={isSubmitting}>
+              Entrar no Sistema
+            </Button>
+          </Form>
+        )}
 
         <Button
           type="link"
