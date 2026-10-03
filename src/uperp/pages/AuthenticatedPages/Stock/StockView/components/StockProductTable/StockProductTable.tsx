@@ -121,6 +121,7 @@ export const StockProductTable = () => {
           pageSize={pageSize}
           onPageChange={handlePageChange}
           onPageSizeChange={handlePageSizeChange}
+          onRowClick={handleRowClick}
         />
       )}
       <ProductStatsModal

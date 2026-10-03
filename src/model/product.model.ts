@@ -1,6 +1,7 @@
 import { DefaultIdModel } from "./base.model";
 import { ProductCategoryModel } from "./productCategory.model";
 import { ProductEspecificationModel } from "./productEspecification.model";
+import { ProductFiscalClassification } from "./productFiscalClassification.model";
 import { SaleModel } from "./sale.model";
 import { UserModel } from "./user.model";
 
@@ -25,6 +26,7 @@ export interface ProductModel extends DefaultIdModel {
   createByUserUid: string;
   productPicture: string;
   productEspecifications: ProductEspecificationModel[];
+  productFiscalClassification: ProductFiscalClassification;
   createByUser: UserModel;
 }
 

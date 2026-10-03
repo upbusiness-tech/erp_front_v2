@@ -22,6 +22,35 @@ import { useStockProductController } from "./useStockProduct.controller";
 import InputNumberFormatted from "@/application-components/InputNumberFormated/InputNumberFormated";
 import { useCompanySettingsStore } from "@/stores/companySettings.store";
 import { SettingsRef } from "@/uperp/common/settings/consts/settings.ref";
+import { PlanIds } from "@/enums/plan.enum";
+import { CsosnEnum, OriginEnum, PisCofinsCstEnum } from "@/enums/productFiscal.enum";
+
+const formatEnumKey = (key: string) =>
+  key
+    .split("_")
+    .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
+    .join(" ");
+
+const originOptions = Object.entries(OriginEnum)
+  .filter(([key]) => Number.isNaN(Number(key)))
+  .map(([key, value]) => ({
+    value,
+    label: `${value} - ${formatEnumKey(key)}`,
+  }));
+
+const csosnOptions = Object.entries(CsosnEnum)
+  .filter(([key]) => Number.isNaN(Number(key)))
+  .map(([key, value]) => ({
+    value,
+    label: `${value} - ${formatEnumKey(key)}`,
+  }));
+
+const pisCofinsOptions = Object.entries(PisCofinsCstEnum)
+  .filter(([key]) => Number.isNaN(Number(key)))
+  .map(([key, value]) => ({
+    value,
+    label: `${value} - ${formatEnumKey(key)}`,
+  }));
 
 const { Text, Title } = Typography;
 
@@ -41,6 +70,7 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
     loading,
     isLoadingSuppliers,
     suppliers,
+    currentPlan,
   } = useStockProductController({ isEdit });
 
   const { hasSettingActive } = useCompanySettingsStore();
@@ -163,6 +193,88 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
             </Form.Item>
           </Col>
         </Row>
+
+        {currentPlan?.id === PlanIds.FISCAL && (
+          <>
+            <Title level={5} style={{ marginTop: 8 }}>
+              Classificação Fiscal
+            </Title>
+            <Text type="secondary" style={{ display: "block", marginBottom: 12 }}>
+              Dados fiscais aplicados a todas as variações deste produto.
+            </Text>
+            <div
+              style={{
+                border: "1px solid #d9d9d9",
+                borderRadius: 8,
+                padding: 12,
+                marginBottom: 16,
+                background: "#fafafa",
+              }}
+            >
+              <Row gutter={8}>
+                <Col xs={12} md={6}>
+                  <Form.Item name={["productFiscalClassification", "ncm"]} label="NCM">
+                    <Input maxLength={8} placeholder="Ex: 22030000" />
+                  </Form.Item>
+                </Col>
+                <Col xs={12} md={6}>
+                  <Form.Item name={["productFiscalClassification", "cfop"]} label="CFOP">
+                    <Input maxLength={4} placeholder="Ex: 5102" />
+                  </Form.Item>
+                </Col>
+                <Col xs={12} md={6}>
+                  <Form.Item name={["productFiscalClassification", "cest"]} label="CEST">
+                    <Input maxLength={7} placeholder="Ex: 0300100" />
+                  </Form.Item>
+                </Col>
+                <Col xs={12} md={6}>
+                  <Form.Item name={["productFiscalClassification", "origin"]} label="Origem">
+                    <Select
+                      allowClear
+                      placeholder="Selecione"
+                      options={originOptions}
+                      showSearch
+                      optionFilterProp="label"
+                    />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item name={["productFiscalClassification", "csosn"]} label="CSOSN">
+                    <Select
+                      allowClear
+                      placeholder="Selecione"
+                      options={csosnOptions}
+                      showSearch
+                      optionFilterProp="label"
+                    />
+                  </Form.Item>
+                </Col>
+                <Col xs={12} md={6}>
+                  <Form.Item name={["productFiscalClassification", "pis"]} label="PIS">
+                    <Select
+                      allowClear
+                      placeholder="Selecione"
+                      options={pisCofinsOptions}
+                      showSearch
+                      optionFilterProp="label"
+                    />
+                  </Form.Item>
+                </Col>
+                <Col xs={12} md={6}>
+                  <Form.Item name={["productFiscalClassification", "cofins"]} label="COFINS">
+                    <Select
+                      allowClear
+                      placeholder="Selecione"
+                      options={pisCofinsOptions}
+                      showSearch
+                      optionFilterProp="label"
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+            </div>
+          </>
+        )}
 
         <Title level={5} style={{ marginTop: 8 }}>
           Variações
