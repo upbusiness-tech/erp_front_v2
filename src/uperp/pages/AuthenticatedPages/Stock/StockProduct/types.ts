@@ -1,3 +1,5 @@
+import { CsosnEnum, OriginEnum, PisCofinsCstEnum } from "@/enums/productFiscal.enum";
+
 export enum ProductUnitOfMeasure {
   GRAM = "Gramas",
   UNIT = "Unidade",
@@ -11,6 +13,7 @@ export interface IProductCreateFields {
   productPicture: string;
   productCategoryId: number;
   variants: IProductVariantField[];
+  productFiscalClassification?: IProductFiscalClassificationFields;
 }
 
 export interface IProductVariantField {
@@ -25,4 +28,15 @@ export interface IProductVariantField {
   color?: string;
   brand?: string;
   productSupplierId?: number;
+}
+
+export interface IProductFiscalClassificationFields {
+  id?: number;
+  ncm: string;
+  cfop: string;
+  origin: OriginEnum;
+  csosn: CsosnEnum;
+  cest?: string;
+  pis: PisCofinsCstEnum;
+  cofins: PisCofinsCstEnum;
 }

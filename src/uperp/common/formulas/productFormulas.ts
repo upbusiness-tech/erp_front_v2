@@ -16,7 +16,9 @@ export const calculeStockTotalByProductEspecification = (
 export const showStockTotalByProductEspecification = (
   product: ProductModel,
   variants: ProductEspecificationModel[],
+  stock?: number,
 ) => {
+  if (stock) return extractStockFormatByProduct(product, stock);
   const total = calculeStockTotalByProductEspecification(variants);
 
   return extractStockFormatByProduct(product, total);

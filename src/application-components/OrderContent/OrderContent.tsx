@@ -98,6 +98,8 @@ export const OrderContent = ({ handleSubmitSale, submitingSale }: OrderContentPr
     <>
       <Steps
         size="small"
+        direction="horizontal"
+        responsive={false}
         current={saleStep === "items" ? 0 : 1}
         items={[{ title: "Itens" }, { title: "Pagamento" }]}
         style={{ marginBottom: 12 }}
@@ -412,7 +414,10 @@ export const OrderContent = ({ handleSubmitSale, submitingSale }: OrderContentPr
               size="large"
               icon={<CheckCircle2 size={16} />}
               disabled={paid < (total ?? 0) - 0.001}
-              onClick={handleSubmitSale}
+              onClick={async () => {
+                await handleSubmitSale();
+                setpValue(0);
+              }}
               loading={submitingSale}
             >
               Finalizar Venda

@@ -3,11 +3,7 @@ import { Card } from "antd";
 import { StockTab } from "./components/StockTab/StockTab";
 import { useStockViewController } from "./useStockView.controller";
 
-type StockViewProps = {
-  a?: string;
-};
-
-export const StockView = ({ a }: StockViewProps) => {
+export const StockView = () => {
   const { handleGoToCreateProduct } = useStockViewController();
 
   return (

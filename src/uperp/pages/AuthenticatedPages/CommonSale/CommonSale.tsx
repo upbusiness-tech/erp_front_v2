@@ -1,28 +1,15 @@
 import { CashFlowStatus } from "@/application-components/CashFlowStatus/CashFlowStatus";
 import { GenericTable } from "@/application-components/GenericTable/GenericTable";
 import { OrderContent } from "@/application-components/OrderContent/OrderContent";
-import { ProductCard } from "@/application-components/ProductCard/ProductCard";
+import { ProductCardList } from "@/application-components/ProductCardList/ProductCardList";
 import { ProductEspecificationModal } from "@/application-components/ProductEspecificationModal/ProductEspecificationModal";
 import { RecentSalesModal } from "@/application-components/RecentSalesModal/RecentSalesModal";
 import { SaleReceiptModal } from "@/application-components/SaleReceiptModal/SaleReceiptModal";
 import { SearchBar } from "@/application-components/SearchBar/SearchBar";
 import { EProductView, useSalesStore } from "@/stores/sales.store";
 import { AppstoreOutlined, BarsOutlined } from "@ant-design/icons";
-import {
-  Badge,
-  Button,
-  Card,
-  Col,
-  Drawer,
-  Empty,
-  Grid,
-  Pagination,
-  Row,
-  Segmented,
-  Space,
-  Spin,
-} from "antd";
-import { ShoppingCart } from "lucide-react";
+import { Badge, Button, Card, Col, Drawer, Grid, Row, Segmented, Space } from "antd";
+import { History, ShoppingCart } from "lucide-react";
 import { useCommonSaleController } from "./useCommonSale.controller";
 
 const { useBreakpoint } = Grid;
@@ -81,7 +68,17 @@ export function CommonSale() {
     <>
       <Row gutter={16} style={{ minHeight: "calc(100vh - 112px)" }} align="stretch">
         <Col xs={24} lg={16} style={{ display: "flex", flexDirection: "column" }}>
-          <CashFlowStatus onShowRecentSales={() => setRecentOpen(true)} />
+          {!isMobile ? (
+            <CashFlowStatus onShowRecentSales={() => setRecentOpen(true)} />
+          ) : (
+            <Button
+              style={{ marginBottom: "5px" }}
+              icon={<History size={14} />}
+              onClick={() => setRecentOpen(true)}
+            >
+              Ver vendas recentes
+            </Button>
+          )}
 
           <Card
             style={{ flex: 1, display: "flex", flexDirection: "column" }}
@@ -105,7 +102,6 @@ export function CommonSale() {
                       onChange: handleCategoryFilterChange,
                       placeholder: "Categorias",
                       options: productCategoriesOptions,
-                      maxWidth: 450,
                       size: "large",
                     },
                   ]}
@@ -126,36 +122,16 @@ export function CommonSale() {
             </Row>
 
             {productsView === EProductView.CARDS ? (
-              isLoading ? (
-                <Spin />
-              ) : (
-                <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-                  <div style={{ flex: 1 }}>
-                    <Row gutter={[12, 12]}>
-                      {products.map((p) => (
-                        <Col key={p.id} xs={12} sm={8} md={6}>
-                          <ProductCard
-                            onClickProduct={() => handleOpenProductModal(p)}
-                            product={p}
-                          />
-                        </Col>
-                      ))}
-                      {products.length === 0 && <Empty style={{ width: "100%", padding: 32 }} />}
-                    </Row>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
-                    <Pagination
-                      current={page}
-                      pageSize={pageSize}
-                      total={total}
-                      showSizeChanger
-                      pageSizeOptions={[8, 12, 16, 24]}
-                      onChange={handlePageChange}
-                      onShowSizeChange={(_, size) => handlePageSizeChange(size)}
-                    />
-                  </div>
-                </div>
-              )
+              <ProductCardList
+                products={products}
+                total={total}
+                page={page}
+                pageSize={pageSize}
+                isLoading={isLoading}
+                onPageChange={handlePageChange}
+                onPageSizeChange={handlePageSizeChange}
+                onClickProduct={handleOpenProductModal}
+              />
             ) : (
               <GenericTable
                 rowKey="id"
@@ -168,6 +144,7 @@ export function CommonSale() {
                 onPageChange={handlePageChange}
                 onPageSizeChange={handlePageSizeChange}
                 onRowClick={handleOpenProductModal}
+                showTotal={false}
               />
             )}
           </Card>

@@ -99,7 +99,6 @@ export function useOrderContentController() {
       return;
     }
     if (pValue === 0) {
-      setpValue(remaining);
       payments.push({
         id: Math.random() * 1000,
         amount: remaining,
@@ -113,6 +112,7 @@ export function useOrderContentController() {
       amount: pValue,
       type: pMethod,
     });
+    setpValue(0);
     setPayments(payments);
   };
 
