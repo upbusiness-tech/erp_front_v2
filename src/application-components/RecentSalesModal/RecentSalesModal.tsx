@@ -4,10 +4,12 @@ import { SaleModel } from "@/model/sale.model";
 import { formatDateFromApi } from "@/uperp/common/dates";
 import { formatPrice } from "@/uperp/common/formulas/productFormulas";
 import { calculateTotalCartItems } from "@/uperp/common/formulas/saleFormulas";
-import { Button, Modal, Tag, Typography } from "antd";
+import { Button, Grid, Modal, Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
 import { Receipt } from "lucide-react";
+import { RecentSaleCardList } from "./RecentSaleCardList";
 
+const { useBreakpoint } = Grid;
 const { Text } = Typography;
 
 type RecentSalesModalProps = {
@@ -37,6 +39,9 @@ export const RecentSalesModal = ({
   onRowClick,
   handleViewRecentSale,
 }: RecentSalesModalProps) => {
+  const screens = useBreakpoint();
+  const isMobile = !screens.sm;
+
   const columns: ColumnsType<SaleModel> = [
     { title: "Código", dataIndex: "code", width: 110 },
     {
@@ -101,19 +106,33 @@ export const RecentSalesModal = ({
 
   return (
     <Modal open={open} title="Vendas recentes" onCancel={onClose} footer={null} width={860}>
-      <GenericTable
-        rowKey="id"
-        columns={columns}
-        data={data}
-        total={total}
-        isLoading={isLoading}
-        page={page}
-        pageSize={pageSize}
-        onPageChange={onPageChange}
-        onPageSizeChange={onPageSizeChange}
-        onRowClick={onRowClick}
-        locale={{ emptyText: "Nenhuma venda registrada" }}
-      />
+      {isMobile ? (
+        <RecentSaleCardList
+          data={data}
+          total={total}
+          page={page}
+          pageSize={pageSize}
+          onPageChange={onPageChange}
+          onPageSizeChange={onPageSizeChange}
+          isLoading={isLoading}
+          onRowClick={onRowClick}
+          onView={handleViewRecentSale}
+        />
+      ) : (
+        <GenericTable
+          rowKey="id"
+          columns={columns}
+          data={data}
+          total={total}
+          isLoading={isLoading}
+          page={page}
+          pageSize={pageSize}
+          onPageChange={onPageChange}
+          onPageSizeChange={onPageSizeChange}
+          onRowClick={onRowClick}
+          locale={{ emptyText: "Nenhuma venda registrada" }}
+        />
+      )}
     </Modal>
   );
 };

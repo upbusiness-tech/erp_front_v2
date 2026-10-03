@@ -19,6 +19,7 @@ type GenericTableProps<T> = {
   locale?: TableProps<T>["locale"];
   size?: SizeType;
   rowClassName?: any | undefined;
+  showTotal?: boolean;
 };
 
 export const GenericTable = <T,>({
@@ -37,6 +38,7 @@ export const GenericTable = <T,>({
   size = "large",
   locale,
   rowClassName,
+  showTotal = true,
 }: GenericTableProps<T>) => {
   const handleTableChange = (pagination: TablePaginationConfig) => {
     if (pagination.current && pagination.current !== page) {
@@ -57,10 +59,12 @@ export const GenericTable = <T,>({
         pageSize,
         total,
         showSizeChanger: true,
+        placement: ["bottomStart"],
         pageSizeOptions,
-        ...(total !== undefined && {
-          showTotal: (totalCount, range) => `${range[0]}-${range[1]} de ${totalCount} registros`,
-        }),
+        ...(total !== undefined &&
+          showTotal && {
+            showTotal: (totalCount, range) => `${range[0]}-${range[1]} de ${totalCount} registros`,
+          }),
       }}
       onChange={handleTableChange}
       scroll={{ x: 760 }}

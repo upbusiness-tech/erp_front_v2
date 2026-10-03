@@ -1,9 +1,10 @@
 import { GenericTable } from "@/application-components/GenericTable/GenericTable";
+import { RecentSaleCardList } from "@/application-components/RecentSalesModal/RecentSaleCardList";
 import { SaleReceiptModal } from "@/application-components/SaleReceiptModal/SaleReceiptModal";
 import { SearchBar } from "@/application-components/SearchBar/SearchBar";
 import { PaymentMethod } from "@/enums/payment.enum";
 import { formatPrice } from "@/uperp/common/formulas/productFormulas";
-import { Button, Card, Col, Row, Space, Statistic, Tag, Typography } from "antd";
+import { Button, Card, Col, Grid, Row, Space, Statistic, Tag, Typography } from "antd";
 import { Download } from "lucide-react";
 import { PAYMENT_LABEL } from "../../../../common/consts";
 import {
@@ -12,9 +13,13 @@ import {
   useSaleHistoryController,
 } from "./useSaleHistory.controller";
 
+const { useBreakpoint } = Grid;
 const { Text } = Typography;
 
 export const SaleHistory = () => {
+  const screens = useBreakpoint();
+  const isMobile = !screens.sm;
+
   const {
     sales,
     salesTotal,
@@ -121,19 +126,35 @@ export const SaleHistory = () => {
           ]}
         />
 
-        <GenericTable
-          rowKey="id"
-          columns={salesColumns}
-          data={sales}
-          total={salesTotal}
-          isLoading={salesLoading}
-          page={salesPage}
-          pageSize={salesPageSize}
-          onPageChange={salesPageChange}
-          onPageSizeChange={salesPageSizeChange}
-          onRowClick={handleViewRecentSale}
-          locale={{ emptyText: "Nenhuma venda registrada" }}
-        />
+        {isMobile ? (
+          <RecentSaleCardList
+            data={sales}
+            total={salesTotal}
+            page={salesPage}
+            pageSize={salesPageSize}
+            onPageChange={salesPageChange}
+            onPageSizeChange={salesPageSizeChange}
+            isLoading={salesLoading}
+            onRowClick={handleViewRecentSale}
+            onView={handleViewRecentSale}
+            showItemCount
+            showPayments
+          />
+        ) : (
+          <GenericTable
+            rowKey="id"
+            columns={salesColumns}
+            data={sales}
+            total={salesTotal}
+            isLoading={salesLoading}
+            page={salesPage}
+            pageSize={salesPageSize}
+            onPageChange={salesPageChange}
+            onPageSizeChange={salesPageSizeChange}
+            onRowClick={handleViewRecentSale}
+            locale={{ emptyText: "Nenhuma venda registrada" }}
+          />
+        )}
 
         <SaleReceiptModal receiptSale={receiptSale} onClose={handleCloseReceipt} variant={"view"} />
       </Card>

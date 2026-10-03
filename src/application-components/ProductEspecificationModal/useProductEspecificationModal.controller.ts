@@ -6,6 +6,7 @@ import { calculeStockTotalByProductEspecification } from "@/uperp/common/formula
 import { getUnitSoldFormat } from "@/uperp/common/formulas/saleReceipt";
 import { CartSaleItem } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
 import { ProductUnitOfMeasure } from "@/uperp/pages/AuthenticatedPages/Stock/StockProduct/types";
+import { UNIT_OF_MEASURE_OPTIONS } from "@/uperp/pages/AuthenticatedPages/Stock/StockView/components/StockProductTable/consts";
 import { message } from "antd";
 import { useEffect, useMemo, useState } from "react";
 
@@ -66,6 +67,13 @@ export function useProductEspecificationModalController({
     ? findSpecification()?.stockQuantity
     : calculeStockTotalByProductEspecification(product?.productEspecifications || []);
 
+  const isQuantityAvaliable = () => {
+    const currentEspecification = findSpecification();
+    if (currentEspecification) {
+      return currentEspecification?.stockQuantity > unitSold * qty;
+    }
+  };
+
   const isNotStandardUnitOfMeasurement = product?.unitOfMeasure != ProductUnitOfMeasure.UNIT;
 
   const specialPriceForSpec = useMemo(() => {
@@ -107,16 +115,20 @@ export function useProductEspecificationModalController({
         message.warning("Sem estoque suficiente!");
         return;
       }
+      if (!isQuantityAvaliable()) {
+        message.warning("Estoque selecionado está indisponível para venda!");
+        return;
+      }
       const sameSpecificationAtOrder = saleItems.filter(
         (si) => si.productEspecificationId === specification?.id,
       );
       if (sameSpecificationAtOrder.length > 0) {
         const currentStock = specification.stockQuantity;
         const totalAdded = sameSpecificationAtOrder.reduce((acc, value) => {
-          return acc + value.quantitySold;
+          return acc + value.quantitySold * value.unitSold;
         }, 0);
         if (currentStock <= totalAdded) {
-          message.warning("Sem estoque suficiente!");
+          message.warning("Estoque selecionado está indisponível para venda!");
           return;
         }
       }
@@ -171,5 +183,6 @@ export function useProductEspecificationModalController({
     setSelectedBrand,
     setNote,
     note,
+    isQuantityAvaliable,
   };
 }

@@ -10,20 +10,22 @@ const { Text } = Typography;
 
 type ProductCardProps = {
   product: ProductModel;
-  onClickProduct: (p: ProductModel) => void;
+  onClickProduct?: (p: ProductModel) => void;
 };
 
 export const ProductCard = ({ product, onClickProduct }: ProductCardProps) => {
   const stock = calculeStockTotalByProductEspecification(product.productEspecifications);
+  const isClickable = !!onClickProduct;
 
   return (
     <Card
       size="small"
-      hoverable={stock > 0}
+      hoverable={isClickable && stock > 0}
       styles={{ body: { padding: 12 } }}
-      onClick={() => onClickProduct(product)}
+      onClick={() => onClickProduct?.(product)}
       style={{
         opacity: stock > 0 ? 1 : 0.5,
+        cursor: isClickable ? "pointer" : "default",
       }}
     >
       {product.productPicture ? (

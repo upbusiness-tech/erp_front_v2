@@ -218,7 +218,6 @@ export function useCommonSaleController() {
 
   const handleCloseReceipt = () => {
     setReceiptSale(null);
-    setRecentOpen(true);
   };
 
   const { invalidateQuery } = useCacheManager();
