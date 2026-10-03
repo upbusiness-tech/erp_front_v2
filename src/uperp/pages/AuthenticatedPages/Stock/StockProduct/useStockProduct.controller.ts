@@ -2,9 +2,11 @@ import { useCacheManager } from "@/hooks/useCacheManager";
 import { useGetAllWithParams } from "@/hooks/useGetAllWithParams";
 import { useGetOneWithParams } from "@/hooks/useGetOneWithParams";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+import { PlanModel } from "@/model/plan.model";
 import { ProductModel } from "@/model/product.model";
 import { ProductCategoryModel } from "@/model/productCategory.model";
 import { ProductSupplierModel } from "@/model/productSupplier.model";
+import { PlanService } from "@/services/plan.service";
 import { ProductService } from "@/services/product.service";
 import { ProductCategoryService } from "@/services/productCategory.service";
 import { ProductSupplierService } from "@/services/productSupplier.service";
@@ -17,6 +19,7 @@ import { IProductCreateFields, IProductVariantField, ProductUnitOfMeasure } from
 const productCategoryService = new ProductCategoryService();
 const productSupplierService = new ProductSupplierService();
 const productService = new ProductService();
+const planService = new PlanService();
 
 export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
   const { id } = useParams<{ id: string }>();
@@ -61,7 +64,7 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
         values.productPicture = url;
       }
       if (isEdit && id) {
-        const variants: IProductVariantField[] = values.variants.map((p) => {
+        const variants: IProductVariantField[] = values.variants.map((p: IProductVariantField) => {
           return {
             id: p.id,
             barcode: p.barcode,
@@ -96,6 +99,13 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
     enabled: !!id && isEdit,
   });
 
+  const [currentPlan, setCurrentPlan] = useState<PlanModel | undefined>(undefined);
+
+  const getPlan = async () => {
+    const plan = await planService.getMyPlan();
+    setCurrentPlan(plan);
+  };
+
   useEffect(() => {
     if (isEdit && productToEdit) {
       const variants: IProductVariantField[] = productToEdit.productEspecifications.map((pe) => {
@@ -104,15 +114,30 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
         };
       });
 
+      const fiscalFromClassification = productToEdit.productFiscalClassification;
+
       form.setFieldsValue({
         name: productToEdit.name,
         productCategoryId: productToEdit.productCategoryId,
         productPicture: productToEdit.productPicture,
         unitOfMeasure: productToEdit.unitOfMeasure as ProductUnitOfMeasure,
         variants,
+        productFiscalClassification: {
+          cest: fiscalFromClassification.cest,
+          cfop: fiscalFromClassification.cfop,
+          cofins: fiscalFromClassification.cofins,
+          csosn: fiscalFromClassification.csosn,
+          ncm: fiscalFromClassification.ncm,
+          origin: fiscalFromClassification.origin,
+          pis: fiscalFromClassification.pis,
+        },
       });
     }
   }, [isEdit, productToEdit]);
+
+  useEffect(() => {
+    getPlan();
+  }, []);
 
   return {
     form,
@@ -127,5 +152,6 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
     loading,
     suppliers,
     isLoadingSuppliers,
+    currentPlan,
   };
 }
