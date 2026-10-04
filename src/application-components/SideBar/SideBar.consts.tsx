@@ -94,6 +94,6 @@ export const pageKeyRequiresPermission: Record<PageKey, string> = {
   clientes: SideBarPermissions.AccessInternClientsSection.name,
   funcionarios: SideBarPermissions.AccessEmployeeSection.name,
   empresa: SideBarPermissions.AccessCompanySection.name,
-  planos: SideBarPermissions.AccessInvoicesSection.name,
+  planos: SideBarPermissions.AccessSubscriptionsSection.name,
   configuracoes: SideBarPermissions.AccessSettingsSection.name,
 };

@@ -2,7 +2,6 @@ import { BasicRoute } from "@/routes/-types";
 import { CashFlowOpen } from "@/uperp/pages/AuthenticatedPages/CashFlow/CashFlowOpen/CashFlowOpen";
 import { CashFlowView } from "@/uperp/pages/AuthenticatedPages/CashFlow/CashFlowView/CashFlowView";
 import { CashFlowHistoryDetail } from "@/uperp/pages/AuthenticatedPages/Finance/CashFlowHistory/CashFlowHistoryDetail/CashFlowHistoryDetail";
-import { Caixa } from "@/uperp/pages/Caixa";
 
 export enum CashierPaths {
   BASE = "/caixa",
