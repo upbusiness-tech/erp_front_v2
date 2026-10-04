@@ -29,7 +29,23 @@ export const ProductCard = ({ product, onClickProduct }: ProductCardProps) => {
       }}
     >
       {product.productPicture ? (
-        <Image width="100%" src={product.productPicture} preview={false} />
+        <div
+          style={{
+            aspectRatio: "1 / 1",
+            width: "100%",
+            borderRadius: 8,
+            overflow: "hidden",
+            marginBottom: 10,
+          }}
+        >
+          <Image
+            width="100%"
+            height="100%"
+            src={product.productPicture}
+            preview={false}
+            style={{ objectFit: "cover" }}
+          />
+        </div>
       ) : (
         <div
           style={{

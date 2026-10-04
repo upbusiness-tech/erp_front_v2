@@ -1,17 +1,17 @@
 import { GenericTable } from "@/application-components/GenericTable/GenericTable";
-import { InvoiceModel } from "@/model/invoice.model";
 import { Button, Card, Col, Row, Tag, Typography, message } from "antd";
 import { Sparkles } from "lucide-react";
-import { PaymentProofModal } from "./components/PaymentProofModal/PaymentProofModal";
-import { useInvoiceViewController } from "./useInvoiceView.controller";
+import { PaymentModal } from "./components/PaymentModal/PaymentModal";
+import { useSubscriptionViewController } from "./useSubscriptionView.controller";
+import { SubscriptionModel } from "@/model/subscription.model";
 
 const { Title, Text } = Typography;
 
-export function InvoiceView() {
+export function SubscriptionView() {
   const {
     plans,
     currentCompany,
-    invoices,
+    subscriptions,
     total,
     isLoading,
     page,
@@ -19,9 +19,10 @@ export function InvoiceView() {
     handlePageChange,
     handlePageSizeChange,
     tableColumns,
-    selectedInvoice,
-    closePaymentProofModal,
-  } = useInvoiceViewController();
+    selectedSubscription,
+    closePaymentModal,
+    openPaymentModal,
+  } = useSubscriptionViewController();
 
   return (
     <>
@@ -70,8 +71,8 @@ export function InvoiceView() {
       </Row>
 
       <Card title="Faturas e Mensalidades">
-        <GenericTable<InvoiceModel>
-          data={invoices}
+        <GenericTable<SubscriptionModel>
+          data={subscriptions}
           columns={tableColumns}
           isLoading={isLoading}
           page={page}
@@ -79,10 +80,11 @@ export function InvoiceView() {
           total={total}
           onPageChange={handlePageChange}
           onPageSizeChange={handlePageSizeChange}
+          onRowClick={openPaymentModal}
         />
 
-        {selectedInvoice && (
-          <PaymentProofModal invoice={selectedInvoice} onClose={closePaymentProofModal} />
+        {selectedSubscription && (
+          <PaymentModal subscription={selectedSubscription} onClose={closePaymentModal} />
         )}
       </Card>
     </>

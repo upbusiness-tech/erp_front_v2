@@ -172,7 +172,7 @@ export interface Sale {
   discount?: number;
 }
 
-export interface Invoice {
+export interface Subscription {
   id: string;
   period: string;
   amount: number;

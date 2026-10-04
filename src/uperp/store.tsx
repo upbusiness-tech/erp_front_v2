@@ -5,7 +5,7 @@ import type {
   Customer,
   Employee,
   Sale,
-  Invoice,
+  Subscription,
   CashSession,
   CashMovement,
   ClosedCashSession,
@@ -17,7 +17,7 @@ import {
   initialCustomers,
   initialEmployees,
   initialSales,
-  initialInvoices,
+  initialSubscriptions,
   initialCategories,
 } from "./mockData";
 
@@ -49,7 +49,7 @@ interface StoreCtx {
   setEmployees: (e: Employee[]) => void;
   sales: Sale[];
   addSale: (s: Sale) => void;
-  invoices: Invoice[];
+  subscriptions: Subscription[];
 
   cashOpen: boolean;
   cashSession: CashSession | null;
@@ -132,7 +132,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
   const [employees, setEmployees] = useState<Employee[]>(initialEmployees);
   const [sales, setSales] = useState<Sale[]>(initialSales);
-  const [invoices] = useState<Invoice[]>(initialInvoices);
+  const [subscriptions] = useState<Subscription[]>(initialSubscriptions);
   const [cashSession, setCashSession] = useState<CashSession | null>(null);
   const [cashMovements, setCashMovements] = useState<CashMovement[]>([]);
   const [cashHistory, setCashHistory] = useState<ClosedCashSession[]>(seedClosedSessions);
@@ -269,7 +269,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setEmployees,
         sales,
         addSale,
-        invoices,
+        subscriptions,
         cashOpen,
         cashSession,
         cashMovements,

@@ -1,4 +1,4 @@
-import type { Category, Customer, Employee, Invoice, Product, Sale } from "./types";
+import type { Category, Customer, Employee, Product, Sale, Subscription } from "./types";
 
 export const initialCategories: Category[] = [
   { id: "c1", name: "Vestuário" },
@@ -193,7 +193,7 @@ export const initialSales: Sale[] = [
   },
 ];
 
-export const initialInvoices: Invoice[] = [
+export const initialSubscriptions: Subscription[] = [
   { id: "F-2026-06", period: "Junho/2026", amount: 299.9, status: "aberta", dueDate: "2026-06-30" },
   { id: "F-2026-05", period: "Maio/2026", amount: 299.9, status: "paga", dueDate: "2026-05-30" },
   { id: "F-2026-04", period: "Abril/2026", amount: 299.9, status: "paga", dueDate: "2026-04-30" },
