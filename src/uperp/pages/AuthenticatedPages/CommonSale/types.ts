@@ -3,7 +3,6 @@ import { SaleType } from "@/enums/sale.enum";
 import { InternCustomerSpecialPriceModel } from "@/model/internCustomerPrice.model";
 import { ProductModel } from "@/model/product.model";
 import { ProductEspecificationModel } from "@/model/productEspecification.model";
-import { ProductUnitOfMeasure } from "../Stock/StockProduct/types";
 
 export interface DiscountInfo {
   value?: number;
@@ -18,6 +17,13 @@ export interface ICreateSaleForm {
   payments: IPaymentMethodField[];
   internCustomerId?: number;
   discount?: DiscountInfo;
+  services?: ISaleServiceForm[];
+}
+
+export interface ISaleServiceForm {
+  description: string;
+  onwerEmployee: string;
+  amount: number;
 }
 
 export interface ISaleItemField {

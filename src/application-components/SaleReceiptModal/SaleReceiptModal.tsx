@@ -193,7 +193,7 @@ export const SaleReceiptModal = ({
               )}
             </div>
 
-            <Divider style={{ margin: "14px 0 10px" }}>Itens</Divider>
+            <Divider style={{ margin: "14px 0 10px" }}>Itens & Serviços</Divider>
             <List
               size="small"
               dataSource={receiptSale.items}
@@ -240,6 +240,29 @@ export const SaleReceiptModal = ({
                     }
                   />
                   <Text strong>{formatPrice(item.lineTotal)}</Text>
+                </List.Item>
+              )}
+            />
+            <List
+              size="small"
+              dataSource={receiptSale.sale.services}
+              renderItem={(item) => (
+                <List.Item>
+                  <List.Item.Meta
+                    title={
+                      <Space size={6} wrap>
+                        <Text strong>{item.description}</Text>
+                      </Space>
+                    }
+                    description={
+                      <Space direction="vertical" size={0}>
+                        <Text italic style={{ fontSize: 13 }}>
+                          Funcionário: {item.onwerEmployee}
+                        </Text>
+                      </Space>
+                    }
+                  />
+                  <Text strong>{formatPrice(item.amount)}</Text>
                 </List.Item>
               )}
             />

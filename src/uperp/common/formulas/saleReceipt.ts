@@ -4,6 +4,7 @@ import {
   SaleModel,
   SaleReceiptModel,
   SaleReceiptPaymentModel,
+  SaleReceiptServiceModel,
 } from "@/model/sale.model";
 import {
   calculateGrossSubtotal,
@@ -46,7 +47,7 @@ const getItemUnitPrice = (item: SaleItemModel): number => {
 };
 
 export const calculateSaleSubtotal = (sale: SaleModel): number =>
-  calculateGrossSubtotal(sale.items);
+  calculateGrossSubtotal(sale.items, sale.services);
 
 export const createSaleReceipt = (sale: SaleModel): SaleReceiptModel => {
   const items = sale.items.map((item) => {
@@ -75,13 +76,21 @@ export const createSaleReceipt = (sale: SaleModel): SaleReceiptModel => {
     };
   });
 
+  const services: SaleReceiptServiceModel[] = (sale.services ?? []).map((service) => ({
+    id: service.id,
+    description: service.description,
+    onwerEmployee: service.onwerEmployee,
+    amount: toNumber(service.amount),
+    discountValue: toNumber(service.discount?.value) || undefined,
+  }));
+
   const payments: SaleReceiptPaymentModel[] = sale.payments.map((payment) => ({
     id: payment.id,
     type: payment.type,
     amount: toNumber(payment.amount),
   }));
 
-  const subtotal = calculateGrossSubtotal(sale.items);
+  const subtotal = calculateGrossSubtotal(sale.items, sale.services);
   const specialPriceTotal = calculateSpecialPriceSavings(sale.items);
   const itemDiscountTotal = calculateItemDiscountsTotal(sale.items);
   const saleDiscountValue = toNumber(sale.discount?.value);
@@ -94,6 +103,7 @@ export const createSaleReceipt = (sale: SaleModel): SaleReceiptModel => {
     date: sale.createdAt || "",
     customerName: sale.internCustomer?.name || "Consumidor final",
     items,
+    services,
     payments,
     subtotal,
     specialPriceTotal,

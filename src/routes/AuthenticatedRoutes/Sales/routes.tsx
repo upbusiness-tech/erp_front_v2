@@ -1,6 +1,6 @@
 import { BasicRoute } from "@/routes/-types";
 import { CommonSale } from "@/uperp/pages/AuthenticatedPages/CommonSale/CommonSale";
-import { Maintenance } from "@/uperp/pages/Maintenance/Maintenance";
+import { ServiceSale } from "@/uperp/pages/AuthenticatedPages/ServiceSale/ServiceSale";
 import { VendaServico } from "@/uperp/pages/VendaServico";
 
 export enum SalesPaths {
@@ -15,7 +15,6 @@ export const salesBaseRoutes: BasicRoute[] = [
   },
   {
     path: SalesPaths.SERVICE_SALE,
-    // element: <VendaServico />,
-    element: <Maintenance />,
+    element: <ServiceSale />,
   },
 ];

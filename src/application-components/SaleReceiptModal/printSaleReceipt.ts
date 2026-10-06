@@ -1,4 +1,5 @@
 import { SaleReceiptModel } from "@/model/sale.model";
+import { formatDateFromApi } from "@/uperp/common/dates";
 import { formatPrice } from "@/uperp/common/formulas/productFormulas";
 import { SALE_PAYMENT_LABEL, formatUnitSoldAmount } from "@/uperp/common/formulas/saleReceipt";
 
@@ -25,6 +26,16 @@ export const createReceiptHtml = (receipt: SaleReceiptModel) => {
           ${item.hasSpecialPrice ? `<div class="special">PREÇO ESPECIAL · De ${formatPrice(item.originalUnitPrice)} por ${formatPrice(item.unitPrice)}</div>` : ""}
           ${item.discountValue != null && item.discountValue > 0 ? `<div class="discount">DESCONTO: -${formatPrice(item.discountValue)}</div>` : ""}
           ${item.note ? `<div class="muted">Obs.: ${escapeHtml(item.note)}</div>` : ""}
+        </article>`,
+    )
+    .join("");
+  const services = receipt.services
+    .map(
+      (service) => `
+        <article class="item">
+          <div class="line strong"><span>${escapeHtml(service.description)}</span><span>${formatPrice(service.amount)}</span></div>
+          <div class="muted">${escapeHtml(service.onwerEmployee)}</div>
+          ${service.discountValue != null && service.discountValue > 0 ? `<div class="discount">DESCONTO: -${formatPrice(service.discountValue)}</div>` : ""}
         </article>`,
     )
     .join("");
@@ -62,12 +73,13 @@ export const createReceiptHtml = (receipt: SaleReceiptModel) => {
         <header class="center">
           <h1>COMPROVANTE DE VENDA</h1>
           <div>Venda ${escapeHtml(receipt.code)}</div>
-          <div class="muted">${escapeHtml(formatDate(receipt.date))}</div>
+          <div class="muted">${escapeHtml(formatDateFromApi(receipt.date))}</div>
         </header>
         <h2>Cliente</h2>
         <div>${escapeHtml(receipt.customerName || "Consumidor final")}</div>
         <h2>Itens</h2>
         ${items}
+        ${receipt.services.length > 0 ? `<h2>Serviços</h2>${services}` : ""}
         <h2>Resumo</h2>
         <div class="line"><span>Subtotal</span><span>${formatPrice(receipt.subtotal)}</span></div>
         ${receipt.specialPriceTotal > 0 ? `<div class="line"><span>Preços especiais</span><span>-${formatPrice(receipt.specialPriceTotal)}</span></div>` : ""}

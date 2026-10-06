@@ -32,7 +32,7 @@ export const RecentSaleCard = ({
   showPayments = false,
 }: RecentSaleCardProps) => {
   const typeInfo = SALE_TYPE_MAP[sale.type] || { label: sale.type, color: "default" };
-  const total = formatPrice(calculateTotalCartItems(sale.items, sale.discount));
+  const total = formatPrice(calculateTotalCartItems(sale.items, sale.services, sale.discount));
   const isClickable = !!onClick;
   const itemCount = sale.items?.length ?? 0;
 

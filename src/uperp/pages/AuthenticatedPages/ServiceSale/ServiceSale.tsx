@@ -1,26 +1,26 @@
 import { CashFlowStatus } from "@/application-components/CashFlowStatus/CashFlowStatus";
 import { GenericTable } from "@/application-components/GenericTable/GenericTable";
 import { OrderContent } from "@/application-components/OrderContent/OrderContent";
-import { ProductCardList } from "@/application-components/ProductCardList/ProductCardList";
 import { ProductEspecificationModal } from "@/application-components/ProductEspecificationModal/ProductEspecificationModal";
 import { RecentSalesModal } from "@/application-components/RecentSalesModal/RecentSalesModal";
 import { SaleReceiptModal } from "@/application-components/SaleReceiptModal/SaleReceiptModal";
 import { SearchBar } from "@/application-components/SearchBar/SearchBar";
-import { EProductView, useSalesStore } from "@/stores/sales.store";
-import { AppstoreOutlined, BarsOutlined } from "@ant-design/icons";
-import { Badge, Button, Card, Col, Drawer, Grid, Row, Segmented, Space } from "antd";
-import { History, ShoppingCart } from "lucide-react";
-import { useCommonSaleController } from "./useCommonSale.controller";
+import InputNumberFormatted from "@/application-components/InputNumberFormated/InputNumberFormated";
+import { useSalesStore } from "@/stores/sales.store";
+import { Badge, Button, Card, Col, Drawer, Form, Grid, Input, Row, Space, Typography } from "antd";
+import { Briefcase, History, Package, Plus, ShoppingCart } from "lucide-react";
+import type { ISaleServiceForm } from "../CommonSale/types";
+import { useServiceSaleController } from "./useServiceSale.controller";
 import { SaleType } from "@/enums/sale.enum";
+
+const { Text } = Typography;
 
 const { useBreakpoint } = Grid;
 
-export function CommonSale() {
+export const ServiceSale = () => {
   const {
-    handleSearchChange,
     search,
-    productsView,
-    setProductsView,
+    handleSearchChange,
     products,
     total,
     isLoading,
@@ -29,19 +29,19 @@ export function CommonSale() {
     handlePageChange,
     handlePageSizeChange,
     tableColumns,
-    handleCloseProductModal,
     handleOpenProductModal,
+    handleCloseProductModal,
     openProductModal,
     selectedProduct,
     saleForm,
-    saleStep,
     saleItems,
+    saleStep,
     cartOpen,
     setCartOpen,
     handleSubmitSale,
+    submiting,
     receiptSale,
     handleCloseReceipt,
-    resetSale,
     receiptVariant,
     recentOpen,
     setRecentOpen,
@@ -53,17 +53,24 @@ export function CommonSale() {
     handleRecentSalesPageChange,
     handleRecentSalesPageSizeChange,
     handleViewRecentSale,
-    categoryFilter,
-    handleCategoryFilterChange,
-    productCategoriesOptions,
-    submiting,
-  } = useCommonSaleController();
+    resetSale,
+  } = useServiceSaleController();
 
-  const { selectedCustomer } = useSalesStore();
+  const { selectedCustomer, addSaleService } = useSalesStore();
+  const [serviceForm] = Form.useForm<ISaleServiceForm>();
   const screens = useBreakpoint();
   const isMobile = !screens.lg;
 
   const cartCount = saleItems.reduce((s, i) => s + i.quantitySold, 0);
+
+  const handleAddService = (values: ISaleServiceForm) => {
+    addSaleService({
+      description: values.description.trim(),
+      onwerEmployee: values.onwerEmployee.trim(),
+      amount: values.amount,
+    });
+    serviceForm.resetFields();
+  };
 
   return (
     <>
@@ -84,70 +91,129 @@ export function CommonSale() {
           <Card
             style={{ flex: 1, display: "flex", flexDirection: "column" }}
             styles={{ body: { flex: 1, display: "flex", flexDirection: "column" } }}
+            title={
+              <Space>
+                <Briefcase size={18} /> Serviços prestados
+              </Space>
+            }
+          >
+            <Form
+              form={serviceForm}
+              layout="vertical"
+              onFinish={handleAddService}
+              initialValues={{ amount: 0 }}
+              requiredMark={false}
+              size="middle"
+            >
+              <Row gutter={12} style={{ marginBottom: 0 }}>
+                <Col xs={24}>
+                  <Form.Item
+                    name="description"
+                    label="Descrição"
+                    rules={[
+                      { required: true, message: "Informe a descrição" },
+                      {
+                        validator: (_, v) =>
+                          v && v.trim().length > 0
+                            ? Promise.resolve()
+                            : Promise.reject("Descrição obrigatória"),
+                      },
+                    ]}
+                    style={{ marginBottom: 8 }}
+                  >
+                    <Input placeholder="Descrição do serviço" allowClear />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row gutter={12}>
+                <Col xs={24} sm={12}>
+                  <Form.Item
+                    name="onwerEmployee"
+                    label="Funcionário"
+                    rules={[
+                      { required: true, message: "Informe o funcionário" },
+                      {
+                        validator: (_, v) =>
+                          v && v.trim().length > 0
+                            ? Promise.resolve()
+                            : Promise.reject("Funcionário obrigatório"),
+                      },
+                    ]}
+                    style={{ marginBottom: 8 }}
+                  >
+                    <Input placeholder="Responsável" allowClear />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} sm={12}>
+                  <Form.Item
+                    name="amount"
+                    label="Valor"
+                    rules={[
+                      { required: true, message: "Informe o valor" },
+                      {
+                        validator: (_, v) =>
+                          typeof v === "number" && v > 0
+                            ? Promise.resolve()
+                            : Promise.reject("Valor deve ser maior que zero"),
+                      },
+                    ]}
+                    style={{ marginBottom: 8 }}
+                  >
+                    <InputNumberFormatted prefix="R$" placeholder="0,00" />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Form.Item style={{ marginBottom: 0 }}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  icon={<Plus size={16} />}
+                  block={isMobile}
+                  style={{ background: "#F26B1F", borderColor: "#F26B1F" }}
+                >
+                  Adicionar serviço
+                </Button>
+              </Form.Item>
+            </Form>
+          </Card>
+
+          <Card
+            style={{ flex: 1, display: "flex", flexDirection: "column" }}
+            styles={{ body: { flex: 1, display: "flex", flexDirection: "column" } }}
+            title={
+              <Space>
+                <Package size={18} /> Produtos do Estoque
+              </Space>
+            }
           >
             <Row gutter={12} style={{ marginBottom: 16 }} align="top">
-              <Col flex="auto">
-                <SearchBar
-                  searches={[
-                    {
-                      name: "name",
-                      value: search,
-                      onChange: handleSearchChange,
-                      placeholder: "Buscar por produto",
-                      size: "large",
-                    },
-                    {
-                      name: "productCategoryId",
-                      type: "select",
-                      value: categoryFilter,
-                      onChange: handleCategoryFilterChange,
-                      placeholder: "Categorias",
-                      options: productCategoriesOptions,
-                      size: "large",
-                    },
-                  ]}
-                />
-              </Col>
-              <Col>
-                <Segmented
-                  size="medium"
-                  default
-                  value={Number(productsView)}
-                  onChange={(v) => setProductsView(v)}
-                  options={[
-                    { value: EProductView.CARDS, icon: <AppstoreOutlined /> },
-                    { value: EProductView.LIST, icon: <BarsOutlined /> },
-                  ]}
-                />
-              </Col>
+              <SearchBar
+                searches={[
+                  {
+                    name: "name",
+                    value: search,
+                    onChange: handleSearchChange,
+                    placeholder: "Buscar por produto",
+                    size: "middle",
+                  },
+                ]}
+              />
             </Row>
 
-            {productsView === EProductView.CARDS ? (
-              <ProductCardList
-                products={products}
-                total={total}
-                page={page}
-                pageSize={pageSize}
-                isLoading={isLoading}
-                onPageChange={handlePageChange}
-                onPageSizeChange={handlePageSizeChange}
-                onClickProduct={handleOpenProductModal}
-              />
-            ) : (
-              <GenericTable
-                rowKey="id"
-                columns={tableColumns}
-                data={products}
-                total={total}
-                isLoading={isLoading}
-                page={page}
-                pageSize={pageSize}
-                onPageChange={handlePageChange}
-                onPageSizeChange={handlePageSizeChange}
-                onRowClick={handleOpenProductModal}
-                showTotal={false}
-              />
-            )}
+            <GenericTable
+              rowKey="id"
+              columns={tableColumns}
+              data={products}
+              total={total}
+              size="small"
+              isLoading={isLoading}
+              page={page}
+              pageSize={pageSize}
+              onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
+              onRowClick={handleOpenProductModal}
+              showTotal={false}
+            />
           </Card>
         </Col>
 
@@ -173,7 +239,7 @@ export function CommonSale() {
               <OrderContent
                 submitingSale={submiting}
                 handleSubmitSale={handleSubmitSale}
-                saleType={SaleType.NORMAL}
+                saleType={SaleType.SERVICE}
               />
             </Card>
           </Col>
@@ -227,7 +293,7 @@ export function CommonSale() {
         <OrderContent
           submitingSale={submiting}
           handleSubmitSale={handleSubmitSale}
-          saleType={SaleType.NORMAL}
+          saleType={SaleType.SERVICE}
         />
       </Drawer>
 
@@ -263,4 +329,4 @@ export function CommonSale() {
       />
     </>
   );
-}
+};

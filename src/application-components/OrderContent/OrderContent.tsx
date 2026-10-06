@@ -33,15 +33,18 @@ import { ItemDiscountModal } from "../ItemDiscountModal/ItemDiscountModal";
 import { OrderProductItem } from "../OrderProductItem/OrderProductItem";
 import { useOrderContentController } from "./useOrderContent.controller";
 import { PAYMENT_LABEL } from "@/uperp/common/consts";
+import { OrderServiceItem } from "../OrderServiceItem/OrderServiceItem";
+import { SaleType } from "@/enums/sale.enum";
 
 const { Title, Text } = Typography;
 
 export type OrderContentProps = {
-  handleSubmitSale: () => Promise<void>;
+  handleSubmitSale: (type: SaleType) => Promise<void>;
   submitingSale: boolean;
+  saleType: SaleType;
 };
 
-export const OrderContent = ({ handleSubmitSale, submitingSale }: OrderContentProps) => {
+export const OrderContent = ({ handleSubmitSale, submitingSale, saleType }: OrderContentProps) => {
   const {
     saleItems,
     saleStep,
@@ -92,6 +95,7 @@ export const OrderContent = ({ handleSubmitSale, submitingSale }: OrderContentPr
     setItemForSpecialPrice,
     setDiscountModalOpen,
     setItemForDiscount,
+    saleServices,
   } = useOrderContentController();
 
   return (
@@ -162,27 +166,36 @@ export const OrderContent = ({ handleSubmitSale, submitingSale }: OrderContentPr
 
           <Divider style={{ margin: "8px 0 12px" }} />
 
-          {saleItems.length === 0 ? (
+          {saleItems.length === 0 && saleServices.length === 0 ? (
             <Empty description="Carrinho vazio" />
           ) : (
-            <List
-              dataSource={saleItems}
-              style={{ height: 320, overflowY: "auto" }}
-              renderItem={(item, index) => (
-                <OrderProductItem
-                  key={index}
-                  item={item}
-                  specialPriceAvailable={
-                    selectedCustomer && !item.isEspecialPrice
-                      ? getSpecialPriceForItem(item)
-                      : undefined
-                  }
-                  onApplySpecialPrice={handleOpenSpecialPriceModal}
-                  onRemoveSpecialPrice={handleRemoveSpecialPrice}
-                  onOpenDiscount={handleOpenDiscountModal}
+            <>
+              {saleServices.length > 0 && (
+                <List
+                  dataSource={saleServices}
+                  style={{ height: "auto", overflowY: "auto" }}
+                  renderItem={(item, index) => <OrderServiceItem item={item} index={index} />}
                 />
               )}
-            />
+              <List
+                dataSource={saleItems}
+                style={{ height: 320, overflowY: "auto" }}
+                renderItem={(item, index) => (
+                  <OrderProductItem
+                    key={index}
+                    item={item}
+                    specialPriceAvailable={
+                      selectedCustomer && !item.isEspecialPrice
+                        ? getSpecialPriceForItem(item)
+                        : undefined
+                    }
+                    onApplySpecialPrice={handleOpenSpecialPriceModal}
+                    onRemoveSpecialPrice={handleRemoveSpecialPrice}
+                    onOpenDiscount={handleOpenDiscountModal}
+                  />
+                )}
+              />
+            </>
           )}
 
           <Divider style={{ margin: "12px 0" }} />
@@ -415,7 +428,7 @@ export const OrderContent = ({ handleSubmitSale, submitingSale }: OrderContentPr
               icon={<CheckCircle2 size={16} />}
               disabled={paid < (total ?? 0) - 0.001}
               onClick={async () => {
-                await handleSubmitSale();
+                await handleSubmitSale(saleType);
                 setpValue(0);
               }}
               loading={submitingSale}

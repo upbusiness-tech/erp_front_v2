@@ -34,6 +34,7 @@ export function useOrderContentController() {
     setSelectedCustomer,
     saleDiscount,
     setSaleDiscount,
+    saleServices,
   } = useSalesStore();
 
   const { currentCashFlow } = useCashFlowStore();
@@ -84,7 +85,7 @@ export function useOrderContentController() {
   const [pMethod, setpMethod] = useState<PaymentMethod>(PaymentMethod.CASH);
   const [pValue, setpValue] = useState<number>(0);
 
-  const total = calculateTotalCartItems(saleItems, saleDiscount);
+  const total = calculateTotalCartItems(saleItems, saleServices, saleDiscount);
   const paid = calculateTotalPayments(payments);
   const remaining = calculateRemainingSaleOnOrderContent(total, payments);
   const change = calculateChangeSaleOnOrderContent(total, payments);
@@ -128,7 +129,7 @@ export function useOrderContentController() {
   const [customerDetailsOpen, setCustomerDetailsOpen] = useState(false);
   const [saleDiscountExpanded, setSaleDiscountExpanded] = useState(false);
 
-  const grossSubtotal = calculateGrossSubtotal(saleItems);
+  const grossSubtotal = calculateGrossSubtotal(saleItems, saleServices);
   const specialPriceSavings = calculateSpecialPriceSavings(saleItems);
   const itemDiscountsTotal = calculateItemDiscountsTotal(saleItems);
   const saleDiscountValue = saleDiscount?.value ?? 0;
@@ -283,5 +284,6 @@ export function useOrderContentController() {
     setItemForSpecialPrice,
     setDiscountModalOpen,
     setItemForDiscount,
+    saleServices,
   };
 }

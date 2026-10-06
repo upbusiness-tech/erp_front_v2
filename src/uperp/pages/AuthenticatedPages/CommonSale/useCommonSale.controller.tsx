@@ -48,6 +48,7 @@ export function useCommonSaleController() {
     productsView,
     setProductsView,
     saleItems,
+    saleServices,
     payments,
     saleStep,
     resetSale,
@@ -222,7 +223,7 @@ export function useCommonSaleController() {
 
   const { invalidateQuery } = useCacheManager();
 
-  const handleSubmitSale = async () => {
+  const handleSubmitSale = async (type: SaleType) => {
     try {
       setsubmiting(true);
       if (!currentCashFlow || currentCashFlow.isClosed) {
@@ -253,12 +254,16 @@ export function useCommonSaleController() {
 
       const data: ICreateSaleForm = {
         cashFlowId: currentCashFlow.id,
-        type: SaleType.NORMAL,
+        type,
         items,
         payments: paymentsConverted,
         internCustomerId: selectedCustomer?.id,
         discount: saleDiscount?.value != null ? saleDiscount : undefined,
       };
+
+      if (type === SaleType.SERVICE) {
+        data.services = saleServices;
+      }
 
       const sale = await saleService.create<SaleModel>(data);
       invalidateQueries();

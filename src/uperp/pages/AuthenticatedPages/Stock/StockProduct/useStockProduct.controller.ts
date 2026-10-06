@@ -123,13 +123,13 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
         unitOfMeasure: productToEdit.unitOfMeasure as ProductUnitOfMeasure,
         variants,
         productFiscalClassification: {
-          cest: fiscalFromClassification.cest,
-          cfop: fiscalFromClassification.cfop,
-          cofins: fiscalFromClassification.cofins,
-          csosn: fiscalFromClassification.csosn,
-          ncm: fiscalFromClassification.ncm,
-          origin: fiscalFromClassification.origin,
-          pis: fiscalFromClassification.pis,
+          cest: fiscalFromClassification?.cest,
+          cfop: fiscalFromClassification?.cfop,
+          cofins: fiscalFromClassification?.cofins,
+          csosn: fiscalFromClassification?.csosn,
+          ncm: fiscalFromClassification?.ncm,
+          origin: fiscalFromClassification?.origin,
+          pis: fiscalFromClassification?.pis,
         },
       });
     }

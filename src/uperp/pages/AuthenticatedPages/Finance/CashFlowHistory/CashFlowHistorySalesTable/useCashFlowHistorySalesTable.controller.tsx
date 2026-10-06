@@ -69,7 +69,7 @@ export function useCashFlowHistorySalesTableController({ cashFlowId }: { cashFlo
       width: 50,
       render: (_, sale: SaleModel) => (
         <strong style={{ color: "#F26B1F" }}>
-          {formatPrice(calculateTotalCartItems(sale.items, sale.discount))}
+          {formatPrice(calculateTotalCartItems(sale.items, sale.services ?? [], sale.discount))}
         </strong>
       ),
     },
