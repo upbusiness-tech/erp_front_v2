@@ -37,6 +37,7 @@ export function useCashFlowHistorySalesTableController({ cashFlowId }: { cashFlo
         { field: "items.internCustomerPrice" },
         { field: "internCustomer" },
         { field: "payments" },
+        { field: "services" },
       ],
     },
   });

@@ -121,6 +121,7 @@ export function useCommonSaleController() {
         { field: "items.internCustomerPrice" },
         { field: "internCustomer" },
         { field: "payments" },
+        { field: "services" },
       ],
     },
   });
@@ -266,6 +267,25 @@ export function useCommonSaleController() {
       }
 
       const sale = await saleService.create<SaleModel>(data);
+
+      // O POST nem sempre devolve os serviços aninhados na resposta. Reanexa os
+      // serviços enviados para o comprovante exibi-los junto com os itens e
+      // para o modal/PDF mostrarem a lista de serviços corretamente.
+      if (
+        type === SaleType.SERVICE &&
+        saleServices.length > 0 &&
+        (!sale.services || sale.services.length === 0)
+      ) {
+        sale.services = saleServices.map((service, index) => ({
+          id: -(index + 1),
+          description: service.description,
+          onwerEmployee: service.onwerEmployee,
+          amount: service.amount,
+          discount: { value: 0 },
+          saleId: sale.id,
+        }));
+      }
+
       invalidateQueries();
       setReceiptVariant("success");
       setReceiptSale(createSaleReceipt(sale));

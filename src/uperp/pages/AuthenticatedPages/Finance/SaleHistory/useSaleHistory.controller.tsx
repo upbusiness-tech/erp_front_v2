@@ -77,6 +77,7 @@ export function useSaleHistoryController() {
         { field: "items.internCustomerPrice" },
         { field: "internCustomer" },
         { field: "payments" },
+        { field: "services" },
       ],
     },
   });

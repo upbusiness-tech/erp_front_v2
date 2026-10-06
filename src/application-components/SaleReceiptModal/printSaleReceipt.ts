@@ -3,8 +3,8 @@ import { formatDateFromApi } from "@/uperp/common/dates";
 import { formatPrice } from "@/uperp/common/formulas/productFormulas";
 import { SALE_PAYMENT_LABEL, formatUnitSoldAmount } from "@/uperp/common/formulas/saleReceipt";
 
-const escapeHtml = (value: string) =>
-  value
+const escapeHtml = (value: unknown) =>
+  String(value ?? "")
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
