@@ -233,7 +233,6 @@ export function useStockProductTableController({
       width: 110,
       render: (_, p) => (
         <Space>
-          <Button size="small" icon={<Eye size={14} />} onClick={() => onViewStats?.(p)} />
           <Button
             size="small"
             icon={<Pencil size={14} />}

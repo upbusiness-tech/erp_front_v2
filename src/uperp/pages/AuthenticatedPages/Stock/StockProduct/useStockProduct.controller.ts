@@ -58,6 +58,16 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
     try {
       setloading(true);
       const values = form.getFieldsValue(true);
+      const fiscal = values.productFiscalClassification;
+      const hasFiscalValue = fiscal
+        ? Object.values(fiscal).some(
+            (value) => value !== null && value !== undefined && value !== "",
+          )
+        : false;
+      if (fiscal && !hasFiscalValue) {
+        delete values.productFiscalClassification;
+      }
+
       if (file) {
         const url = await uploadToCloudinary(file);
         form.setFieldValue("productPicture", url);
@@ -116,21 +126,29 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
 
       const fiscalFromClassification = productToEdit.productFiscalClassification;
 
+      const fiscalClassificationValues = {
+        cest: fiscalFromClassification?.cest,
+        cfop: fiscalFromClassification?.cfop,
+        cofins: fiscalFromClassification?.cofins,
+        csosn: fiscalFromClassification?.csosn,
+        ncm: fiscalFromClassification?.ncm,
+        origin: fiscalFromClassification?.origin,
+        pis: fiscalFromClassification?.pis,
+      };
+
+      const hasFiscalClassification = Object.values(fiscalClassificationValues).some(
+        (value) => value !== null && value !== undefined && value !== "",
+      );
+
       form.setFieldsValue({
         name: productToEdit.name,
         productCategoryId: productToEdit.productCategoryId,
         productPicture: productToEdit.productPicture,
         unitOfMeasure: productToEdit.unitOfMeasure as ProductUnitOfMeasure,
         variants,
-        productFiscalClassification: {
-          cest: fiscalFromClassification?.cest,
-          cfop: fiscalFromClassification?.cfop,
-          cofins: fiscalFromClassification?.cofins,
-          csosn: fiscalFromClassification?.csosn,
-          ncm: fiscalFromClassification?.ncm,
-          origin: fiscalFromClassification?.origin,
-          pis: fiscalFromClassification?.pis,
-        },
+        ...(hasFiscalClassification
+          ? { productFiscalClassification: fiscalClassificationValues }
+          : {}),
       });
     }
   }, [isEdit, productToEdit]);
