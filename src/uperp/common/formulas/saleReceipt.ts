@@ -52,11 +52,12 @@ export const calculateSaleSubtotal = (sale: SaleModel): number =>
 export const createSaleReceipt = (sale: SaleModel): SaleReceiptModel => {
   const items = sale.items.map((item) => {
     const unitPrice = getItemUnitPrice(item);
+    const unitSold = Number(item.unitSold);
     const normalPrice = toNumber(item.productEspecification.salePrice);
     const hasSpecialPrice = item.isEspecialPrice && item.internCustomerPrice?.specialPrice != null;
     const quantity = Number(item.quantitySold);
     const itemDiscount = toNumber(item.discountInfo?.value);
-    const lineTotal = Math.max(unitPrice * quantity - itemDiscount, 0);
+    const lineTotal = Math.max(unitPrice * unitSold * quantity - itemDiscount, 0);
 
     return {
       id: item.id,

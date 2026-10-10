@@ -16,6 +16,7 @@ import { CheckCircle2, CreditCard, Percent, Printer, Share2, Star } from "lucide
 import { useEffect, useRef, useState } from "react";
 import { printSaleReceipt } from "./printSaleReceipt";
 import { generateSaleReceiptFile, shareSaleReceipt } from "./shareSaleReceipt";
+import { calculateItemsTotal } from "@/uperp/common/formulas/saleFormulas";
 
 const { Title, Text } = Typography;
 
