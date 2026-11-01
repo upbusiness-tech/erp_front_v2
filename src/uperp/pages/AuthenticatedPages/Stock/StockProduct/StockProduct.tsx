@@ -9,48 +9,25 @@ import {
   Row,
   Select,
   Space,
-  Spin,
   Switch,
   Typography,
   Upload,
 } from "antd";
 
-import { ArrowLeft, Camera, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
-import { ProductUnitOfMeasure } from "./types";
-import { useStockProductController } from "./useStockProduct.controller";
 import InputNumberFormatted from "@/application-components/InputNumberFormated/InputNumberFormated";
+import { ProductGalleryModal } from "@/application-components/ProductGalleryModal/ProductGalleryModal";
+import { PlanIds } from "@/enums/plan.enum";
 import { useCompanySettingsStore } from "@/stores/companySettings.store";
 import { SettingsRef } from "@/uperp/common/settings/consts/settings.ref";
-import { PlanIds } from "@/enums/plan.enum";
-import { CsosnEnum, OriginEnum, PisCofinsCstEnum } from "@/enums/productFiscal.enum";
-
-const formatEnumKey = (key: string) =>
-  key
-    .split("_")
-    .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
-    .join(" ");
-
-const originOptions = Object.entries(OriginEnum)
-  .filter(([key]) => Number.isNaN(Number(key)))
-  .map(([key, value]) => ({
-    value,
-    label: `${value} - ${formatEnumKey(key)}`,
-  }));
-
-const csosnOptions = Object.entries(CsosnEnum)
-  .filter(([key]) => Number.isNaN(Number(key)))
-  .map(([key, value]) => ({
-    value,
-    label: `${value} - ${formatEnumKey(key)}`,
-  }));
-
-const pisCofinsOptions = Object.entries(PisCofinsCstEnum)
-  .filter(([key]) => Number.isNaN(Number(key)))
-  .map(([key, value]) => ({
-    value,
-    label: `${value} - ${formatEnumKey(key)}`,
-  }));
+import { ArrowLeft, Camera, Images, Plus, Trash2, X } from "lucide-react";
+import { ProductUnitOfMeasure } from "./types";
+import {
+  csosnOptions,
+  originOptions,
+  pisCofinsOptions,
+  useStockProductController,
+} from "./useStockProduct.controller";
+import { priceSuffixMap, stockFormatMap } from "@/uperp/common/util/productForm.util";
 
 const { Text, Title } = Typography;
 
@@ -65,7 +42,14 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
     isLoadingCategories,
     submitProduct,
     handleGoBack,
-    setfile,
+    previewSrc,
+    handleFileSelect,
+    handleRemovePhoto,
+    isGalleryOpen,
+    openGallery,
+    closeGallery,
+    handleSelectGalleryPhoto,
+    selectedPictureUrl,
     handleDeleteProduct,
     loading,
     isLoadingSuppliers,
@@ -75,24 +59,10 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
 
   const { hasSettingActive } = useCompanySettingsStore();
 
-  const [previewUrl, setPreviewUrl] = useState<string | undefined>();
-
   const unitOfMeasure = Form.useWatch("unitOfMeasure", form);
 
-  const priceSuffixMap: Partial<Record<ProductUnitOfMeasure, string>> = {
-    [ProductUnitOfMeasure.GRAM]: "Por kg",
-    [ProductUnitOfMeasure.METER]: "Por metro",
-    [ProductUnitOfMeasure.LITER]: "Por litro",
-  };
   const priceSuffix = (unitOfMeasure && priceSuffixMap[unitOfMeasure]) || "Unidade";
 
-  const stockFormatMap: Partial<
-    Record<ProductUnitOfMeasure, { precision: number; suffix: string; placeholder: string }>
-  > = {
-    [ProductUnitOfMeasure.GRAM]: { precision: 3, suffix: "g", placeholder: "0,000g" },
-    [ProductUnitOfMeasure.METER]: { precision: 2, suffix: "cm", placeholder: "0,00cm" },
-    [ProductUnitOfMeasure.LITER]: { precision: 2, suffix: "ml", placeholder: "0,00ml" },
-  };
   const stockFormat = (unitOfMeasure && stockFormatMap[unitOfMeasure]) || null;
 
   return (
@@ -123,44 +93,71 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
         <Row gutter={12}>
           <Col xs={24} md={4}>
             <div style={{ textAlign: "center" }}>
-              <Form.Item name="productPicture" label="Foto">
+              <Form.Item label="Foto">
                 <Upload
                   accept="image/*"
                   showUploadList={false}
                   beforeUpload={(file) => {
-                    const localUrl = URL.createObjectURL(file);
-                    setPreviewUrl(localUrl);
-                    setfile(file);
+                    handleFileSelect(file);
                     return false;
                   }}
                 >
-                  <Spin spinning={false}>
-                    <div
-                      style={{
-                        width: 120,
-                        height: 120,
-                        border: "2px dashed #d9d9d9",
-                        borderRadius: 8,
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor: "pointer",
-                        background: previewUrl
-                          ? `url(${previewUrl}) center/cover no-repeat`
-                          : undefined,
-                        overflow: "hidden",
-                      }}
-                    >
-                      {!previewUrl && <Camera size={28} color="#bbb" />}
-                      {!previewUrl && (
-                        <Text type="secondary" style={{ fontSize: 11, marginTop: 4 }}>
-                          Adicionar foto
-                        </Text>
-                      )}
-                    </div>
-                  </Spin>
+                  <div
+                    style={{
+                      width: 120,
+                      height: 120,
+                      border: "2px dashed #d9d9d9",
+                      borderRadius: 8,
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      background: previewSrc
+                        ? `url(${previewSrc}) center/cover no-repeat`
+                        : undefined,
+                      overflow: "hidden",
+                      position: "relative",
+                    }}
+                  >
+                    {!previewSrc && <Camera size={28} color="#bbb" />}
+                    {!previewSrc && (
+                      <Text type="secondary" style={{ fontSize: 11, marginTop: 4 }}>
+                        Adicionar foto
+                      </Text>
+                    )}
+                    {previewSrc && (
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<X size={14} />}
+                        aria-label="Remover foto"
+                        title="Remover foto"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          event.preventDefault();
+                          handleRemovePhoto();
+                        }}
+                        style={{
+                          position: "absolute",
+                          top: 2,
+                          right: 2,
+                          background: "rgba(255, 255, 255, 0.85)",
+                        }}
+                      />
+                    )}
+                  </div>
                 </Upload>
+                <div style={{ textAlign: "center" }}>
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={<Images size={14} />}
+                    onClick={openGallery}
+                  >
+                    Ver galeria
+                  </Button>
+                </div>
               </Form.Item>
             </div>
           </Col>
@@ -459,6 +456,13 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
           </Button>
         </Space>
       </Form>
+      <ProductGalleryModal
+        open={isGalleryOpen}
+        currentPicture={selectedPictureUrl}
+        onClose={closeGallery}
+        onSelect={handleSelectGalleryPhoto}
+        onRequestUpload={closeGallery}
+      />
     </Card>
   );
 };

@@ -10,7 +10,7 @@ export enum ProductUnitOfMeasure {
 export interface IProductCreateFields {
   name: string;
   unitOfMeasure: ProductUnitOfMeasure;
-  productPicture: string;
+  productPicture?: string | null;
   productCategoryId: number;
   variants: IProductVariantField[];
   productFiscalClassification?: IProductFiscalClassificationFields;

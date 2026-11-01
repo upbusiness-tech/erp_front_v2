@@ -8,7 +8,7 @@ import {
   showStockTotalByProductEspecification,
 } from "@/uperp/common/formulas/productFormulas";
 import { SettingsRef } from "@/uperp/common/settings/consts/settings.ref";
-import { productUnitFormat } from "@/uperp/common/util/productForm";
+import { productUnitFormat } from "@/uperp/common/util/productForm.util";
 import { ICreateSaleForm } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
 import { ProductUnitOfMeasure } from "@/uperp/pages/AuthenticatedPages/Stock/StockProduct/types";
 import {

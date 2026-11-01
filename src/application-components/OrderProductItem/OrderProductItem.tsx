@@ -1,6 +1,6 @@
 import { InternCustomerSpecialPriceModel } from "@/model/internCustomerPrice.model";
 import { calculateOrderItem, formatPrice } from "@/uperp/common/formulas/productFormulas";
-import { productUnitFormat } from "@/uperp/common/util/productForm";
+import { productUnitFormat } from "@/uperp/common/util/productForm.util";
 import { CartSaleItem } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
 import { ProductUnitOfMeasure } from "@/uperp/pages/AuthenticatedPages/Stock/StockProduct/types";
 import { Button, InputNumber, List, Row, Space, Tag, Typography } from "antd";

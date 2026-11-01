@@ -12,9 +12,37 @@ import { ProductCategoryService } from "@/services/productCategory.service";
 import { ProductSupplierService } from "@/services/productSupplier.service";
 import { PaginatedResponse } from "@/types/crud.types";
 import { Form, message } from "antd";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { IProductCreateFields, IProductVariantField, ProductUnitOfMeasure } from "./types";
+import { CsosnEnum, OriginEnum, PisCofinsCstEnum } from "@/enums/productFiscal.enum";
+
+const formatEnumKey = (key: string) =>
+  key
+    .split("_")
+    .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
+    .join(" ");
+
+export const originOptions = Object.entries(OriginEnum)
+  .filter(([key]) => Number.isNaN(Number(key)))
+  .map(([key, value]) => ({
+    value,
+    label: `${value} - ${formatEnumKey(key)}`,
+  }));
+
+export const csosnOptions = Object.entries(CsosnEnum)
+  .filter(([key]) => Number.isNaN(Number(key)))
+  .map(([key, value]) => ({
+    value,
+    label: `${value} - ${formatEnumKey(key)}`,
+  }));
+
+export const pisCofinsOptions = Object.entries(PisCofinsCstEnum)
+  .filter(([key]) => Number.isNaN(Number(key)))
+  .map(([key, value]) => ({
+    value,
+    label: `${value} - ${formatEnumKey(key)}`,
+  }));
 
 const productCategoryService = new ProductCategoryService();
 const productSupplierService = new ProductSupplierService();
@@ -51,7 +79,55 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
     }
   };
 
-  const [file, setfile] = useState<File | undefined>(undefined);
+  const [pendingFile, setPendingFile] = useState<File | undefined>(undefined);
+  const [selectedPictureUrl, setSelectedPictureUrl] = useState<string | undefined>(undefined);
+  const [pendingPreviewUrl, setPendingPreviewUrl] = useState<string | undefined>(undefined);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const pendingPreviewUrlRef = useRef<string | undefined>(undefined);
+  const initializedPictureProductIdRef = useRef<number | null>(null);
+
+  const revokePendingPreview = () => {
+    if (pendingPreviewUrlRef.current) {
+      URL.revokeObjectURL(pendingPreviewUrlRef.current);
+      pendingPreviewUrlRef.current = undefined;
+    }
+  };
+
+  const handleFileSelect = (file: File) => {
+    revokePendingPreview();
+    const previewUrl = URL.createObjectURL(file);
+    pendingPreviewUrlRef.current = previewUrl;
+    setPendingFile(file);
+    setPendingPreviewUrl(previewUrl);
+  };
+
+  const handleSelectGalleryPhoto = (url: string) => {
+    revokePendingPreview();
+    setPendingFile(undefined);
+    setPendingPreviewUrl(undefined);
+    setSelectedPictureUrl(url);
+    setIsGalleryOpen(false);
+  };
+
+  const handleRemovePhoto = () => {
+    revokePendingPreview();
+    setPendingFile(undefined);
+    setPendingPreviewUrl(undefined);
+    setSelectedPictureUrl(undefined);
+  };
+
+  const openGallery = () => setIsGalleryOpen(true);
+  const closeGallery = () => setIsGalleryOpen(false);
+  const previewSrc = pendingPreviewUrl ?? selectedPictureUrl;
+
+  useEffect(() => {
+    return () => {
+      if (pendingPreviewUrlRef.current) {
+        URL.revokeObjectURL(pendingPreviewUrlRef.current);
+      }
+    };
+  }, []);
+
   const [loading, setloading] = useState(false);
 
   const submitProduct = async () => {
@@ -68,10 +144,11 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
         delete values.productFiscalClassification;
       }
 
-      if (file) {
-        const url = await uploadToCloudinary(file);
-        form.setFieldValue("productPicture", url);
+      if (pendingFile) {
+        const url = await uploadToCloudinary(pendingFile);
         values.productPicture = url;
+      } else {
+        values.productPicture = selectedPictureUrl ?? null;
       }
       if (isEdit && id) {
         const variants: IProductVariantField[] = values.variants.map((p: IProductVariantField) => {
@@ -143,13 +220,19 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
       form.setFieldsValue({
         name: productToEdit.name,
         productCategoryId: productToEdit.productCategoryId,
-        productPicture: productToEdit.productPicture,
         unitOfMeasure: productToEdit.unitOfMeasure as ProductUnitOfMeasure,
         variants,
         ...(hasFiscalClassification
           ? { productFiscalClassification: fiscalClassificationValues }
           : {}),
       });
+    }
+  }, [isEdit, productToEdit, form]);
+
+  useEffect(() => {
+    if (isEdit && productToEdit && initializedPictureProductIdRef.current !== productToEdit.id) {
+      initializedPictureProductIdRef.current = productToEdit.id;
+      setSelectedPictureUrl(productToEdit.productPicture || undefined);
     }
   }, [isEdit, productToEdit]);
 
@@ -163,7 +246,16 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
     isLoadingCategories,
     submitProduct,
     handleGoBack,
-    setfile,
+    pendingFile,
+    selectedPictureUrl,
+    pendingPreviewUrl,
+    previewSrc,
+    handleFileSelect,
+    handleSelectGalleryPhoto,
+    handleRemovePhoto,
+    isGalleryOpen,
+    openGallery,
+    closeGallery,
     handleDeleteProduct,
     isEdit: !!isEdit,
     id,

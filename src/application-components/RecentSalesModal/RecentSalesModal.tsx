@@ -8,6 +8,7 @@ import { Button, Grid, Modal, Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
 import { Receipt } from "lucide-react";
 import { RecentSaleCardList } from "./RecentSaleCardList";
+import { mapSaleStatus } from "@/uperp/common/util/sale.util";
 
 const { useBreakpoint } = Grid;
 const { Text } = Typography;
@@ -67,7 +68,7 @@ export const RecentSalesModal = ({
     {
       title: "Status",
       render: (_, sale: SaleModel) => (
-        <Tag color={sale.status === SaleStatus.CANCELED ? "error" : "green"}>{sale.status}</Tag>
+        <Tag color={mapSaleStatus[sale.status].color}>{sale.status}</Tag>
       ),
     },
     {
