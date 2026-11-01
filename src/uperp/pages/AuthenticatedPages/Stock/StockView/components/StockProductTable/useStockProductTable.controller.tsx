@@ -155,23 +155,6 @@ export function useStockProductTableController({
       dataIndex: "name",
     },
     {
-      title: "Variação (Tam, cor, marca)",
-      render: (n: string, p: ProductModel) => (
-        <Space direction="vertical" size={0}>
-          {p.productEspecifications.map((pe) => (
-            <Space size={4}>
-              {pe.size && (
-                <Tag style={{ margin: 0 }} color="orange">
-                  {pe.size}
-                </Tag>
-              )}
-              {pe.color && <Tag style={{ margin: 0 }}>{pe.color}</Tag>}
-            </Space>
-          ))}
-        </Space>
-      ),
-    },
-    {
       title: "Categoria",
       dataIndex: "productCategoryId",
       render: (_, p: ProductModel) =>

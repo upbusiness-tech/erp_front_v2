@@ -95,7 +95,7 @@ export const ProductStatsModal = ({ product, open, onClose }: ProductStatsModalP
             </Space>
           }
         >
-          {product.createByUser.employee.name}
+          {product?.createByUser?.employee?.name}
         </Descriptions.Item>
         <Descriptions.Item
           label={
