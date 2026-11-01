@@ -178,12 +178,12 @@ export const ProductStatsModal = ({ product, open, onClose }: ProductStatsModalP
       {/* Timeline de transacoes */}
       <Text strong style={{ display: "block", marginBottom: 12 }}>
         <Space>
-          <TrendingUp size={14} /> Timeline de Transacoes
+          <TrendingUp size={14} /> Timeline de Transações
         </Space>
       </Text>
 
       {productTransactionsData.length === 0 ? (
-        <Text type="secondary">Nenhuma transacao encontrada no periodo selecionado.</Text>
+        <Text type="secondary">Nenhuma transação encontrada no período selecionado.</Text>
       ) : (
         <div style={{ maxHeight: 320, overflowY: "auto", paddingRight: 8 }}>
           <Timeline

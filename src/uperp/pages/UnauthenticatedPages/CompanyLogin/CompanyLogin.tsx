@@ -1,15 +1,11 @@
-import { App, Button, Card, Divider, Form, Input, Modal, Typography } from "antd";
-import { Building2, Store } from "lucide-react";
-import { useState } from "react";
 import { BRAND } from "@/theme/colors";
+import { Button, Card, Form, Input, Typography } from "antd";
+import { Store } from "lucide-react";
 import { useCompanyLoginController } from "./useCompanyLogin.controller";
 
 const { Title, Text } = Typography;
 
 export function CompanyLogin() {
-  const { message } = App.useApp();
-  const [registerOpen, setRegisterOpen] = useState(false);
-
   const { handleLoginWithCompany, isSubmitting } = useCompanyLoginController();
 
   return (
@@ -56,42 +52,7 @@ export function CompanyLogin() {
             Entrar
           </Button>
         </Form>
-
-        <Divider plain>ou</Divider>
-        <Button block icon={<Building2 size={16} />} onClick={() => setRegisterOpen(true)}>
-          Cadastrar Empresa
-        </Button>
       </Card>
-
-      <Modal
-        title="Cadastrar nova empresa"
-        open={registerOpen}
-        onCancel={() => setRegisterOpen(false)}
-        onOk={() => {
-          message.success("Empresa cadastrada! Faça login para continuar.");
-          setRegisterOpen(false);
-        }}
-        okText="Cadastrar"
-        cancelText="Cancelar"
-      >
-        <Form layout="vertical">
-          <Form.Item label="Razão Social" required>
-            <Input placeholder="Minha Empresa Ltda" />
-          </Form.Item>
-          <Form.Item label="CNPJ" required>
-            <Input placeholder="00.000.000/0000-00" />
-          </Form.Item>
-          <Form.Item label="E-mail" required>
-            <Input placeholder="contato@empresa.com" />
-          </Form.Item>
-          <Form.Item label="Telefone">
-            <Input placeholder="(00) 0000-0000" />
-          </Form.Item>
-          <Form.Item label="Senha" required>
-            <Input.Password />
-          </Form.Item>
-        </Form>
-      </Modal>
     </div>
   );
 }

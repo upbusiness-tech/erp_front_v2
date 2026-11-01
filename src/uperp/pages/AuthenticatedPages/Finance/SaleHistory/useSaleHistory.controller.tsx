@@ -1,29 +1,20 @@
 import { useGenericTableFetch } from "@/application-components/GenericTable/useGenericTableFetch";
 import { PaymentMethod } from "@/enums/payment.enum";
 import { SaleType } from "@/enums/sale.enum";
-import { useDashboardPeriod } from "@/hooks/useDashboardPeriod";
-import { useGetAllWithParams } from "@/hooks/useGetAllWithParams";
 import { SaleItemModel, SaleModel, SaleReceiptModel } from "@/model/sale.model";
 import { SaleService } from "@/services/sale.service";
-import { StatsDashboardService } from "@/services/statsDashboard.service";
-import { SalesDashboardResponse } from "@/types/saleDashboard";
+import { BRAND } from "@/theme/colors";
 import { formatDateFromApi } from "@/uperp/common/dates";
 import { formatPrice } from "@/uperp/common/formulas/productFormulas";
 import { calculateTotalCartItems } from "@/uperp/common/formulas/saleFormulas";
 import { createSaleReceipt, SALE_PAYMENT_LABEL } from "@/uperp/common/formulas/saleReceipt";
+import { mapSaleStatus, mapSaleType } from "@/uperp/common/util/sale.util";
 import { Space, Tag } from "antd";
 import { ColumnsType } from "antd/es/table";
 import { useMemo, useState } from "react";
-import { BRAND } from "@/theme/colors";
 
 const saleService = new SaleService();
-const saleDashboardService = new StatsDashboardService("sales-dashboard");
-
-export const SALE_TYPE_OPTIONS = [
-  { value: SaleType.NORMAL, label: "Balcão" },
-  { value: SaleType.SERVICE, label: "Serviço" },
-  { value: SaleType.PDV, label: "PDV" },
-];
+// const saleDashboardService = new StatsDashboardService("sales-dashboard");
 
 export const SALE_PAYMENT_METHOD_OPTIONS = Object.values(PaymentMethod).map((m) => ({
   value: m,
@@ -31,17 +22,20 @@ export const SALE_PAYMENT_METHOD_OPTIONS = Object.values(PaymentMethod).map((m) 
 }));
 
 export function useSaleHistoryController() {
-  const { period, setPreset, setCustomRange } = useDashboardPeriod("this_month");
+  // const { period, setPreset, setCustomRange } = useDashboardPeriod("this_month");
 
   const [search, setSearch] = useState("");
   const [searchCustomerName, setSearchCustomerName] = useState("");
   const [typeFilter, setTypeFilter] = useState<string[]>([]);
+  const [saleStatus, setSaleStatus] = useState<string[]>([]);
   const [methodFilter, setMethodFilter] = useState<string[]>([]);
 
   const handleSearchChange = (e: string | string[]) => setSearch(e as string);
   const handleSearchCustomerNameChange = (e: string | string[]) =>
     setSearchCustomerName(e as string);
   const handleTypeFilterChange = (values: string | string[]) => setTypeFilter(values as string[]);
+  const handleSaleStatusFilterChange = (values: string | string[]) =>
+    setSaleStatus(values as string[]);
   const handleMethodFilterChange = (values: string | string[]) =>
     setMethodFilter(values as string[]);
 
@@ -52,11 +46,12 @@ export function useSaleHistoryController() {
         ? [{ field: "internCustomer.name", operator: "$contL", value: searchCustomerName.trim() }]
         : []),
       ...(typeFilter.length > 0 ? [{ field: "type", operator: "$in", value: typeFilter }] : []),
+      ...(saleStatus.length > 0 ? [{ field: "status", operator: "$in", value: saleStatus }] : []),
       ...(methodFilter.length > 0
         ? [{ field: "payments.type", operator: "$in", value: methodFilter }]
         : []),
     ];
-  }, [methodFilter, search, searchCustomerName, typeFilter]);
+  }, [methodFilter, search, searchCustomerName, typeFilter, saleStatus]);
 
   const {
     data: sales,
@@ -83,42 +78,45 @@ export function useSaleHistoryController() {
     },
   });
 
-  const {
-    data: saleDashboardData,
-    isLoading: loadingSaleDashboard,
-    isFetching,
-    isError,
-    error,
-  } = useGetAllWithParams<SalesDashboardResponse>(saleDashboardService, undefined, {
-    queryParams: {
-      from: period.from,
-      to: period.to,
-      ...(methodFilter.length ? { paymentType: methodFilter.join(",") } : {}),
-      ...(typeFilter.length ? { saleType: typeFilter.join(",") } : {}),
-      ...(searchCustomerName ? { customerName: searchCustomerName } : {}),
-      ...(search ? { saleCode: search } : {}),
-    },
-  });
+  // const {
+  //   data: saleDashboardData,
+  //   isLoading: loadingSaleDashboard,
+  //   isFetching,
+  //   isError,
+  //   error,
+  // } = useGetAllWithParams<SalesDashboardResponse>(saleDashboardService, undefined, {
+  //   queryParams: {
+  //     from: period.from,
+  //     to: period.to,
+  //     ...(methodFilter.length ? { paymentType: methodFilter.join(",") } : {}),
+  //     ...(typeFilter.length ? { saleType: typeFilter.join(",") } : {}),
+  //     ...(searchCustomerName ? { customerName: searchCustomerName } : {}),
+  //     ...(search ? { saleCode: search } : {}),
+  //   },
+  // });
 
   const salesColumns: ColumnsType<SaleModel> = [
-    { title: "Código", dataIndex: "code", width: 110 },
+    { title: "Código", dataIndex: "code" },
     {
       title: "Data",
       dataIndex: "createdAt",
-      width: 130,
+
       render: (v?: string) => (v ? formatDateFromApi(v) : "—"),
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+
+      render: (_, sale: SaleModel) => (
+        <Tag color={mapSaleStatus[sale.status].color}>{sale.status}</Tag>
+      ),
     },
     {
       title: "Tipo",
       dataIndex: "type",
-      width: 100,
+
       render: (t: SaleType) => {
-        const map: Record<SaleType, { label: string; color: string }> = {
-          [SaleType.NORMAL]: { label: "Balcão", color: "orange" },
-          [SaleType.SERVICE]: { label: "Serviço", color: "blue" },
-          [SaleType.PDV]: { label: "PDV", color: "purple" },
-        };
-        const { label, color } = map[t] || { label: t, color: "default" };
+        const { label, color } = mapSaleType[t] || { label: t, color: "default" };
         return <Tag color={color}>{label}</Tag>;
       },
     },
@@ -129,7 +127,7 @@ export function useSaleHistoryController() {
     {
       title: "Itens",
       dataIndex: "items",
-      width: 70,
+
       align: "center",
       render: (items: SaleItemModel[]) => items?.length ?? 0,
     },
@@ -150,7 +148,7 @@ export function useSaleHistoryController() {
     },
     {
       title: "Total",
-      width: 110,
+
       align: "right",
       render: (_, sale: SaleModel) => (
         <strong style={{ color: BRAND }}>
@@ -189,7 +187,7 @@ export function useSaleHistoryController() {
     receiptSale,
     handleViewRecentSale,
     handleCloseReceipt,
-    saleDashboardData,
-    loadingSaleDashboard,
+    handleSaleStatusFilterChange,
+    saleStatus,
   };
 }

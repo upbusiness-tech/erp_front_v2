@@ -2,20 +2,15 @@ import { GenericTable } from "@/application-components/GenericTable/GenericTable
 import { RecentSaleCardList } from "@/application-components/RecentSalesModal/RecentSaleCardList";
 import { SaleReceiptModal } from "@/application-components/SaleReceiptModal/SaleReceiptModal";
 import { SearchBar } from "@/application-components/SearchBar/SearchBar";
-import { PaymentMethod } from "@/enums/payment.enum";
-import { formatPrice } from "@/uperp/common/formulas/productFormulas";
-import { Button, Card, Col, Grid, Row, Space, Statistic, Tag, Typography } from "antd";
-import { Download } from "lucide-react";
-import { BRAND } from "@/theme/colors";
-import { PAYMENT_LABEL } from "../../../../common/consts";
 import {
-  SALE_PAYMENT_METHOD_OPTIONS,
-  SALE_TYPE_OPTIONS,
-  useSaleHistoryController,
-} from "./useSaleHistory.controller";
+  SALE_STATUS_OPTIONS_ARRAY_FORMATED,
+  SALE_TYPE_OPTIONS_ARRAY_FORMATED,
+} from "@/uperp/common/util/sale.util";
+import { Button, Card, Grid } from "antd";
+import { Download } from "lucide-react";
+import { SALE_PAYMENT_METHOD_OPTIONS, useSaleHistoryController } from "./useSaleHistory.controller";
 
 const { useBreakpoint } = Grid;
-const { Text } = Typography;
 
 export const SaleHistory = () => {
   const screens = useBreakpoint();
@@ -41,13 +36,14 @@ export const SaleHistory = () => {
     handleCloseReceipt,
     handleViewRecentSale,
     receiptSale,
-    loadingSaleDashboard,
-    saleDashboardData,
+    handleSaleStatusFilterChange,
+    saleStatus,
   } = useSaleHistoryController();
 
   return (
     <>
-      <Row gutter={16} style={{ marginBottom: 16 }}>
+      {/* FIXME: não traz nenhuma informação relevante para o usuário, e não vai ser usado para nada, aqui vai se tratar apenas de um histórico de todas as vendas como forma de consulta */}
+      {/* <Row gutter={16} style={{ marginBottom: 16 }}>
         <Col xs={12} md={6}>
           <Card loading={loadingSaleDashboard}>
             <Statistic title="Vendas filtradas" value={saleDashboardData?.summary.filteredSales} />
@@ -84,11 +80,12 @@ export const SaleHistory = () => {
             </Space>
           </Card>
         </Col>
-      </Row>
+      </Row> */}
 
       <Card
         title="Histórico de Vendas Detalhado"
-        extra={<Button icon={<Download size={14} />}>Exportar</Button>}
+        // TODO: ainda não implementado
+        // extra={<Button icon={<Download size={14} />}>Exportar</Button>}
       >
         <SearchBar
           searches={[
@@ -112,7 +109,16 @@ export const SaleHistory = () => {
               value: typeFilter,
               onChange: handleTypeFilterChange,
               placeholder: "Tipo de venda",
-              options: SALE_TYPE_OPTIONS,
+              options: SALE_TYPE_OPTIONS_ARRAY_FORMATED,
+              maxWidth: 200,
+            },
+            {
+              name: "status",
+              type: "select",
+              value: saleStatus,
+              onChange: handleSaleStatusFilterChange,
+              placeholder: "Status da venda",
+              options: SALE_STATUS_OPTIONS_ARRAY_FORMATED,
               maxWidth: 200,
             },
             {
