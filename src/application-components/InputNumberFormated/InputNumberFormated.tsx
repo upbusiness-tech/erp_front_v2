@@ -17,8 +17,7 @@ const InputNumberFormatted = ({
   suffix,
   ...rest
 }: InputNumberFormattedProps) => {
-  const formatDisplay = (val: number): string =>
-    Number(val).toFixed(precision).replace(".", ",") + (suffix ?? "");
+  const formatDisplay = (val: number): string => Number(val).toFixed(precision).replace(".", ",");
 
   const parseValue = (raw: string): number => {
     const digits = raw.replace(/\D/g, "");
@@ -34,7 +33,13 @@ const InputNumberFormatted = ({
   );
 
   return (
-    <Input {...rest} value={formatDisplay(value)} onChange={handleChange} inputMode="numeric" />
+    <Input
+      {...rest}
+      value={formatDisplay(value)}
+      onChange={handleChange}
+      inputMode="numeric"
+      suffix={suffix}
+    />
   );
 };
 

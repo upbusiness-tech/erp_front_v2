@@ -113,7 +113,7 @@ export function useStockProductTableController({
     service: productService,
     options: {
       join: [{ field: "createByUser" }, { field: "createByUser.employee" }],
-      sort: { field: "name", order: "ASC" },
+      sort: { field: "createdAt", order: "ASC" },
       filter,
     },
   });

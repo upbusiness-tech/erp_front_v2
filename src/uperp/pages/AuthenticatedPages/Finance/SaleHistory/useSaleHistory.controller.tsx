@@ -30,14 +30,26 @@ export function useSaleHistoryController() {
   const [saleStatus, setSaleStatus] = useState<string[]>([]);
   const [methodFilter, setMethodFilter] = useState<string[]>([]);
 
-  const handleSearchChange = (e: string | string[]) => setSearch(e as string);
-  const handleSearchCustomerNameChange = (e: string | string[]) =>
+  const handleSearchChange = (e: string | string[]) => {
+    setSearch(e as string);
+    resetPage();
+  };
+  const handleSearchCustomerNameChange = (e: string | string[]) => {
     setSearchCustomerName(e as string);
-  const handleTypeFilterChange = (values: string | string[]) => setTypeFilter(values as string[]);
-  const handleSaleStatusFilterChange = (values: string | string[]) =>
+    resetPage();
+  };
+  const handleTypeFilterChange = (values: string | string[]) => {
+    setTypeFilter(values as string[]);
+    resetPage();
+  };
+  const handleSaleStatusFilterChange = (values: string | string[]) => {
     setSaleStatus(values as string[]);
-  const handleMethodFilterChange = (values: string | string[]) =>
+    resetPage();
+  };
+  const handleMethodFilterChange = (values: string | string[]) => {
     setMethodFilter(values as string[]);
+    resetPage();
+  };
 
   const filter = useMemo(() => {
     return [
@@ -61,6 +73,7 @@ export function useSaleHistoryController() {
     pageSize: salesPageSize,
     handlePageChange: salesPageChange,
     handlePageSizeChange: salesPageSizeChange,
+    resetPage,
   } = useGenericTableFetch<SaleModel>({
     service: saleService,
     options: {

@@ -22,6 +22,7 @@ export function useCustomerViewController() {
 
   const handleSearchChange = (value: string | string[]) => {
     setSearch(value as string);
+    resetPage();
   };
 
   const {
@@ -32,6 +33,7 @@ export function useCustomerViewController() {
     page,
     pageSize,
     total,
+    resetPage,
   } = useGenericTableFetch<InternCustomerModel>({
     service: internCustomerService,
     options: {

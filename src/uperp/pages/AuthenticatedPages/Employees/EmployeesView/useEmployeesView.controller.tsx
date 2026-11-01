@@ -44,6 +44,7 @@ export default function useEmployeesViewController() {
 
   const handleSearchChange = (value: string | string[]) => {
     setSearch(value as string);
+    setPage(1);
   };
 
   const { data: employeesPaginated, isLoading } = useGetAllWithParams<

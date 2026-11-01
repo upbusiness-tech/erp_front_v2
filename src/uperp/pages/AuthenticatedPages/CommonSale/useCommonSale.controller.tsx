@@ -28,6 +28,7 @@ import { ColumnsType } from "antd/es/table";
 import { BRAND } from "@/theme/colors";
 import { useMemo, useState } from "react";
 import { ICreateSaleForm, IPaymentMethodField, ISaleItemField } from "./types";
+import { CondOperator } from "@dataui/crud-request";
 
 const { Text } = Typography;
 
@@ -59,11 +60,14 @@ export function useCommonSaleController() {
 
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
-  const handleCategoryFilterChange = (values: string | string[]) =>
+  const handleCategoryFilterChange = (values: string | string[]) => {
     setCategoryFilter(values as string[]);
+    resetPage();
+  };
 
   const handleSearchChange = (value: string | string[]) => {
     setSearch(value as string);
+    resetPage();
   };
 
   const { data: productCategories } =
@@ -76,7 +80,9 @@ export function useCommonSaleController() {
 
   const filter = useMemo(() => {
     return [
-      ...(search ? [{ field: "name", operator: "$contL", value: search.trim() }] : []),
+      ...(search
+        ? [{ field: "name", operator: CondOperator.CONTAINS_LOW, value: search.trim() }]
+        : []),
       ...(categoryFilter.length > 0
         ? [{ field: "productCategoryId", operator: "$in", value: categoryFilter }]
         : []),
@@ -95,7 +101,7 @@ export function useCommonSaleController() {
   } = useGenericTableFetch<ProductModel>({
     service: productService,
     options: {
-      sort: { field: "name", order: "ASC" },
+      sort: { field: "createdAt", order: "ASC" },
       filter,
     },
   });

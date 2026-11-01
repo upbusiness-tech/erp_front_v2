@@ -28,6 +28,7 @@ import {
   useStockProductController,
 } from "./useStockProduct.controller";
 import { priceSuffixMap, stockFormatMap } from "@/uperp/common/util/productForm.util";
+import { BRAND } from "@/theme";
 
 const { Text, Title } = Typography;
 
@@ -389,8 +390,8 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
                           <InputNumberFormatted
                             min={0}
                             precision={stockFormat.precision}
-                            suffix={stockFormat.suffix}
                             placeholder={stockFormat.placeholder}
+                            suffix={stockFormat.suffix}
                             style={{ width: "100%" }}
                           />
                         ) : (

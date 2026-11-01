@@ -27,7 +27,7 @@ export const showStockTotalByProductEspecification = (
 export const extractStockFormatByProduct = (product: ProductModel, value: number) => {
   switch (product.unitOfMeasure) {
     case ProductUnitOfMeasure.GRAM:
-      return `${value.toFixed(3)} g`;
+      return `${value.toFixed(2)} kg`;
     case ProductUnitOfMeasure.LITER:
       return `${value.toFixed(3)} l`;
     case ProductUnitOfMeasure.METER:

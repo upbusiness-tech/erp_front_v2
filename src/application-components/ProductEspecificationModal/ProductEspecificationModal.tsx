@@ -339,31 +339,20 @@ export const ProductEspecificationModal = ({
               >
                 Peso/medida do produto
               </Text>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <InputNumberFormatted
-                  min={0}
-                  max={stockMax}
-                  precision={
-                    productUnitFormat(product.unitOfMeasure as ProductUnitOfMeasure)?.precision
-                  }
-                  placeholder={
-                    productUnitFormat(product.unitOfMeasure as ProductUnitOfMeasure)?.placeholder
-                  }
-                  value={unitSold}
-                  onChange={(v) => setUnitSold(v)}
-                  style={{ flex: 1 }}
-                />
-                <Text
-                  style={{
-                    fontSize: 14,
-                    color: BRAND,
-                    fontWeight: 500,
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {productUnitFormat(product.unitOfMeasure as ProductUnitOfMeasure)?.suffix}
-                </Text>
-              </div>
+              <InputNumberFormatted
+                min={0}
+                max={stockMax}
+                precision={
+                  productUnitFormat(product.unitOfMeasure as ProductUnitOfMeasure)?.precision
+                }
+                placeholder={
+                  productUnitFormat(product.unitOfMeasure as ProductUnitOfMeasure)?.placeholder
+                }
+                value={unitSold}
+                onChange={(v) => setUnitSold(v)}
+                style={{ flex: 1 }}
+                suffix={productUnitFormat(product.unitOfMeasure as ProductUnitOfMeasure)?.suffix}
+              />
             </div>
           ) : (
             <div style={{ marginBottom: 16 }}>

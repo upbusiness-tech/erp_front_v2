@@ -101,6 +101,7 @@ export const EmployeeForm = ({ isEdit }: { isEdit?: boolean }) => {
                         name="password"
                         label="Senha"
                         help={
+                          isEdit ??
                           "Caso uma senha não seja informada, 1234 será estabelecida por padrão."
                         }
                       >
