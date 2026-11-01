@@ -65,6 +65,7 @@ export interface SaleReceiptItemModel {
   unitPrice: number;
   lineTotal: number;
   hasSpecialPrice: boolean;
+  code?: string;
   size?: string;
   color?: string;
   brand?: string;

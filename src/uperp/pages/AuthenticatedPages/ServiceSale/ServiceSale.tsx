@@ -318,7 +318,6 @@ export const ServiceSale = () => {
         openProductEspecificationModal={openProductModal}
         onClose={handleCloseProductModal}
         product={selectedProduct}
-        form={saleForm}
         selectedCustomer={selectedCustomer}
       />
 

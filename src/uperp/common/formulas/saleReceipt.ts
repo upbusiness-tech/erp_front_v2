@@ -67,6 +67,7 @@ export const createSaleReceipt = (sale: SaleModel): SaleReceiptModel => {
       unitPrice,
       lineTotal,
       hasSpecialPrice,
+      code: item.productEspecification.code || undefined,
       size: item.productEspecification.size || undefined,
       color: item.productEspecification.color || undefined,
       brand: item.productEspecification.brand || undefined,

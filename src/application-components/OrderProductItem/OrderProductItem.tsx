@@ -3,6 +3,7 @@ import { calculateOrderItem, formatPrice } from "@/uperp/common/formulas/product
 import { productUnitFormat } from "@/uperp/common/util/productForm.util";
 import { CartSaleItem } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
 import { ProductUnitOfMeasure } from "@/uperp/pages/AuthenticatedPages/Stock/StockProduct/types";
+import { VariationTags } from "@/application-components/VariationTags/VariationTags";
 import { Button, InputNumber, List, Row, Space, Tag, Typography } from "antd";
 import { ChevronDown, ChevronRight, Percent, Star, Trash2, X } from "lucide-react";
 import { useState } from "react";
@@ -92,20 +93,7 @@ export const OrderProductItem = ({
         }
         description={
           <Space direction="vertical" size={2} style={{ width: "100%" }}>
-            {(item.productEspecification.size || item.productEspecification.color) && (
-              <Space size={4} wrap>
-                {item.productEspecification.size && (
-                  <Tag color="orange" style={{ margin: 0 }}>
-                    Tam. {item.productEspecification.size}
-                  </Tag>
-                )}
-                {item.productEspecification.color && (
-                  <Tag color="default" style={{ margin: 0 }}>
-                    {item.productEspecification.color}
-                  </Tag>
-                )}
-              </Space>
-            )}
+            <VariationTags specification={item.productEspecification} wrap />
             {item.note && (
               <Text type="secondary" italic style={{ fontSize: 13 }}>
                 "{item.note}"

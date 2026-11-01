@@ -1,6 +1,7 @@
 import { InternCustomerSpecialPriceModel } from "@/model/internCustomerPrice.model";
 import { formatPrice } from "@/uperp/common/formulas/productFormulas";
 import { CartSaleItem } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
+import { VariationTags } from "@/application-components/VariationTags/VariationTags";
 import { Button, Divider, Modal, Row, Space, Tag, Typography } from "antd";
 import { Star } from "lucide-react";
 import { BRAND, BRAND_BORDER, BRAND_SOFT, SUCCESS } from "@/theme/colors";
@@ -58,14 +59,9 @@ export const ApplySpecialPriceModal = ({
         <Text strong style={{ fontSize: 16, display: "block" }}>
           {item.product.name}
         </Text>
-        <Space size={4} style={{ marginTop: 4 }}>
-          {item.productEspecification.size && (
-            <Tag color="orange">Tam. {item.productEspecification.size}</Tag>
-          )}
-          {item.productEspecification.color && (
-            <Tag color="default">{item.productEspecification.color}</Tag>
-          )}
-        </Space>
+        <div style={{ marginTop: 4 }}>
+          <VariationTags specification={item.productEspecification} />
+        </div>
       </div>
 
       <div

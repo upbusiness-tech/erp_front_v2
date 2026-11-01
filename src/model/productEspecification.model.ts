@@ -7,9 +7,9 @@ export interface ProductEspecificationModel extends DefaultIdModel {
   costPrice: number;
   isStockControlled: boolean;
   stockQuantity: number;
-  size: string;
-  color: string;
-  brand: string;
+  size: string | null;
+  color: string | null;
+  brand: string | null;
   productSupplierId?: number;
   productSupplier?: ProductSupplierModel;
 }

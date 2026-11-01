@@ -10,6 +10,7 @@ import { StatsDashboardService } from "@/services/statsDashboard.service";
 import { formatDateFromApi } from "@/uperp/common/dates";
 import { formatPrice } from "@/uperp/common/formulas/productFormulas";
 import { formatUnitSoldAmount, SALE_PAYMENT_LABEL } from "@/uperp/common/formulas/saleReceipt";
+import { getVariationLabel } from "@/uperp/common/util/productVariation";
 import { PermissionsRef } from "@/uperp/common/permissions/const/permissions.ref";
 import { BRAND, DANGER, SUCCESS } from "@/theme/colors";
 import { Button, Divider, List, message, Modal, Row, Space, Tag, Typography } from "antd";
@@ -248,8 +249,7 @@ export const SaleReceiptModal = ({
                         <Text type="secondary" style={{ fontSize: 12 }}>
                           {formatUnitSoldAmount(item.unitOfMeasure, item.unitSold) ?? item.quantity}{" "}
                           × {formatPrice(item.unitPrice)}
-                          {item.size ? ` · Tam. ${item.size}` : ""}
-                          {item.color ? ` · ${item.color}` : ""}
+                          {getVariationLabel(item) ? ` · ${getVariationLabel(item)}` : ""}
                         </Text>
                         {item.hasSpecialPrice && (
                           <Text type="secondary" style={{ fontSize: 12 }}>
