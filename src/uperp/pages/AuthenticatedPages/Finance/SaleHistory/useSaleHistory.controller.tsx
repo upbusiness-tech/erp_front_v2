@@ -14,6 +14,7 @@ import { createSaleReceipt, SALE_PAYMENT_LABEL } from "@/uperp/common/formulas/s
 import { Space, Tag } from "antd";
 import { ColumnsType } from "antd/es/table";
 import { useMemo, useState } from "react";
+import { BRAND } from "@/theme/colors";
 
 const saleService = new SaleService();
 const saleDashboardService = new StatsDashboardService("sales-dashboard");
@@ -152,7 +153,7 @@ export function useSaleHistoryController() {
       width: 110,
       align: "right",
       render: (_, sale: SaleModel) => (
-        <strong style={{ color: "#F26B1F" }}>
+        <strong style={{ color: BRAND }}>
           {formatPrice(calculateTotalCartItems(sale.items, sale.services ?? [], sale.discount))}
         </strong>
       ),

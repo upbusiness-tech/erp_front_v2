@@ -25,6 +25,7 @@ import { createSaleReceipt } from "@/uperp/common/formulas/saleReceipt";
 import { SettingsRef } from "@/uperp/common/settings/consts/settings.ref";
 import { Form, message, Space, Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
+import { BRAND } from "@/theme/colors";
 import { useMemo, useState } from "react";
 import { ICreateSaleForm, IPaymentMethodField, ISaleItemField } from "./types";
 
@@ -159,7 +160,7 @@ export function useCommonSaleController() {
                 width: 10,
                 height: 10,
                 borderRadius: "50%",
-                background: `${p.productCategory?.color || "#F26B1F"}`,
+                background: p.productCategory?.color || BRAND,
               }}
             />
             <Text strong>{p.productCategory?.name || "-"}</Text>

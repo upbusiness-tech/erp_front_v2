@@ -12,6 +12,7 @@ import { Briefcase, History, Package, Plus, ShoppingCart } from "lucide-react";
 import type { ISaleServiceForm } from "../CommonSale/types";
 import { useServiceSaleController } from "./useServiceSale.controller";
 import { SaleType } from "@/enums/sale.enum";
+import { BRAND, DANGER } from "@/theme/colors";
 
 const { Text } = Typography;
 
@@ -169,7 +170,7 @@ export const ServiceSale = () => {
                   htmlType="submit"
                   icon={<Plus size={16} />}
                   block={isMobile}
-                  style={{ background: "#F26B1F", borderColor: "#F26B1F" }}
+                  style={{ background: BRAND, borderColor: BRAND }}
                 >
                   Adicionar serviço
                 </Button>
@@ -256,7 +257,7 @@ export const ServiceSale = () => {
             zIndex: 1000,
           }}
         >
-          <Badge count={cartCount} offset={[-6, 6]} color="#DC2626">
+          <Badge count={cartCount} offset={[-6, 6]} color={DANGER}>
             <Button
               type="primary"
               shape="circle"

@@ -10,6 +10,7 @@ import { mapSaleStatus, mapSaleType } from "@/uperp/common/util/sale.util";
 import { Space, Tag } from "antd";
 import { ColumnsType } from "antd/es/table";
 import { useState } from "react";
+import { BRAND } from "@/theme/colors";
 
 const saleService = new SaleService();
 
@@ -73,7 +74,7 @@ export function useCashFlowHistorySalesTableController({ cashFlowId }: { cashFlo
       align: "right",
       width: 50,
       render: (_, sale: SaleModel) => (
-        <strong style={{ color: "#F26B1F" }}>
+        <strong style={{ color: BRAND }}>
           {formatPrice(calculateTotalCartItems(sale.items, sale.services ?? [], sale.discount))}
         </strong>
       ),

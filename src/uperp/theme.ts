@@ -1,12 +1,13 @@
 import type { ThemeConfig } from "antd";
+import { BRAND, DANGER, SUCCESS, WARNING } from "@/theme/colors";
 
 export const uperpTheme: ThemeConfig = {
   token: {
-    colorPrimary: "#F26B1F",
-    colorInfo: "#F26B1F",
-    colorSuccess: "#16A34A",
-    colorWarning: "#F59E0B",
-    colorError: "#DC2626",
+    colorPrimary: BRAND,
+    colorInfo: BRAND,
+    colorSuccess: SUCCESS,
+    colorWarning: WARNING,
+    colorError: DANGER,
     colorBgLayout: "#F5F5F5",
     colorText: "#111111",
     borderRadius: 8,
@@ -22,7 +23,7 @@ export const uperpTheme: ThemeConfig = {
     },
     Menu: {
       darkItemBg: "#111111",
-      darkItemSelectedBg: "#F26B1F",
+      darkItemSelectedBg: BRAND,
       darkItemHoverBg: "#1F1F1F",
       darkSubMenuItemBg: "#0A0A0A",
     },

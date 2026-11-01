@@ -7,6 +7,7 @@ import { calculateTotalCartItems } from "@/uperp/common/formulas/saleFormulas";
 import { SALE_PAYMENT_LABEL } from "@/uperp/common/formulas/saleReceipt";
 import { Button, Card, Space, Tag, Typography } from "antd";
 import { Receipt } from "lucide-react";
+import { BRAND } from "@/theme/colors";
 
 const { Text } = Typography;
 
@@ -110,7 +111,7 @@ export const RecentSaleCard = ({
           paddingTop: 8,
         }}
       >
-        <Text strong style={{ color: "#F26B1F", fontSize: 15 }}>
+        <Text strong style={{ color: BRAND, fontSize: 15 }}>
           {total}
         </Text>
         <Button

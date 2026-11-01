@@ -1,6 +1,7 @@
 import { Avatar, Button, Card, Col, Form, Input, Row } from "antd";
 import { Camera, Building2 } from "lucide-react";
 import { useRef } from "react";
+import { BRAND } from "@/theme/colors";
 import { useCompanyViewController } from "./useCompanyView.controller";
 
 export const CompanyView = () => {
@@ -17,7 +18,7 @@ export const CompanyView = () => {
               <Avatar
                 src={avatarUrl ?? company?.profilePicture}
                 size={96}
-                style={{ background: "#F26B1F", cursor: "pointer" }}
+                style={{ background: BRAND, cursor: "pointer" }}
                 icon={<Building2 />}
                 onClick={() => fileInputRef.current?.click()}
               />
@@ -49,7 +50,7 @@ export const CompanyView = () => {
             <h2 style={{ margin: 0 }}>{company?.name}</h2>
             <h2 style={{ margin: 0 }}>{company?.email}</h2>
             <p style={{ color: "#888", margin: 0 }}>{company?.document}</p>
-            <p style={{ color: "#F26B1F", marginTop: 12, fontWeight: 600 }}>
+            <p style={{ color: BRAND, marginTop: 12, fontWeight: 600 }}>
               Plano {company?.planName}
             </p>
           </div>

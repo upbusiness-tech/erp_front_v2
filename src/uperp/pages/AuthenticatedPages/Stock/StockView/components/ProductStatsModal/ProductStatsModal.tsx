@@ -18,6 +18,7 @@ import {
 } from "antd";
 import { Calendar, FileText, Package, Tag, TrendingUp, User } from "lucide-react";
 import { useProductStatsModalController } from "./useProductStatsModal.controller";
+import { DANGER, SUCCESS } from "@/theme/colors";
 
 const { Text } = Typography;
 
@@ -136,7 +137,7 @@ export const ProductStatsModal = ({ product, open, onClose }: ProductStatsModalP
                   value={stats?.netProfit ?? 0}
                   precision={2}
                   prefix="R$"
-                  valueStyle={{ color: "#16A34A" }}
+                  valueStyle={{ color: SUCCESS }}
                 />
               )}
             </Card>
@@ -152,7 +153,7 @@ export const ProductStatsModal = ({ product, open, onClose }: ProductStatsModalP
                   precision={2}
                   prefix="R$"
                   valueStyle={{
-                    color: (stats?.grossProfit ?? 0) >= 0 ? "#16A34A" : "#DC2626",
+                    color: (stats?.grossProfit ?? 0) >= 0 ? SUCCESS : DANGER,
                   }}
                 />
               )}
@@ -168,7 +169,7 @@ export const ProductStatsModal = ({ product, open, onClose }: ProductStatsModalP
           value={filteredCost}
           precision={2}
           prefix={<TrendingDown size={14} />}
-          valueStyle={{ color: "#DC2626" }}
+          valueStyle={{ color: DANGER }}
         />
       </Card> */}
 

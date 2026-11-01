@@ -1,6 +1,7 @@
 import { Avatar, Button, Drawer, Dropdown, Layout, Menu, Space, Typography } from "antd";
 import { ChevronDown, LogOut, Menu as MenuIcon, Settings, Users } from "lucide-react";
 import { Outlet, useNavigate } from "react-router-dom";
+import { BRAND } from "@/theme/colors";
 import { BrandHeader } from "./BrandHeader";
 import { titles, PageKey } from "./SideBar.consts";
 import { useSideBarController } from "./useSideBar.controller";
@@ -128,7 +129,7 @@ export function SideBar() {
             }}
           >
             <Space style={{ cursor: "pointer" }} size={6}>
-              <Avatar size={isMobile ? "small" : "default"} style={{ background: "#F26B1F" }}>
+              <Avatar size={isMobile ? "small" : "default"} style={{ background: BRAND }}>
                 {userName.charAt(0)}
               </Avatar>
               {!isMobile && (

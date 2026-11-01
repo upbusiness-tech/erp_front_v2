@@ -27,6 +27,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { StatsDashboardService } from "@/services/statsDashboard.service";
+import { BRAND, DANGER, INFO, SUCCESS } from "@/theme/colors";
 
 const { Text } = Typography;
 
@@ -92,7 +93,7 @@ export const StockStatsOverview = () => {
                   value={summary?.revenue ?? 0}
                   precision={2}
                   prefix="R$"
-                  valueStyle={{ color: "#F26B1F" }}
+                  valueStyle={{ color: BRAND }}
                 />
               )}
             </Card>
@@ -107,7 +108,7 @@ export const StockStatsOverview = () => {
                     Produto destaque
                   </Text>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
-                    <Star size={20} color="#F26B1F" />
+                    <Star size={20} color={BRAND} />
                     <div>
                       <Text strong style={{ display: "block", fontSize: 13 }}>
                         {summary?.featuredProduct?.productName || "—"}
@@ -131,7 +132,7 @@ export const StockStatsOverview = () => {
                   value={summary?.zeroStockProducts ?? 0}
                   prefix={<AlertCircle size={16} />}
                   valueStyle={{
-                    color: (summary?.zeroStockProducts ?? 0) > 0 ? "#DC2626" : undefined,
+                    color: (summary?.zeroStockProducts ?? 0) > 0 ? DANGER : undefined,
                   }}
                 />
               )}
@@ -144,7 +145,7 @@ export const StockStatsOverview = () => {
             <Card
               title={
                 <Space>
-                  <TrendingUp size={16} color="#16A34A" /> Mais vendidos
+                  <TrendingUp size={16} color={SUCCESS} /> Mais vendidos
                 </Space>
               }
             >
@@ -166,7 +167,7 @@ export const StockStatsOverview = () => {
             <Card
               title={
                 <Space>
-                  <DollarSign size={16} color="#F26B1F" /> Maior faturamento
+                  <DollarSign size={16} color={BRAND} /> Maior faturamento
                 </Space>
               }
             >
@@ -180,7 +181,7 @@ export const StockStatsOverview = () => {
                     value: p.revenue,
                     max: rankings?.highestRevenue[0]?.revenue || 1,
                   }))}
-                  color="#F26B1F"
+                  color={BRAND}
                 />
               )}
             </Card>
@@ -189,7 +190,7 @@ export const StockStatsOverview = () => {
             <Card
               title={
                 <Space>
-                  <RefreshCcw size={16} color="#2563EB" /> Maior giro
+                  <RefreshCcw size={16} color={INFO} /> Maior giro
                 </Space>
               }
             >
@@ -203,7 +204,7 @@ export const StockStatsOverview = () => {
                     value: p.turnover,
                     max: rankings?.highestTurnover[0]?.turnover || 1,
                   }))}
-                  color="#2563EB"
+                  color={INFO}
                 />
               )}
             </Card>
@@ -212,7 +213,7 @@ export const StockStatsOverview = () => {
             <Card
               title={
                 <Space>
-                  <AlertTriangle size={16} color="#DC2626" /> Reposição urgente
+                  <AlertTriangle size={16} color={DANGER} /> Reposição urgente
                 </Space>
               }
             >
@@ -231,7 +232,7 @@ export const StockStatsOverview = () => {
                     value: 6 - Math.min(p.stockQuantity, 5),
                     max: 6,
                   }))}
-                  color="#DC2626"
+                  color={DANGER}
                 />
               )}
             </Card>
@@ -244,7 +245,7 @@ export const StockStatsOverview = () => {
 
 function RankList({
   items,
-  color = "#16A34A",
+  color = SUCCESS,
 }: {
   items: { label: string; sub: string; value: number; max: number }[];
   color?: string;

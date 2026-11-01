@@ -6,6 +6,7 @@ import {
 } from "@/uperp/common/formulas/productFormulas";
 import { Space, Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
+import { BRAND } from "@/theme/colors";
 import { useCommonSaleController } from "../CommonSale/useCommonSale.controller";
 
 const { Text } = Typography;
@@ -64,7 +65,7 @@ export function useServiceSaleController() {
                 width: 10,
                 height: 10,
                 borderRadius: "50%",
-                background: `${p.productCategory?.color || "#F26B1F"}`,
+                background: p.productCategory?.color || BRAND,
               }}
             />
             <Text strong>{p.productCategory?.name || "-"}</Text>

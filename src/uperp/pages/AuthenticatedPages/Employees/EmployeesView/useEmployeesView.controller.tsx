@@ -11,6 +11,7 @@ import { ColumnsType } from "antd/es/table";
 import { Eye, Pencil, Star, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { BRAND } from "@/theme/colors";
 
 const { Text } = Typography;
 
@@ -92,7 +93,7 @@ export default function useEmployeesViewController() {
       dataIndex: "name",
       render: (_, e: EmployeeModel) => (
         <Space>
-          <Avatar style={{ background: "#F26B1F" }}>{e.name.charAt(0)}</Avatar>
+          <Avatar style={{ background: BRAND }}>{e.name.charAt(0)}</Avatar>
           {e.isPrimaryEmployee ? (
             <Space>
               {e.name}{" "}

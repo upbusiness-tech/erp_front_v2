@@ -11,6 +11,7 @@ import { formatDateFromApi } from "@/uperp/common/dates";
 import { formatPrice } from "@/uperp/common/formulas/productFormulas";
 import { formatUnitSoldAmount, SALE_PAYMENT_LABEL } from "@/uperp/common/formulas/saleReceipt";
 import { PermissionsRef } from "@/uperp/common/permissions/const/permissions.ref";
+import { BRAND, DANGER, SUCCESS } from "@/theme/colors";
 import { Button, Divider, List, message, Modal, Row, Space, Tag, Typography } from "antd";
 import { CheckCircle2, CreditCard, Percent, Printer, Share2, Star } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -148,7 +149,7 @@ export const SaleReceiptModal = ({
           receiptSale ? (
             variant === "success" ? (
               <Space>
-                <CheckCircle2 size={20} color="#16A34A" />
+                <CheckCircle2 size={20} color={SUCCESS} />
                 <span>Venda realizada com sucesso</span>
               </Space>
             ) : (
@@ -211,7 +212,7 @@ export const SaleReceiptModal = ({
                 Cliente: {receiptSale.customerName || "Consumidor final"}
               </Text>
               {receiptSale.sale.status === SaleStatus.CANCELED && (
-                <Text strong style={{ display: "block", marginTop: 8, color: "#DC2626" }}>
+                <Text strong style={{ display: "block", marginTop: 8, color: DANGER }}>
                   Venda cancelada
                   {receiptSale.sale.canceledAt
                     ? ` em ${formatDateFromApi(receiptSale.sale.canceledAt)}`
@@ -323,7 +324,7 @@ export const SaleReceiptModal = ({
               <Title level={4} style={{ margin: 0 }}>
                 Total
               </Title>
-              <Title level={4} style={{ margin: 0, color: "#F26B1F" }}>
+              <Title level={4} style={{ margin: 0, color: BRAND }}>
                 {formatPrice(receiptSale.total)}
               </Title>
             </Row>
@@ -332,7 +333,7 @@ export const SaleReceiptModal = ({
             {receiptSale.payments.map((payment) => (
               <Row key={payment.id} justify="space-between" style={{ marginBottom: 5 }}>
                 <Space>
-                  <CreditCard size={14} color="#F26B1F" />
+                  <CreditCard size={14} color={BRAND} />
                   <Text>{SALE_PAYMENT_LABEL[payment.type] || payment.type}</Text>
                 </Space>
                 <Text strong>{formatPrice(payment.amount)}</Text>
@@ -344,10 +345,10 @@ export const SaleReceiptModal = ({
             </Row>
             {receiptSale.change > 0 && (
               <Row justify="space-between" style={{ marginTop: 4 }}>
-                <Text strong style={{ color: "#16A34A" }}>
+                <Text strong style={{ color: SUCCESS }}>
                   Troco
                 </Text>
-                <Text strong style={{ color: "#16A34A" }}>
+                <Text strong style={{ color: SUCCESS }}>
                   {formatPrice(receiptSale.change)}
                 </Text>
               </Row>

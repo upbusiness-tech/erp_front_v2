@@ -4,6 +4,7 @@ import { Sparkles } from "lucide-react";
 import { PaymentModal } from "./components/PaymentModal/PaymentModal";
 import { useSubscriptionViewController } from "./useSubscriptionView.controller";
 import { SubscriptionModel } from "@/model/subscription.model";
+import { BRAND } from "@/theme/colors";
 
 const { Title, Text } = Typography;
 
@@ -33,7 +34,7 @@ export function SubscriptionView() {
             <Col xs={24} md={8} key={p.name}>
               <Card
                 style={{
-                  border: current ? "2px solid #F26B1F" : undefined,
+                  border: current ? `2px solid ${BRAND}` : undefined,
                   height: "100%",
                 }}
               >
@@ -43,14 +44,11 @@ export function SubscriptionView() {
                   </Tag>
                 )}
                 <Title level={4} style={{ margin: 0 }}>
-                  <Sparkles
-                    size={16}
-                    style={{ marginRight: 6, verticalAlign: -2, color: "#F26B1F" }}
-                  />
+                  <Sparkles size={16} style={{ marginRight: 6, verticalAlign: -2, color: BRAND }} />
                   {p.name}
                 </Title>
                 <div style={{ margin: "12px 0" }}>
-                  <Text style={{ fontSize: 28, fontWeight: 700, color: "#F26B1F" }}>
+                  <Text style={{ fontSize: 28, fontWeight: 700, color: BRAND }}>
                     R$ {Number(p.price).toFixed(2)}
                   </Text>
                   <Text type="secondary"> /mês</Text>

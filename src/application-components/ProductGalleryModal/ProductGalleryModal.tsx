@@ -1,6 +1,7 @@
 import { Button, Col, Modal, Pagination, Result, Row, Skeleton, Typography } from "antd";
 import { Check, ImageOff, Images } from "lucide-react";
 import { useState } from "react";
+import { BRAND, BRAND_SOFT_ALT } from "@/theme/colors";
 import { useProductGalleryModalController } from "./useProductGalleryModalController";
 
 const { Text, Title } = Typography;
@@ -12,9 +13,6 @@ type ProductGalleryModalProps = {
   onSelect: (url: string) => void;
   onRequestUpload?: () => void;
 };
-
-const ACCENT = "#F26B1F";
-const ACCENT_DARK = "#C8571A";
 
 const tileStyle: React.CSSProperties = {
   position: "relative",
@@ -44,7 +42,7 @@ const badgeStyle: React.CSSProperties = {
   width: 24,
   height: 24,
   borderRadius: "50%",
-  background: ACCENT,
+  background: BRAND,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -77,14 +75,14 @@ function Thumbnail({ src, isCurrent, onSelect }: ThumbnailProps) {
 
   const resolvedStyle: React.CSSProperties = {
     ...tileStyle,
-    borderColor: active || isCurrent ? ACCENT : "transparent",
+    borderColor: active || isCurrent ? BRAND : "transparent",
     boxShadow: active
       ? "0 6px 14px rgba(242, 107, 31, 0.18)"
       : isCurrent
         ? "0 0 0 1px rgba(242, 107, 31, 0.3)"
         : "none",
     transform: active ? "translateY(-1px)" : "none",
-    outline: focused ? `2px solid ${ACCENT}` : "none",
+    outline: focused ? `2px solid ${BRAND}` : "none",
     outlineOffset: 2,
   };
 
@@ -138,7 +136,7 @@ export function ProductGalleryModal({
 
   const titleNode = (
     <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-      <Images size={18} style={{ color: ACCENT, flexShrink: 0, marginTop: 2 }} />
+      <Images size={18} style={{ color: BRAND, flexShrink: 0, marginTop: 2 }} />
       <div style={{ minWidth: 0 }}>
         <Title level={4} style={{ margin: 0 }}>
           Galeria de fotos
@@ -204,14 +202,14 @@ export function ProductGalleryModal({
             width: 56,
             height: 56,
             borderRadius: "50%",
-            background: "#fff3e8",
+            background: BRAND_SOFT_ALT,
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
             marginBottom: 12,
           }}
         >
-          <ImageOff size={26} style={{ color: ACCENT }} />
+          <ImageOff size={26} style={{ color: BRAND }} />
         </div>
         <Title level={5} style={{ marginBottom: 4 }}>
           Nenhuma foto na galeria ainda

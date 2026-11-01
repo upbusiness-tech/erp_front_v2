@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { Button, Result, Typography } from "antd";
 import { Wrench } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { BRAND, BRAND_ALPHA_15 } from "@/theme/colors";
 
 interface MaintenanceProps {
   title?: string;
@@ -50,8 +51,8 @@ export function Maintenance({
               height: 72,
               margin: "0 auto",
               borderRadius: "50%",
-              background: "#F26B1F15",
-              color: "#F26B1F",
+              background: BRAND_ALPHA_15,
+              color: BRAND,
             }}
           >
             <Wrench size={36} />

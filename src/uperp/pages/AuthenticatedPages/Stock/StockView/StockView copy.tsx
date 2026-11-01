@@ -29,6 +29,7 @@ import { useStore } from "../../../../store";
 import type { Category, Product } from "../../../../types";
 import { StockTab } from "./components/StockTab/StockTab";
 import { useStockViewController } from "./useStockView.controller";
+import { BRAND, DANGER, SUCCESS } from "@/theme/colors";
 
 const { Text } = Typography;
 
@@ -178,7 +179,7 @@ export const StockView = ({ a }: StockViewProps) => {
             <Statistic
               title="Itens em falta"
               value={outOfStock}
-              valueStyle={{ color: outOfStock > 0 ? "#DC2626" : undefined }}
+              valueStyle={{ color: outOfStock > 0 ? DANGER : undefined }}
               prefix={<AlertTriangle size={18} />}
             />
           </Card>
@@ -188,7 +189,7 @@ export const StockView = ({ a }: StockViewProps) => {
             <Statistic
               title="Estoque baixo"
               value={lowStock}
-              valueStyle={{ color: lowStock > 0 ? "#F26B1F" : undefined }}
+              valueStyle={{ color: lowStock > 0 ? BRAND : undefined }}
               prefix={<TrendingDown size={18} />}
             />
           </Card>
@@ -200,7 +201,7 @@ export const StockView = ({ a }: StockViewProps) => {
               value={totalValue}
               precision={2}
               prefix={<DollarSign size={18} />}
-              valueStyle={{ color: "#F26B1F" }}
+              valueStyle={{ color: BRAND }}
             />
           </Card>
         </Col>
@@ -216,7 +217,7 @@ export const StockView = ({ a }: StockViewProps) => {
             </Text>
             <Progress
               percent={healthScore}
-              strokeColor={healthScore > 70 ? "#16A34A" : healthScore > 40 ? "#F26B1F" : "#DC2626"}
+              strokeColor={healthScore > 70 ? SUCCESS : healthScore > 40 ? BRAND : DANGER}
               style={{ marginTop: 4 }}
             />
             <Text type="secondary" style={{ fontSize: 11 }}>
@@ -243,7 +244,7 @@ export const StockView = ({ a }: StockViewProps) => {
                   <Text strong>{name}</Text>
                   <Text type="secondary">{info.items} un.</Text>
                 </div>
-                <Progress percent={pct} strokeColor="#F26B1F" showInfo={false} />
+                <Progress percent={pct} strokeColor={BRAND} showInfo={false} />
                 <Text type="secondary" style={{ fontSize: 11 }}>
                   R$ {info.value.toFixed(2)} · {pct}% do estoque
                 </Text>

@@ -6,6 +6,7 @@ import { ProductUnitOfMeasure } from "@/uperp/pages/AuthenticatedPages/Stock/Sto
 import { Button, InputNumber, List, Row, Space, Tag, Typography } from "antd";
 import { ChevronDown, ChevronRight, Percent, Star, Trash2, X } from "lucide-react";
 import { useState } from "react";
+import { BRAND, WARNING, BRAND_TEXT_STRONG } from "@/theme/colors";
 import { useOrderProductItemController } from "./useOrderProductItem.controller";
 
 const { Text } = Typography;
@@ -122,7 +123,7 @@ export const OrderProductItem = ({
                   {formatPrice(effective)}
                 </Text>{" "}
                 por{" "}
-                <Text strong style={{ color: "#F26B1F", fontSize: 13 }}>
+                <Text strong style={{ color: BRAND, fontSize: 13 }}>
                   {formatPrice(itemPrice)}
                 </Text>
               </Text>
@@ -155,16 +156,16 @@ export const OrderProductItem = ({
                   onClick={() => setExpanded(!expanded)}
                 >
                   <Space size={4}>
-                    <Star size={12} style={{ color: "#F59E0B" }} />
-                    <Text strong style={{ fontSize: 12, color: "#92400E" }}>
+                    <Star size={12} style={{ color: WARNING }} />
+                    <Text strong style={{ fontSize: 12, color: BRAND_TEXT_STRONG }}>
                       Preço especial: {formatPrice(specialPriceAvailable.specialPrice)} (-
                       {discountPercent}%)
                     </Text>
                   </Space>
                   {expanded ? (
-                    <ChevronDown size={14} style={{ color: "#92400E" }} />
+                    <ChevronDown size={14} style={{ color: BRAND_TEXT_STRONG }} />
                   ) : (
-                    <ChevronRight size={14} style={{ color: "#92400E" }} />
+                    <ChevronRight size={14} style={{ color: BRAND_TEXT_STRONG }} />
                   )}
                 </div>
                 {expanded && (

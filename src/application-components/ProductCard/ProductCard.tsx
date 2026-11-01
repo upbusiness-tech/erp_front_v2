@@ -5,6 +5,7 @@ import {
   showStockTotalByProductEspecification,
 } from "@/uperp/common/formulas/productFormulas";
 import { Card, Image, Tag, Typography } from "antd";
+import { BRAND, BRAND_GRADIENT_END, BRAND_SOFT_ALT } from "@/theme/colors";
 
 const { Text } = Typography;
 
@@ -52,13 +53,13 @@ export const ProductCard = ({ product, onClickProduct }: ProductCardProps) => {
             aspectRatio: "1 / 1",
             width: "100%",
             borderRadius: 8,
-            background: "linear-gradient(135deg, #fff3e8, #ffe0c2)",
+            background: `linear-gradient(135deg, ${BRAND_SOFT_ALT}, ${BRAND_GRADIENT_END})`,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             marginBottom: 10,
             fontWeight: 700,
-            color: "#F26B1F",
+            color: BRAND,
             fontSize: 32,
           }}
         >
@@ -79,7 +80,7 @@ export const ProductCard = ({ product, onClickProduct }: ProductCardProps) => {
           alignItems: "center",
         }}
       >
-        <Text strong style={{ color: "#F26B1F" }}>
+        <Text strong style={{ color: BRAND }}>
           {calculeSalePriceRange(product.productEspecifications)}
         </Text>
         <Tag color={stock > 5 ? "green" : stock > 0 ? "orange" : "red"} style={{ margin: 0 }}>

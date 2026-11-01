@@ -3,6 +3,7 @@ import { formatPrice } from "@/uperp/common/formulas/productFormulas";
 import { CartSaleItem } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
 import { Button, Divider, Modal, Row, Space, Tag, Typography } from "antd";
 import { Star } from "lucide-react";
+import { BRAND, BRAND_BORDER, BRAND_SOFT, SUCCESS } from "@/theme/colors";
 
 const { Text, Title } = Typography;
 
@@ -37,7 +38,7 @@ export const ApplySpecialPriceModal = ({
       open={open}
       title={
         <Space>
-          <Star size={16} style={{ color: "#F26B1F" }} />
+          <Star size={16} style={{ color: BRAND }} />
           Aplicar Preço Especial
         </Space>
       }
@@ -69,8 +70,8 @@ export const ApplySpecialPriceModal = ({
 
       <div
         style={{
-          background: "#FFF7ED",
-          border: "1px solid #FED7AA",
+          background: BRAND_SOFT,
+          border: `1px solid ${BRAND_BORDER}`,
           borderRadius: 8,
           padding: 16,
         }}
@@ -86,7 +87,7 @@ export const ApplySpecialPriceModal = ({
               -{discountPercent}%
             </Tag>
           </Space>
-          <Text strong style={{ color: "#F26B1F" }}>
+          <Text strong style={{ color: BRAND }}>
             {formatPrice(specialPriceValue)}
           </Text>
         </Row>
@@ -109,15 +110,15 @@ export const ApplySpecialPriceModal = ({
         </Row>
         <Row justify="space-between" style={{ marginBottom: 8 }}>
           <Text strong>Total com preço especial</Text>
-          <Text strong style={{ color: "#F26B1F", fontSize: 16 }}>
+          <Text strong style={{ color: BRAND, fontSize: 16 }}>
             {formatPrice(totalSpecial)}
           </Text>
         </Row>
         <Row justify="space-between">
-          <Text strong style={{ color: "#16A34A" }}>
+          <Text strong style={{ color: SUCCESS }}>
             Economia total
           </Text>
-          <Text strong style={{ color: "#16A34A" }}>
+          <Text strong style={{ color: SUCCESS }}>
             {formatPrice(totalSavings)}
           </Text>
         </Row>

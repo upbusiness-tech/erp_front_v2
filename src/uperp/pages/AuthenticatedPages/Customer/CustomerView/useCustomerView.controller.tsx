@@ -9,6 +9,7 @@ import { ColumnsType } from "antd/es/table";
 import { Eye, Pencil } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { BRAND } from "@/theme/colors";
 
 const internCustomerService = new InternCustomerService();
 export function useCustomerViewController() {
@@ -72,7 +73,7 @@ export function useCustomerViewController() {
       dataIndex: "name",
       render: (n, c: InternCustomerModel) => (
         <Space>
-          <Avatar size="small" style={{ background: "#F26B1F" }}>
+          <Avatar size="small" style={{ background: BRAND }}>
             {n.charAt(0)}
           </Avatar>
           {n}

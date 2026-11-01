@@ -12,6 +12,7 @@ import { Badge, Button, Card, Col, Drawer, Grid, Row, Segmented, Space } from "a
 import { History, ShoppingCart } from "lucide-react";
 import { useCommonSaleController } from "./useCommonSale.controller";
 import { SaleType } from "@/enums/sale.enum";
+import { DANGER } from "@/theme/colors";
 
 const { useBreakpoint } = Grid;
 
@@ -190,7 +191,7 @@ export function CommonSale() {
             zIndex: 1000,
           }}
         >
-          <Badge count={cartCount} offset={[-6, 6]} color="#DC2626">
+          <Badge count={cartCount} offset={[-6, 6]} color={DANGER}>
             <Button
               type="primary"
               shape="circle"

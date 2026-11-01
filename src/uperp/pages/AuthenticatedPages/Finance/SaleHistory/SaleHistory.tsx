@@ -6,6 +6,7 @@ import { PaymentMethod } from "@/enums/payment.enum";
 import { formatPrice } from "@/uperp/common/formulas/productFormulas";
 import { Button, Card, Col, Grid, Row, Space, Statistic, Tag, Typography } from "antd";
 import { Download } from "lucide-react";
+import { BRAND } from "@/theme/colors";
 import { PAYMENT_LABEL } from "../../../../common/consts";
 import {
   SALE_PAYMENT_METHOD_OPTIONS,
@@ -59,7 +60,7 @@ export const SaleHistory = () => {
               value={saleDashboardData?.summary.total}
               precision={2}
               prefix="R$"
-              valueStyle={{ color: "#F26B1F" }}
+              valueStyle={{ color: BRAND }}
             />
           </Card>
         </Col>

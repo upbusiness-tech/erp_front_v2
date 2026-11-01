@@ -2,6 +2,7 @@
 // Tipagens mockadas para estatisticas de estoque
 // Posteriormente sera adaptado para a tipagem real da API
 // ============================================================
+import { BRAND, DANGER, INFO, SUCCESS } from "@/theme/colors";
 
 export type TransactionType = "sale" | "restock" | "adjustment" | "return";
 
@@ -58,21 +59,21 @@ export const MOCK_CATEGORY_STATS: CategoryStatsResponse = {
     {
       categoryId: "1",
       categoryName: "Roupas",
-      categoryColor: "#F26B1F",
+      categoryColor: BRAND,
       totalSold: 342,
       revenue: 15200.0,
     },
     {
       categoryId: "2",
       categoryName: "Eletronicos",
-      categoryColor: "#2563EB",
+      categoryColor: INFO,
       totalSold: 189,
       revenue: 48500.0,
     },
     {
       categoryId: "3",
       categoryName: "Alimentos",
-      categoryColor: "#16A34A",
+      categoryColor: SUCCESS,
       totalSold: 567,
       revenue: 8900.0,
     },
@@ -86,7 +87,7 @@ export const MOCK_CATEGORY_STATS: CategoryStatsResponse = {
     {
       categoryId: "5",
       categoryName: "Moveis",
-      categoryColor: "#DC2626",
+      categoryColor: DANGER,
       totalSold: 43,
       revenue: 32100.0,
     },
@@ -97,7 +98,7 @@ export const MOCK_PRODUCT_STATS: ProductStatsDetail = {
   productId: 1,
   productName: "Camiseta Basica Algodao",
   categoryName: "Roupas",
-  categoryColor: "#F26B1F",
+  categoryColor: BRAND,
   unitOfMeasure: "un",
   supplier: "Fornecedor ABC Ltda",
   createdBy: "Maria Silva",

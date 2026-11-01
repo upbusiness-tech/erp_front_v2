@@ -3,6 +3,7 @@ import { ArrowLeft, UserCircle2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEmployeeLoginController } from "./useEmployeeLogin.controller";
 import { useAuthStore } from "@/stores/auth.store";
+import { BRAND } from "@/theme/colors";
 
 const { Title, Text } = Typography;
 
@@ -26,7 +27,7 @@ export function EmployeeLogin() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "linear-gradient(135deg, #111 0%, #2a1a10 60%, #F26B1F 160%)",
+        background: `linear-gradient(135deg, #111 0%, #2a1a10 60%, ${BRAND} 160%)`,
         padding: 24,
       }}
     >
@@ -44,7 +45,7 @@ export function EmployeeLogin() {
               marginBottom: 12,
             }}
           >
-            <UserCircle2 color="#F26B1F" size={32} />
+            <UserCircle2 color={BRAND} size={32} />
           </div>
           <Title level={3} style={{ margin: 0 }}>
             Acesso do Funcionário

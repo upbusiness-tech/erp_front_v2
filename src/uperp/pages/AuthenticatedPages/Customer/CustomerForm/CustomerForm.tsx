@@ -32,6 +32,7 @@ import { SpecialPriceVariationModal } from "./components/SpecialPriceVariationMo
 import { ILinkedVariation } from "./types";
 import { useCustomerFormController } from "./useCustomerForm.controller";
 import { SearchBar } from "@/application-components/SearchBar/SearchBar";
+import { BRAND_SOFT } from "@/theme/colors";
 
 const { Text, Title } = Typography;
 
@@ -179,7 +180,7 @@ export const CustomerForm = ({ isEdit = false }: CustomerFormProps) => {
                       alignItems: "center",
                       margin: "12px 0",
                       padding: 12,
-                      background: "#FFF7ED",
+                      background: BRAND_SOFT,
                       borderRadius: 8,
                       flexWrap: "wrap",
                     }}

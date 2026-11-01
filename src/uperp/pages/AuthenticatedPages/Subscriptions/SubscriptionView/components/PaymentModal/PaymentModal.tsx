@@ -5,9 +5,9 @@ import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CheckCircle2, CreditCard, FileText, Link2 } from "lucide-react";
 import { usePaymentModalController } from "./usePaymentModal.controller";
+import { BRAND } from "@/theme/colors";
 
 const { Text, Link, Title } = Typography;
-const BRAND_ORANGE = "#F26B1F";
 
 const statusConfig: Record<SubscriptionStatus, { color: string }> = {
   [SubscriptionStatus.PAID]: { color: "green" },
@@ -39,11 +39,11 @@ export const PaymentModal = ({ subscription, onClose }: PaymentModalProps) => {
               width: 32,
               height: 32,
               borderRadius: 8,
-              background: `${BRAND_ORANGE}15`,
+              background: `${BRAND}15`,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: BRAND_ORANGE,
+              color: BRAND,
               fontSize: 16,
             }}
           >
@@ -58,7 +58,7 @@ export const PaymentModal = ({ subscription, onClose }: PaymentModalProps) => {
       cancelText="Fechar"
       okButtonProps={{
         style: {
-          background: BRAND_ORANGE,
+          background: BRAND,
           boxShadow: "0 2px 8px rgba(242, 107, 31, 0.3)",
           display: isPaid ? "none" : undefined,
         },
@@ -91,11 +91,11 @@ export const PaymentModal = ({ subscription, onClose }: PaymentModalProps) => {
                 width: 24,
                 height: 24,
                 borderRadius: 6,
-                background: `${BRAND_ORANGE}15`,
+                background: `${BRAND}15`,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: BRAND_ORANGE,
+                color: BRAND,
                 fontSize: 12,
                 flexShrink: 0,
               }}
@@ -230,8 +230,8 @@ export const PaymentModal = ({ subscription, onClose }: PaymentModalProps) => {
         ) : subscription.externalLink ? (
           <div
             style={{
-              background: `${BRAND_ORANGE}08`,
-              border: `1.5px solid ${BRAND_ORANGE}30`,
+              background: `${BRAND}08`,
+              border: `1.5px solid ${BRAND}30`,
               borderRadius: 12,
               padding: "16px 20px",
               marginBottom: isPolling ? 20 : 0,
@@ -251,7 +251,7 @@ export const PaymentModal = ({ subscription, onClose }: PaymentModalProps) => {
                   width: 28,
                   height: 28,
                   borderRadius: 6,
-                  background: BRAND_ORANGE,
+                  background: BRAND,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -274,7 +274,7 @@ export const PaymentModal = ({ subscription, onClose }: PaymentModalProps) => {
               style={{
                 fontSize: 13,
                 wordBreak: "break-all",
-                color: BRAND_ORANGE,
+                color: BRAND,
                 display: "block",
               }}
             >
@@ -299,8 +299,8 @@ export const PaymentModal = ({ subscription, onClose }: PaymentModalProps) => {
         {isPolling && (
           <div
             style={{
-              background: `linear-gradient(135deg, ${BRAND_ORANGE}08 0%, ${BRAND_ORANGE}15 100%)`,
-              border: `1.5px solid ${BRAND_ORANGE}25`,
+              background: `linear-gradient(135deg, ${BRAND}08 0%, ${BRAND}15 100%)`,
+              border: `1.5px solid ${BRAND}25`,
               borderRadius: 12,
               padding: "32px 24px",
               textAlign: "center",
@@ -320,8 +320,8 @@ export const PaymentModal = ({ subscription, onClose }: PaymentModalProps) => {
                     style={{
                       width: 40,
                       height: 40,
-                      border: `3px solid ${BRAND_ORANGE}20`,
-                      borderTopColor: BRAND_ORANGE,
+                      border: `3px solid ${BRAND}20`,
+                      borderTopColor: BRAND,
                       borderRadius: "50%",
                       animation: "spin 0.8s linear infinite",
                     }}

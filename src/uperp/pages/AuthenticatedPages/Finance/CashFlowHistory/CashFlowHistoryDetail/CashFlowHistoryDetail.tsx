@@ -24,6 +24,7 @@ import { useState } from "react";
 import { formatDateFromApi } from "@/uperp/common/dates";
 import { CashFlowHistorySalesTable } from "../CashFlowHistorySalesTable/CashFlowHistorySalesTable";
 import { CashFlowHistoryTransactionTable } from "../CashFlowHistoryTransactionTable/CashFlowHistoryTransactionTable";
+import { BRAND, BRAND_SOFT, BRAND_BORDER, DANGER, SUCCESS, INFO } from "@/theme/colors";
 import {
   PAYMENT_METHOD_LABELS,
   useCashFlowHistoryDetailController,
@@ -74,7 +75,7 @@ export const CashFlowHistoryDetail = () => {
   return (
     <>
       <Card
-        style={{ marginBottom: 16, borderLeft: "4px solid #DC2626" }}
+        style={{ marginBottom: 16, borderLeft: `4px solid ${DANGER}` }}
         styles={{ body: { padding: 16 } }}
         extra={
           <Button icon={<ArrowLeft size={14} />} onClick={handleBack}>
@@ -85,7 +86,7 @@ export const CashFlowHistoryDetail = () => {
         <Row align="middle" gutter={[16, 12]}>
           <Col>
             <Space align="center">
-              <Lock color="#DC2626" size={24} />
+              <Lock color={DANGER} size={24} />
               <div>
                 <Text type="secondary" style={{ fontSize: 12 }}>
                   Caixa Fechado — {cashFlow.code}
@@ -128,7 +129,7 @@ export const CashFlowHistoryDetail = () => {
             <Statistic
               title="Vendas"
               value={formatPrice(salesData?.amount ?? 0)}
-              valueStyle={{ color: "#16A34A" }}
+              valueStyle={{ color: SUCCESS }}
               prefix={<TrendingUp size={16} />}
             />
           </Card>
@@ -138,7 +139,7 @@ export const CashFlowHistoryDetail = () => {
             <Statistic
               title="Reposições"
               value={formatPrice(replacementData?.amount ?? 0)}
-              valueStyle={{ color: "#2563EB" }}
+              valueStyle={{ color: INFO }}
               prefix={<ArrowDownCircle size={16} />}
             />
           </Card>
@@ -148,7 +149,7 @@ export const CashFlowHistoryDetail = () => {
             <Statistic
               title="Sangrias"
               value={formatPrice(sangriasData?.amount ?? 0)}
-              valueStyle={{ color: "#DC2626" }}
+              valueStyle={{ color: DANGER }}
               prefix={<TrendingDown size={16} />}
             />
           </Card>
@@ -159,14 +160,14 @@ export const CashFlowHistoryDetail = () => {
       <Card
         style={{
           marginBottom: 16,
-          background: "#FFF7ED",
-          borderColor: "#FED7AA",
+          background: BRAND_SOFT,
+          borderColor: BRAND_BORDER,
         }}
       >
         <Row align="middle" justify="space-between" gutter={[16, 12]}>
           <Col>
             <Text type="secondary">Saldo estimado (Sistema)</Text>
-            <Title level={2} style={{ margin: 0, color: "#F26B1F" }}>
+            <Title level={2} style={{ margin: 0, color: BRAND }}>
               {formatPrice(expectedAmount.toFixed(2))}
             </Title>
           </Col>
@@ -180,7 +181,7 @@ export const CashFlowHistoryDetail = () => {
               </Row>
               <Row justify="space-between" gutter={24}>
                 <Text type="secondary">Diferença</Text>
-                <Text strong style={{ color: diff < 0 ? "#DC2626" : "#16A34A", marginInline: 5 }}>
+                <Text strong style={{ color: diff < 0 ? DANGER : SUCCESS, marginInline: 5 }}>
                   {formatPrice(diff)}
                 </Text>
               </Row>

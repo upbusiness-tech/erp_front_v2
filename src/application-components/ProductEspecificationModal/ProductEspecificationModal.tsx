@@ -27,6 +27,7 @@ import {
   Typography,
 } from "antd";
 import { Star } from "lucide-react";
+import { BRAND, BRAND_GRADIENT_END, BRAND_SOFT_ALT, WARNING } from "@/theme/colors";
 import { useProductEspecificationModalController } from "./useProductEspecificationModal.controller";
 
 const { Text } = Typography;
@@ -107,12 +108,12 @@ export const ProductEspecificationModal = ({
                     width: 64,
                     height: 64,
                     borderRadius: 8,
-                    background: "linear-gradient(135deg, #fff3e8, #ffe0c2)",
+                    background: `linear-gradient(135deg, ${BRAND_SOFT_ALT}, ${BRAND_GRADIENT_END})`,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     fontWeight: 700,
-                    color: "#F26B1F",
+                    color: BRAND,
                     fontSize: 24,
                   }}
                 >
@@ -128,7 +129,7 @@ export const ProductEspecificationModal = ({
                 {product?.id} · {product?.productCategory?.name}
               </Text>
               <div style={{ marginTop: 4 }}>
-                <Text strong style={{ color: "#F26B1F", fontSize: 18 }}>
+                <Text strong style={{ color: BRAND, fontSize: 18 }}>
                   {findSpecification()
                     ? `${formatPrice(findSpecification()?.salePrice || 0)}`
                     : calculeSalePriceRange(product?.productEspecifications || [])}
@@ -149,10 +150,10 @@ export const ProductEspecificationModal = ({
               </div>
               {specialPriceForSpec && (
                 <Space size={4} style={{ marginTop: 4 }}>
-                  <Star size={12} style={{ color: "#F59E0B" }} />
+                  <Star size={12} style={{ color: WARNING }} />
                   <Text type="secondary" style={{ fontSize: 12 }}>
                     Preço especial:{" "}
-                    <Text strong style={{ color: "#F26B1F" }}>
+                    <Text strong style={{ color: BRAND }}>
                       {formatPrice(specialPriceForSpec.specialPrice)}
                     </Text>
                   </Text>
@@ -181,7 +182,7 @@ export const ProductEspecificationModal = ({
                   <Text
                     style={{
                       fontSize: 14,
-                      color: "#F26B1F",
+                      color: BRAND,
                       fontWeight: 500,
                       whiteSpace: "nowrap",
                     }}

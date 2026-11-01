@@ -35,6 +35,7 @@ import { useOrderContentController } from "./useOrderContent.controller";
 import { PAYMENT_LABEL } from "@/uperp/common/consts";
 import { OrderServiceItem } from "../OrderServiceItem/OrderServiceItem";
 import { SaleType } from "@/enums/sale.enum";
+import { BRAND, DANGER, SUCCESS, BRAND_SOFT } from "@/theme/colors";
 
 const { Title, Text } = Typography;
 
@@ -136,13 +137,13 @@ export const OrderContent = ({ handleSubmitSale, submitingSale, saleType }: Orde
                   marginTop: 8,
                   padding: 8,
                   borderRadius: 6,
-                  background: "#FFF7ED",
+                  background: BRAND_SOFT,
                   display: "flex",
                   alignItems: "center",
                   gap: 8,
                 }}
               >
-                <Avatar size="small" style={{ background: "#F26B1F" }}>
+                <Avatar size="small" style={{ background: BRAND }}>
                   {selectedCustomer.name.charAt(0)}
                 </Avatar>
                 <div style={{ flex: 1, lineHeight: 1.3 }}>
@@ -158,7 +159,7 @@ export const OrderContent = ({ handleSubmitSale, submitingSale, saleType }: Orde
                   size="small"
                   icon={<Eye size={16} />}
                   onClick={() => setCustomerDetailsOpen(true)}
-                  style={{ color: "#F26B1F" }}
+                  style={{ color: BRAND }}
                 />
               </div>
             )}
@@ -228,7 +229,7 @@ export const OrderContent = ({ handleSubmitSale, submitingSale, saleType }: Orde
             <Row justify="space-between" align="middle">
               <Space size={4}>
                 {saleDiscountExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                <Text style={{ color: saleDiscountValue > 0 ? "#F26B1F" : undefined }}>
+                <Text style={{ color: saleDiscountValue > 0 ? BRAND : undefined }}>
                   Desconto da venda
                 </Text>
               </Space>
@@ -287,7 +288,7 @@ export const OrderContent = ({ handleSubmitSale, submitingSale, saleType }: Orde
             <Title level={4} style={{ margin: 0 }}>
               Total
             </Title>
-            <Title level={4} style={{ margin: 0, color: "#F26B1F" }}>
+            <Title level={4} style={{ margin: 0, color: BRAND }}>
               {formatPrice(total)}
             </Title>
           </Row>
@@ -307,7 +308,7 @@ export const OrderContent = ({ handleSubmitSale, submitingSale, saleType }: Orde
         </>
       ) : (
         <>
-          <div style={{ background: "#FFF7ED", padding: 12, borderRadius: 8, marginBottom: 12 }}>
+          <div style={{ background: BRAND_SOFT, padding: 12, borderRadius: 8, marginBottom: 12 }}>
             <Row justify="space-between">
               <Text>Subtotal</Text>
               <Text>{formatPrice(grossSubtotal)}</Text>
@@ -328,17 +329,17 @@ export const OrderContent = ({ handleSubmitSale, submitingSale, saleType }: Orde
               <Text type="secondary">{formatPrice(paid)}</Text>
             </Row>
             <Row justify="space-between">
-              <Text strong style={{ color: remaining > 0 ? "#DC2626" : "#16A34A" }}>
+              <Text strong style={{ color: remaining > 0 ? DANGER : SUCCESS }}>
                 Restante
               </Text>
-              <Text strong style={{ color: remaining > 0 ? "#DC2626" : "#16A34A" }}>
+              <Text strong style={{ color: remaining > 0 ? DANGER : SUCCESS }}>
                 {formatPrice(remaining)}
               </Text>
             </Row>
             {isOverpaid && (
               <Row justify="space-between">
                 <Text strong>Troco</Text>
-                <Text strong style={{ color: "#16A34A" }}>
+                <Text strong style={{ color: SUCCESS }}>
                   {formatPrice(change)}
                 </Text>
               </Row>
@@ -386,7 +387,7 @@ export const OrderContent = ({ handleSubmitSale, submitingSale, saleType }: Orde
               <Text strong style={{ fontSize: 14 }}>
                 Troco
               </Text>
-              <Text strong style={{ fontSize: 15, color: "#16A34A" }}>
+              <Text strong style={{ fontSize: 15, color: SUCCESS }}>
                 R$ {changePreview.toFixed(2)}
               </Text>
             </div>
@@ -411,7 +412,7 @@ export const OrderContent = ({ handleSubmitSale, submitingSale, saleType }: Orde
                   ]}
                 >
                   <Space>
-                    <CreditCard size={14} color="#F26B1F" />
+                    <CreditCard size={14} color={BRAND} />
                     <Text>{PAYMENT_LABEL[p.type]}</Text>
                   </Space>
                   <Text strong>R$ {p.amount.toFixed(2)}</Text>

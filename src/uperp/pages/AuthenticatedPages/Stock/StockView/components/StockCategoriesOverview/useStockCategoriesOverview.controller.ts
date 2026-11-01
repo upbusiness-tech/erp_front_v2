@@ -6,6 +6,7 @@ import { ProductCategoryService } from "@/services/productCategory.service";
 import { PaginatedResponse } from "@/types/crud.types";
 import { message } from "antd";
 import { useState } from "react";
+import { BRAND } from "@/theme/colors";
 
 const productCategoryService = new ProductCategoryService();
 const productService = new ProductService();
@@ -17,7 +18,7 @@ export function useStockCategoriesOverviewController() {
   const { invalidateQuery } = useCacheManager();
 
   const [category, setCategory] = useState<string>("");
-  const [color, setColor] = useState<string>("#F26B1F");
+  const [color, setColor] = useState<string>(BRAND);
 
   const [submiting, setsubmiting] = useState(false);
   const submitCategory = async () => {

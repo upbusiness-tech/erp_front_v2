@@ -19,6 +19,7 @@ import { TableProps } from "antd/lib/table";
 import { Eye, Pencil } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { BRAND } from "@/theme/colors";
 const { Text } = Typography;
 
 const productService = new ProductService();
@@ -181,7 +182,7 @@ export function useStockProductTableController({
                 width: 10,
                 height: 10,
                 borderRadius: "50%",
-                background: `${p.productCategory?.color || "#F26B1F"}`,
+                background: p.productCategory?.color || BRAND,
               }}
             />
             <Text strong>{p.productCategory?.name || "-"}</Text>

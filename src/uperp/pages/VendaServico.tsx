@@ -35,6 +35,7 @@ import {
   Star,
 } from "lucide-react";
 import { useStore } from "../store";
+import { BRAND, BRAND_SOFT, DANGER, SUCCESS } from "@/theme/colors";
 import {
   PAYMENT_LABEL,
   type Payment,
@@ -258,13 +259,13 @@ export function VendaServico() {
                     marginTop: 12,
                     padding: 12,
                     borderRadius: 8,
-                    background: "#FFF7ED",
+                    background: BRAND_SOFT,
                     display: "flex",
                     alignItems: "center",
                     gap: 12,
                   }}
                 >
-                  <Avatar size={40} style={{ background: "#F26B1F" }}>
+                  <Avatar size={40} style={{ background: BRAND }}>
                     {selectedCustomer.name.charAt(0)}
                   </Avatar>
                   <div style={{ flex: 1 }}>
@@ -410,7 +411,7 @@ export function VendaServico() {
                         <Text delete style={{ fontSize: 11 }}>
                           R$ {v.toFixed(2)}
                         </Text>
-                        <Text strong style={{ color: "#F26B1F", fontSize: 12 }}>
+                        <Text strong style={{ color: BRAND, fontSize: 12 }}>
                           R$ {sp.toFixed(2)}
                         </Text>
                       </Space>
@@ -560,7 +561,7 @@ export function VendaServico() {
                                     R$ {it.originalPrice!.toFixed(2)}
                                   </Text>{" "}
                                   por{" "}
-                                  <Text strong style={{ color: "#F26B1F", fontSize: 11 }}>
+                                  <Text strong style={{ color: BRAND, fontSize: 11 }}>
                                     R$ {it.price.toFixed(2)}
                                   </Text>
                                 </Text>
@@ -584,7 +585,7 @@ export function VendaServico() {
                 <Title level={4} style={{ margin: 0 }}>
                   Total
                 </Title>
-                <Title level={4} style={{ margin: 0, color: "#F26B1F" }}>
+                <Title level={4} style={{ margin: 0, color: BRAND }}>
                   R$ {total.toFixed(2)}
                 </Title>
               </Row>
@@ -603,7 +604,7 @@ export function VendaServico() {
           ) : (
             <>
               <div
-                style={{ background: "#FFF7ED", padding: 12, borderRadius: 8, marginBottom: 12 }}
+                style={{ background: BRAND_SOFT, padding: 12, borderRadius: 8, marginBottom: 12 }}
               >
                 <Row justify="space-between">
                   <Text>Total</Text>
@@ -614,10 +615,10 @@ export function VendaServico() {
                   <Text type="secondary">R$ {paid.toFixed(2)}</Text>
                 </Row>
                 <Row justify="space-between">
-                  <Text strong style={{ color: remaining > 0 ? "#DC2626" : "#16A34A" }}>
+                  <Text strong style={{ color: remaining > 0 ? DANGER : SUCCESS }}>
                     Restante
                   </Text>
-                  <Text strong style={{ color: remaining > 0 ? "#DC2626" : "#16A34A" }}>
+                  <Text strong style={{ color: remaining > 0 ? DANGER : SUCCESS }}>
                     R$ {remaining.toFixed(2)}
                   </Text>
                 </Row>
@@ -667,7 +668,7 @@ export function VendaServico() {
                       ]}
                     >
                       <Space>
-                        <CreditCard size={14} color="#F26B1F" />
+                        <CreditCard size={14} color={BRAND} />
                         <Text>{PAYMENT_LABEL[p.method]}</Text>
                       </Space>
                       <Text strong>R$ {p.value.toFixed(2)}</Text>

@@ -5,6 +5,7 @@ import { CashFlowTransactionService } from "@/services/cashFlowTransaction.servi
 import { formatDateFromApi } from "@/uperp/common/dates";
 import { Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
+import { DANGER, SUCCESS } from "@/theme/colors";
 
 const { Text } = Typography;
 
@@ -66,7 +67,7 @@ export function useCashFlowHistoryTransactionTableController({
         <Text
           strong
           style={{
-            color: r.origin === TransactionOrigin.SANGRIA ? "#DC2626" : "#16A34A",
+            color: r.origin === TransactionOrigin.SANGRIA ? DANGER : SUCCESS,
           }}
         >
           {r.origin === TransactionOrigin.SANGRIA ? "-" : "+"} R$ {Number(v).toFixed(2)}

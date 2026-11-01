@@ -1,6 +1,7 @@
 import { App, Button, Card, Divider, Form, Input, Modal, Typography } from "antd";
 import { Building2, Store } from "lucide-react";
 import { useState } from "react";
+import { BRAND } from "@/theme/colors";
 import { useCompanyLoginController } from "./useCompanyLogin.controller";
 
 const { Title, Text } = Typography;
@@ -18,7 +19,7 @@ export function CompanyLogin() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "linear-gradient(135deg, #111 0%, #2a1a10 60%, #F26B1F 160%)",
+        background: `linear-gradient(135deg, #111 0%, #2a1a10 60%, ${BRAND} 160%)`,
         padding: 24,
       }}
     >
@@ -29,7 +30,7 @@ export function CompanyLogin() {
               width: 64,
               height: 64,
               borderRadius: 16,
-              background: "#F26B1F",
+              background: BRAND,
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
