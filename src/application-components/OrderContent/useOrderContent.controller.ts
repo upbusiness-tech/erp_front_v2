@@ -1,4 +1,5 @@
 import { PaymentMethod } from "@/enums/payment.enum";
+import { SaleType } from "@/enums/sale.enum";
 import { useGetAllWithParams } from "@/hooks/useGetAllWithParams";
 import { InternCustomerModel } from "@/model/internCustomer.model";
 import { InternCustomerSpecialPriceModel } from "@/model/internCustomerPrice.model";
@@ -22,7 +23,7 @@ import { useMemo, useState } from "react";
 export type OrderSteps = "items" | "payment";
 
 const internCustomerService = new InternCustomerService();
-export function useOrderContentController() {
+export function useOrderContentController({ saleType }: { saleType: SaleType }) {
   const {
     saleItems,
     setSaleItems,
@@ -38,6 +39,14 @@ export function useOrderContentController() {
   } = useSalesStore();
 
   const { currentCashFlow } = useCashFlowStore();
+
+  const isGoToPaymentDisabled = () => {
+    if (saleType === SaleType.SERVICE) {
+      return saleServices.length === 0;
+    } else {
+      return saleItems.length === 0;
+    }
+  };
 
   const removeSaleItem = (id: number) => {
     setSaleItems(saleItems.filter((item) => item.id !== id));
@@ -285,5 +294,6 @@ export function useOrderContentController() {
     setDiscountModalOpen,
     setItemForDiscount,
     saleServices,
+    isGoToPaymentDisabled,
   };
 }

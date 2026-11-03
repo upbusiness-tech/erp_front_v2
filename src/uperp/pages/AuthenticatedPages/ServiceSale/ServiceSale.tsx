@@ -111,15 +111,7 @@ export const ServiceSale = () => {
                   <Form.Item
                     name="description"
                     label="Descrição"
-                    rules={[
-                      { required: true, message: "Informe a descrição" },
-                      {
-                        validator: (_, v) =>
-                          v && v.trim().length > 0
-                            ? Promise.resolve()
-                            : Promise.reject("Descrição obrigatória"),
-                      },
-                    ]}
+                    rules={[{ required: true, message: "Informe a descrição" }]}
                     style={{ marginBottom: 8 }}
                   >
                     <Input placeholder="Descrição do serviço" allowClear />
@@ -131,15 +123,7 @@ export const ServiceSale = () => {
                   <Form.Item
                     name="onwerEmployee"
                     label="Funcionário"
-                    rules={[
-                      { required: true, message: "Informe o funcionário" },
-                      {
-                        validator: (_, v) =>
-                          v && v.trim().length > 0
-                            ? Promise.resolve()
-                            : Promise.reject("Funcionário obrigatório"),
-                      },
-                    ]}
+                    rules={[{ required: true, message: "Informe o funcionário" }]}
                     style={{ marginBottom: 8 }}
                   >
                     <Input placeholder="Responsável" allowClear />
@@ -149,15 +133,7 @@ export const ServiceSale = () => {
                   <Form.Item
                     name="amount"
                     label="Valor"
-                    rules={[
-                      { required: true, message: "Informe o valor" },
-                      {
-                        validator: (_, v) =>
-                          typeof v === "number" && v > 0
-                            ? Promise.resolve()
-                            : Promise.reject("Valor deve ser maior que zero"),
-                      },
-                    ]}
+                    rules={[{ required: true, message: "Informe o valor" }]}
                     style={{ marginBottom: 8 }}
                   >
                     <InputNumberFormatted prefix="R$" placeholder="0,00" />

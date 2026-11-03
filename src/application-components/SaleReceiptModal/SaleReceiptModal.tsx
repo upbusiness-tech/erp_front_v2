@@ -223,54 +223,57 @@ export const SaleReceiptModal = ({
             </div>
 
             <Divider style={{ margin: "14px 0 10px" }}>Itens & Serviços</Divider>
-            <List
-              size="small"
-              dataSource={receiptSale.items}
-              renderItem={(item) => (
-                <List.Item>
-                  <List.Item.Meta
-                    title={
-                      <Space size={6} wrap>
-                        <Text strong>{item.name}</Text>
-                        {item.hasSpecialPrice && (
-                          <Tag color="gold" icon={<Star size={11} />} style={{ margin: 0 }}>
-                            Preço especial
-                          </Tag>
-                        )}
-                        {item.discountValue != null && item.discountValue > 0 && (
-                          <Tag color="red" icon={<Percent size={11} />} style={{ margin: 0 }}>
-                            {formatPrice(item.discountValue)}
-                          </Tag>
-                        )}
-                      </Space>
-                    }
-                    description={
-                      <Space direction="vertical" size={0}>
-                        <Text type="secondary" style={{ fontSize: 12 }}>
-                          {formatUnitSoldAmount(item.unitOfMeasure, item.unitSold) ?? item.quantity}{" "}
-                          × {formatPrice(item.unitPrice)}
-                          {getVariationLabel(item) ? ` · ${getVariationLabel(item)}` : ""}
-                        </Text>
-                        {item.hasSpecialPrice && (
+            {receiptSale?.sale?.items && receiptSale?.sale?.items?.length > 0 && (
+              <List
+                size="small"
+                dataSource={receiptSale.items}
+                renderItem={(item) => (
+                  <List.Item>
+                    <List.Item.Meta
+                      title={
+                        <Space size={6} wrap>
+                          <Text strong>{item.name}</Text>
+                          {item.hasSpecialPrice && (
+                            <Tag color="gold" icon={<Star size={11} />} style={{ margin: 0 }}>
+                              Preço especial
+                            </Tag>
+                          )}
+                          {item.discountValue != null && item.discountValue > 0 && (
+                            <Tag color="red" icon={<Percent size={11} />} style={{ margin: 0 }}>
+                              {formatPrice(item.discountValue)}
+                            </Tag>
+                          )}
+                        </Space>
+                      }
+                      description={
+                        <Space direction="vertical" size={0}>
                           <Text type="secondary" style={{ fontSize: 12 }}>
-                            De <Text delete>{formatPrice(item.originalUnitPrice)}</Text> por{" "}
-                            <Text strong style={{ color: "#B45309" }}>
-                              {formatPrice(item.unitPrice)}
+                            {formatUnitSoldAmount(item.unitOfMeasure, item.unitSold) ??
+                              item.quantity}{" "}
+                            × {formatPrice(item.unitPrice)}
+                            {getVariationLabel(item) ? ` · ${getVariationLabel(item)}` : ""}
+                          </Text>
+                          {item.hasSpecialPrice && (
+                            <Text type="secondary" style={{ fontSize: 12 }}>
+                              De <Text delete>{formatPrice(item.originalUnitPrice)}</Text> por{" "}
+                              <Text strong style={{ color: "#B45309" }}>
+                                {formatPrice(item.unitPrice)}
+                              </Text>
                             </Text>
-                          </Text>
-                        )}
-                        {item.note && (
-                          <Text italic type="secondary" style={{ fontSize: 11 }}>
-                            "{item.note}"
-                          </Text>
-                        )}
-                      </Space>
-                    }
-                  />
-                  <Text strong>{formatPrice(item.lineTotal)}</Text>
-                </List.Item>
-              )}
-            />
+                          )}
+                          {item.note && (
+                            <Text italic type="secondary" style={{ fontSize: 11 }}>
+                              "{item.note}"
+                            </Text>
+                          )}
+                        </Space>
+                      }
+                    />
+                    <Text strong>{formatPrice(item.lineTotal)}</Text>
+                  </List.Item>
+                )}
+              />
+            )}
             {receiptSale?.sale?.services && receiptSale?.sale?.services?.length > 0 && (
               <List
                 size="small"

@@ -97,7 +97,8 @@ export const OrderContent = ({ handleSubmitSale, submitingSale, saleType }: Orde
     setDiscountModalOpen,
     setItemForDiscount,
     saleServices,
-  } = useOrderContentController();
+    isGoToPaymentDisabled,
+  } = useOrderContentController({ saleType });
 
   return (
     <>
@@ -301,7 +302,7 @@ export const OrderContent = ({ handleSubmitSale, submitingSale, saleType }: Orde
             icon={<ArrowRight size={14} />}
             iconPosition="end"
             onClick={goToPayment}
-            disabled={saleItems.length === 0}
+            disabled={isGoToPaymentDisabled()}
           >
             Ir para pagamento
           </Button>
