@@ -75,23 +75,40 @@ export const ServiceSale = () => {
 
   return (
     <>
-      <Row gutter={16} style={{ minHeight: "calc(100vh - 112px)" }} align="stretch">
-        <Col xs={24} lg={16} style={{ display: "flex", flexDirection: "column" }}>
-          {!isMobile ? (
-            <CashFlowStatus onShowRecentSales={() => setRecentOpen(true)} />
-          ) : (
-            <Button
-              style={{ marginBottom: "5px" }}
-              icon={<History size={14} />}
-              onClick={() => setRecentOpen(true)}
-            >
-              Ver vendas recentes
-            </Button>
-          )}
+      <Row
+        gutter={16}
+        style={{
+          ...(isMobile ? { minHeight: "calc(100vh - 112px)" } : { height: "calc(100vh - 112px)" }),
+        }}
+        align="stretch"
+      >
+        <Col
+          xs={24}
+          lg={16}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            minHeight: 0,
+            height: isMobile ? undefined : "100%",
+          }}
+        >
+          <div style={{ flexShrink: 0 }}>
+            {!isMobile ? (
+              <CashFlowStatus onShowRecentSales={() => setRecentOpen(true)} />
+            ) : (
+              <Button
+                style={{ marginBottom: "5px" }}
+                icon={<History size={14} />}
+                onClick={() => setRecentOpen(true)}
+              >
+                Ver vendas recentes
+              </Button>
+            )}
+          </div>
 
           <Card
-            style={{ flex: 1, display: "flex", flexDirection: "column" }}
-            styles={{ body: { flex: 1, display: "flex", flexDirection: "column" } }}
+            style={{ flexShrink: 0, display: "flex", flexDirection: "column" }}
+            styles={{ body: { flexShrink: 0 } }}
             title={
               <Space>
                 <Briefcase size={18} /> Serviços prestados
@@ -155,15 +172,17 @@ export const ServiceSale = () => {
           </Card>
 
           <Card
-            style={{ flex: 1, display: "flex", flexDirection: "column" }}
-            styles={{ body: { flex: 1, display: "flex", flexDirection: "column" } }}
+            style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}
+            styles={{
+              body: { flex: 1, display: "flex", flexDirection: "column", minHeight: 0 },
+            }}
             title={
               <Space>
                 <Package size={18} /> Produtos do Estoque
               </Space>
             }
           >
-            <Row gutter={12} style={{ marginBottom: 16 }} align="top">
+            <Row gutter={12} style={{ marginBottom: 16, flexShrink: 0 }} align="top">
               <SearchBar
                 searches={[
                   {
@@ -177,25 +196,31 @@ export const ServiceSale = () => {
               />
             </Row>
 
-            <GenericTable
-              rowKey="id"
-              columns={tableColumns}
-              data={products}
-              total={total}
-              size="small"
-              isLoading={isLoading}
-              page={page}
-              pageSize={pageSize}
-              onPageChange={handlePageChange}
-              onPageSizeChange={handlePageSizeChange}
-              onRowClick={handleOpenProductModal}
-              showTotal={false}
-            />
+            <div style={{ flex: 1, minHeight: 0, overflow: "auto" }}>
+              <GenericTable
+                rowKey="id"
+                columns={tableColumns}
+                data={products}
+                total={total}
+                size="small"
+                isLoading={isLoading}
+                page={page}
+                pageSize={pageSize}
+                onPageChange={handlePageChange}
+                onPageSizeChange={handlePageSizeChange}
+                onRowClick={handleOpenProductModal}
+                showTotal={false}
+              />
+            </div>
           </Card>
         </Col>
 
         {!isMobile && (
-          <Col xs={0} lg={8} style={{ display: "flex", flexDirection: "column" }}>
+          <Col
+            xs={0}
+            lg={8}
+            style={{ display: "flex", flexDirection: "column", minHeight: 0, height: "100%" }}
+          >
             <Card
               title={
                 <Space>
@@ -210,8 +235,21 @@ export const ServiceSale = () => {
                   </Button>
                 )
               }
-              style={{ flex: 1, display: "flex", flexDirection: "column" }}
-              styles={{ body: { flex: 1, overflowY: "auto" } }}
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                minHeight: 0,
+              }}
+              styles={{
+                body: {
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  minHeight: 0,
+                  overflow: "hidden",
+                },
+              }}
             >
               <OrderContent
                 submitingSale={submiting}

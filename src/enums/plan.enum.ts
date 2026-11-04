@@ -3,8 +3,8 @@ export enum PlanStatus {
   DISABLED = "Desabilitado",
 }
 
-export enum PlanIds {
-  GESTOR = 1,
-  FISCAL = 2,
-  PDV = 3,
+export enum PlanNames {
+  GESTOR = "Gestor",
+  FISCAL = "Fiscal",
+  PDV = "PDV",
 }

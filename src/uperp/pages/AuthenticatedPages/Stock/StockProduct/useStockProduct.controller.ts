@@ -2,11 +2,9 @@ import { useCacheManager } from "@/hooks/useCacheManager";
 import { useGetAllWithParams } from "@/hooks/useGetAllWithParams";
 import { useGetOneWithParams } from "@/hooks/useGetOneWithParams";
 import { uploadToCloudinary } from "@/lib/cloudinary";
-import { PlanModel } from "@/model/plan.model";
 import { ProductModel } from "@/model/product.model";
 import { ProductCategoryModel } from "@/model/productCategory.model";
 import { ProductSupplierModel } from "@/model/productSupplier.model";
-import { PlanService } from "@/services/plan.service";
 import { ProductService } from "@/services/product.service";
 import { ProductCategoryService } from "@/services/productCategory.service";
 import { ProductSupplierService } from "@/services/productSupplier.service";
@@ -16,6 +14,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { IProductCreateFields, IProductVariantField, ProductUnitOfMeasure } from "./types";
 import { CsosnEnum, OriginEnum, PisCofinsCstEnum } from "@/enums/productFiscal.enum";
+import { useAuthStore } from "@/stores/auth.store";
 
 const formatEnumKey = (key: string) =>
   key
@@ -47,7 +46,6 @@ export const pisCofinsOptions = Object.entries(PisCofinsCstEnum)
 const productCategoryService = new ProductCategoryService();
 const productSupplierService = new ProductSupplierService();
 const productService = new ProductService();
-const planService = new PlanService();
 
 export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
   const { id } = useParams<{ id: string }>();
@@ -186,12 +184,7 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
     enabled: !!id && isEdit,
   });
 
-  const [currentPlan, setCurrentPlan] = useState<PlanModel | undefined>(undefined);
-
-  const getPlan = async () => {
-    const plan = await planService.getMyPlan();
-    setCurrentPlan(plan);
-  };
+  const { currentCompany } = useAuthStore();
 
   useEffect(() => {
     if (isEdit && productToEdit) {
@@ -236,10 +229,6 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
     }
   }, [isEdit, productToEdit]);
 
-  useEffect(() => {
-    getPlan();
-  }, []);
-
   return {
     form,
     categories,
@@ -262,6 +251,6 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
     loading,
     suppliers,
     isLoadingSuppliers,
-    currentPlan,
+    currentCompany,
   };
 }

@@ -16,7 +16,7 @@ import {
 
 import InputNumberFormatted from "@/application-components/InputNumberFormated/InputNumberFormated";
 import { ProductGalleryModal } from "@/application-components/ProductGalleryModal/ProductGalleryModal";
-import { PlanIds } from "@/enums/plan.enum";
+import { PlanNames } from "@/enums/plan.enum";
 import { useCompanySettingsStore } from "@/stores/companySettings.store";
 import { SettingsRef } from "@/uperp/common/settings/consts/settings.ref";
 import { ArrowLeft, Camera, Images, Plus, Trash2, X } from "lucide-react";
@@ -55,7 +55,7 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
     loading,
     isLoadingSuppliers,
     suppliers,
-    currentPlan,
+    currentCompany,
   } = useStockProductController({ isEdit });
 
   const { hasSettingActive } = useCompanySettingsStore();
@@ -192,7 +192,7 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
           </Col>
         </Row>
 
-        {currentPlan?.id === PlanIds.FISCAL && (
+        {currentCompany?.planName === PlanNames.FISCAL && (
           <>
             <Title level={5} style={{ marginTop: 8 }}>
               Classificação Fiscal

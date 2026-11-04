@@ -19,27 +19,27 @@ export const VariationTags = ({
   fallback = true,
 }: VariationTagsProps) => {
   const parts = getVariationParts(specification);
-  const fontSize = size === "small" ? 11 : 12;
+  const fontSize = size === "small" ? 11 : 13;
 
   return (
     <Space size={4} wrap={wrap}>
       {parts.size && (
-        <Tag color="orange" style={{ margin: 0, fontSize }}>
+        <Tag color="volcano-inverse" style={{ margin: 0, fontSize, fontWeight: "bold" }}>
           Tam. {parts.size}
         </Tag>
       )}
       {parts.color && (
-        <Tag color="green" style={{ margin: 0, fontSize }}>
+        <Tag color="blue-inverse" style={{ margin: 0, fontSize, fontWeight: "bold" }}>
           {parts.color}
         </Tag>
       )}
       {parts.brand && (
-        <Tag color="purple" style={{ margin: 0, fontSize }}>
+        <Tag color="purple-inverse" style={{ margin: 0, fontSize, fontWeight: "bold" }}>
           {parts.brand}
         </Tag>
       )}
       {fallback && !parts.size && !parts.color && !parts.brand && (
-        <Typography.Text type="secondary" style={{ fontSize }}>
+        <Typography.Text type="secondary" style={{ fontSize, fontWeight: "bold" }}>
           {getVariationLabel(specification)}
         </Typography.Text>
       )}

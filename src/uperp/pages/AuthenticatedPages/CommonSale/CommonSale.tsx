@@ -68,25 +68,54 @@ export function CommonSale() {
 
   return (
     <>
-      <Row gutter={16} style={{ minHeight: "calc(100vh - 112px)" }} align="stretch">
-        <Col xs={24} lg={16} style={{ display: "flex", flexDirection: "column" }}>
-          {!isMobile ? (
-            <CashFlowStatus onShowRecentSales={() => setRecentOpen(true)} />
-          ) : (
-            <Button
-              style={{ marginBottom: "5px" }}
-              icon={<History size={14} />}
-              onClick={() => setRecentOpen(true)}
-            >
-              Ver vendas recentes
-            </Button>
-          )}
+      <Row
+        gutter={16}
+        style={{
+          ...(isMobile ? { minHeight: "calc(100vh - 112px)" } : { height: "calc(100vh - 112px)" }),
+        }}
+        align="stretch"
+      >
+        <Col
+          xs={24}
+          lg={16}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            minHeight: 0,
+            height: isMobile ? undefined : "100%",
+          }}
+        >
+          <div style={{ flexShrink: 0 }}>
+            {!isMobile ? (
+              <CashFlowStatus onShowRecentSales={() => setRecentOpen(true)} />
+            ) : (
+              <Button
+                style={{ marginBottom: "5px" }}
+                icon={<History size={14} />}
+                onClick={() => setRecentOpen(true)}
+              >
+                Ver vendas recentes
+              </Button>
+            )}
+          </div>
 
           <Card
-            style={{ flex: 1, display: "flex", flexDirection: "column" }}
-            styles={{ body: { flex: 1, display: "flex", flexDirection: "column" } }}
+            style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}
+            styles={{
+              body: {
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                minHeight: 0,
+                overflow: isMobile
+                  ? undefined
+                  : productsView === EProductView.CARDS
+                    ? "hidden"
+                    : "auto",
+              },
+            }}
           >
-            <Row gutter={12} style={{ marginBottom: 16 }} align="top">
+            <Row gutter={12} style={{ marginBottom: 16, flexShrink: 0 }} align="top">
               <Col flex="auto">
                 <SearchBar
                   searches={[
@@ -133,6 +162,7 @@ export function CommonSale() {
                 onPageChange={handlePageChange}
                 onPageSizeChange={handlePageSizeChange}
                 onClickProduct={handleOpenProductModal}
+                fitToHeight={!isMobile}
               />
             ) : (
               <GenericTable
@@ -153,7 +183,11 @@ export function CommonSale() {
         </Col>
 
         {!isMobile && (
-          <Col xs={0} lg={8} style={{ display: "flex", flexDirection: "column" }}>
+          <Col
+            xs={0}
+            lg={8}
+            style={{ display: "flex", flexDirection: "column", minHeight: 0, height: "100%" }}
+          >
             <Card
               title={
                 <Space>
@@ -168,8 +202,21 @@ export function CommonSale() {
                   </Button>
                 )
               }
-              style={{ flex: 1, display: "flex", flexDirection: "column" }}
-              styles={{ body: { flex: 1, overflowY: "auto" } }}
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                minHeight: 0,
+              }}
+              styles={{
+                body: {
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  minHeight: 0,
+                  overflow: "hidden",
+                },
+              }}
             >
               <OrderContent
                 submitingSale={submiting}

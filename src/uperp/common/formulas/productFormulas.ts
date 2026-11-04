@@ -24,10 +24,16 @@ export const showStockTotalByProductEspecification = (
   return extractStockFormatByProduct(product, total);
 };
 
+export const formatNumberWithBrasilianFormat = (value: number) =>
+  new Intl.NumberFormat("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+
 export const extractStockFormatByProduct = (product: ProductModel, value: number) => {
   switch (product.unitOfMeasure) {
     case ProductUnitOfMeasure.GRAM:
-      return `${value.toFixed(2)} kg`;
+      return `${formatNumberWithBrasilianFormat(value)} kg`;
     case ProductUnitOfMeasure.LITER:
       return `${value.toFixed(3)} l`;
     case ProductUnitOfMeasure.METER:

@@ -1,8 +1,6 @@
 import { useGenericTableFetch } from "@/application-components/GenericTable/useGenericTableFetch";
 import { SubscriptionStatus } from "@/enums/subscription.enum";
-import { PlanModel } from "@/model/plan.model";
 import { SubscriptionModel } from "@/model/subscription.model";
-import { PlanService } from "@/services/plan.service";
 import { SubscriptionService } from "@/services/subscription.service";
 import { useAuthStore } from "@/stores/auth.store";
 import { Button, Tag } from "antd";
@@ -10,7 +8,6 @@ import { ColumnsType } from "antd/es/table";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useState } from "react";
-const planService = new PlanService();
 const subscriptionService = new SubscriptionService();
 
 const statusConfig: Record<SubscriptionStatus, { color: string }> = {
@@ -30,10 +27,6 @@ export function useSubscriptionViewController() {
     handlePageChange,
     handlePageSizeChange,
   } = useGenericTableFetch<SubscriptionModel>({ service: subscriptionService });
-
-  const { data: plans } = useGenericTableFetch<PlanModel>({
-    service: planService,
-  });
 
   const { currentCompany } = useAuthStore();
 
@@ -76,7 +69,6 @@ export function useSubscriptionViewController() {
   ];
 
   return {
-    plans,
     currentCompany,
     subscriptions,
     total,

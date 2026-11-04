@@ -2,7 +2,7 @@ export interface CompanyDetailModel {
   companyUid: string;
   document: string;
   planName: string;
-  planId: number;
+  planPrice: number;
   profilePicture: string;
   name: string;
   description: string;
