@@ -1,3 +1,4 @@
+import { ProductEspecificationModel } from "@/model/productEspecification.model";
 import { SaleItemModel, SaleModel, SaleServiceModel } from "@/model/sale.model";
 import {
   CartSaleItem,
@@ -5,19 +6,29 @@ import {
   PaymentItem,
 } from "../../pages/AuthenticatedPages/CommonSale/types";
 
+export type SaleItemLike = SaleItemModel | CartSaleItem;
+
 export const round2 = (n: number) => Math.round(n * 100) / 100;
 
+const isSaleItemModel = (item: SaleItemLike): item is SaleItemModel =>
+  "productSnapshot" in item && item.productSnapshot != null;
+
+const getItemSpecification = (item: SaleItemLike): ProductEspecificationModel | null | undefined =>
+  isSaleItemModel(item) ? item.productSnapshot : item.productEspecification;
+
+const getItemSalePrice = (item: SaleItemLike) => Number(getItemSpecification(item)?.salePrice ?? 0);
+
+const getItemSpecialPrice = (item: SaleItemLike) =>
+  isSaleItemModel(item)
+    ? Number(item.specialPriceSnapshot ?? 0)
+    : Number(item.internCustomerPrice?.specialPrice ?? 0);
+
 export const calculateGrossSubtotal = (
-  items: CartSaleItem[] | SaleItemModel[],
+  items: SaleItemLike[],
   services?: ISaleServiceForm[] | SaleServiceModel[],
 ) => {
   const totalItems = items.reduce((acc, item) => {
-    return (
-      acc +
-      Number(item.productEspecification.salePrice) *
-        Number(item.quantitySold) *
-        Number(item.unitSold)
-    );
+    return acc + getItemSalePrice(item) * Number(item.quantitySold) * Number(item.unitSold);
   }, 0);
 
   const totalService = services?.reduce((acc, item) => {
@@ -27,23 +38,23 @@ export const calculateGrossSubtotal = (
   return totalItems + (totalService ?? 0);
 };
 
-export const calculateSpecialPriceSavings = (items: CartSaleItem[] | SaleItemModel[]) => {
+export const calculateSpecialPriceSavings = (items: SaleItemLike[]) => {
   return items.reduce((acc, item) => {
     if (!item.isEspecialPrice || !item.internCustomerPrice?.specialPrice) return acc;
-    const normal = Number(item.productEspecification.salePrice);
-    const special = Number(item.internCustomerPrice.specialPrice);
+    const normal = getItemSalePrice(item);
+    const special = getItemSpecialPrice(item);
     return acc + (normal - special) * Number(item.quantitySold) * Number(item.unitSold);
   }, 0);
 };
 
-export const calculateItemDiscountsTotal = (items: CartSaleItem[] | SaleItemModel[]) => {
+export const calculateItemDiscountsTotal = (items: SaleItemLike[]) => {
   return items.reduce((acc, item) => {
     return acc + Number(item.discountInfo?.value ?? 0);
   }, 0);
 };
 
-export const calculateItemsTotal = (items: CartSaleItem[] | SaleItemModel[]) => {
-  const gross = calculateGrossSubtotal(items);
+export const calculateItemsTotal = (items: SaleItemLike[]) => {
+  const gross = calculateGrossSubtotal(items, []);
   const savings = calculateSpecialPriceSavings(items);
   const itemDiscounts = calculateItemDiscountsTotal(items);
   return Math.max(gross - savings - itemDiscounts, 0);
@@ -60,7 +71,7 @@ export const calculateServiceItemsTotal = (
 };
 
 export const calculateTotalCartItems = (
-  items: CartSaleItem[] | SaleItemModel[],
+  items: SaleItemLike[],
   saleServices: ISaleServiceForm[] | SaleServiceModel[] | undefined,
   saleDiscount?: { value?: number } | null,
 ) => {

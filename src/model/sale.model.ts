@@ -7,21 +7,30 @@ import { ProductEspecificationModel } from "./productEspecification.model";
 import { UserModel } from "./user.model";
 import { InternCustomerModel } from "./internCustomer.model";
 import { DiscountInfo } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
+import { ProductUnitOfMeasure } from "@/uperp/pages/AuthenticatedPages/Stock/StockProduct/types";
 
 export type ApiMoney = string | number | null;
-
 export interface SaleItemModel extends DefaultIdModel {
   note: string;
   quantitySold: number;
   unitSold: number;
+  unitOfMeasure: ProductUnitOfMeasure;
   isEspecialPrice: boolean;
-  discountInfo?: DiscountInfo;
-  internCustomerPriceId?: number | null;
-  internCustomerPrice?: InternCustomerSpecialPriceModel | null;
+  productSnapshot: ProductEspecificationModel;
+  salePriceSnapshot: number;
+  specialPriceSnapshot: number;
+  costPriceSnapshot: number;
+  discountInfo: DiscountInfo;
+  amountItem: number;
+  amountProfitItem: number;
+  saleDiscountShare: number;
+  internCustomerPriceId: number;
+  internCustomerPrice: InternCustomerSpecialPriceModel | null;
   productId: number;
   product: ProductModel;
   productEspecificationId: number;
-  productEspecification: ProductEspecificationModel;
+  productEspecification: ProductEspecificationModel | null;
+  saleId: number;
 }
 
 export interface SalePaymentModel extends DefaultIdModel {

@@ -38,11 +38,11 @@ export const menu: { key: PageKey; label: string; icon: React.ReactNode }[] = [
   { key: "servico", label: "Venda Serviço", icon: <Briefcase size={16} /> },
   { key: "caixa", label: "Caixa", icon: <Wallet size={16} /> },
   { key: "estoque", label: "Estoque", icon: <Boxes size={16} /> },
-  { key: "financas", label: "Finanças & Relatórios", icon: <BarChart3 size={16} /> },
+  { key: "financas", label: "Finanças", icon: <BarChart3 size={16} /> },
   { key: "clientes", label: "Clientes", icon: <Users size={16} /> },
   { key: "funcionarios", label: "Funcionários", icon: <UserCog size={16} /> },
   { key: "empresa", label: "Empresa", icon: <Building2 size={16} /> },
-  { key: "planos", label: "Planos & Mensalidades", icon: <CreditCard size={16} /> },
+  { key: "planos", label: "Mensalidades", icon: <CreditCard size={16} /> },
   { key: "configuracoes", label: "Configurações", icon: <Settings size={16} /> },
 ];
 
@@ -51,11 +51,11 @@ export const titles: Record<PageKey, string> = {
   servico: "Venda Serviço",
   caixa: "Caixa",
   estoque: "Estoque",
-  financas: "Finanças & Relatórios",
+  financas: "Finanças",
   clientes: "Clientes",
   funcionarios: "Funcionários",
   empresa: "Empresa",
-  planos: "Planos & Mensalidades",
+  planos: "Mensalidades",
   configuracoes: "Configurações",
 };
 

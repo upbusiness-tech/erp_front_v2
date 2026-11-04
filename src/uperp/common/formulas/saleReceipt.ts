@@ -40,7 +40,7 @@ export const formatUnitSoldAmount = (unitOfMeasure?: string, unitSold?: number):
 };
 
 const getItemUnitPrice = (item: SaleItemModel): number => {
-  const normalPrice = toNumber(item.productEspecification.salePrice);
+  const normalPrice = toNumber(item.productSnapshot.salePrice);
   const specialPrice = toNumber(item.internCustomerPrice?.specialPrice);
   const hasSpecialPrice = item.isEspecialPrice && item.internCustomerPrice?.specialPrice != null;
   return hasSpecialPrice ? specialPrice : normalPrice;
@@ -53,7 +53,7 @@ export const createSaleReceipt = (sale: SaleModel): SaleReceiptModel => {
   const items = sale.items.map((item) => {
     const unitPrice = getItemUnitPrice(item);
     const unitSold = Number(item.unitSold);
-    const normalPrice = toNumber(item.productEspecification.salePrice);
+    const normalPrice = toNumber(item.productSnapshot.salePrice);
     const hasSpecialPrice = item.isEspecialPrice && item.internCustomerPrice?.specialPrice != null;
     const quantity = Number(item.quantitySold);
     const itemDiscount = toNumber(item.discountInfo?.value);
@@ -61,17 +61,17 @@ export const createSaleReceipt = (sale: SaleModel): SaleReceiptModel => {
 
     return {
       id: item.id,
-      name: item.product.name,
+      name: item.productSnapshot.product?.name ?? "Produto",
       quantity,
       originalUnitPrice: normalPrice,
       unitPrice,
       lineTotal,
       hasSpecialPrice,
-      code: item.productEspecification.code || undefined,
-      size: item.productEspecification.size || undefined,
-      color: item.productEspecification.color || undefined,
-      brand: item.productEspecification.brand || undefined,
-      unitOfMeasure: item.product.unitOfMeasure || undefined,
+      code: item.productSnapshot.code || undefined,
+      size: item.productSnapshot.size || undefined,
+      color: item.productSnapshot.color || undefined,
+      brand: item.productSnapshot.brand || undefined,
+      unitOfMeasure: item.productSnapshot.product?.unitOfMeasure || undefined,
       unitSold: toNumber(item.unitSold) || 1,
       note: item.note || undefined,
       discountValue: itemDiscount > 0 ? itemDiscount : undefined,
