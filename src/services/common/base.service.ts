@@ -1,11 +1,12 @@
 import { api } from "@/config/axios.config";
+import { CRUD_CUSTOM_OPERATORS } from "@/lib/crudOperators";
 import { GetWithFilterProps } from "@/lib/request.types";
 import { CreateQueryParams, RequestQueryBuilder } from "@dataui/crud-request";
 
 export const buildApiPathWithQuery = ({ path, queryParams }: GetWithFilterProps) => {
   let pathWithQuery = path;
 
-  const queryString = RequestQueryBuilder.create(queryParams).query();
+  const queryString = RequestQueryBuilder.create(queryParams, CRUD_CUSTOM_OPERATORS).query();
   if (queryString) {
     pathWithQuery = `${pathWithQuery}?${queryString}`;
   }

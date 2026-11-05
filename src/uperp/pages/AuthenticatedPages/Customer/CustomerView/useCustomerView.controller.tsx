@@ -38,7 +38,7 @@ export function useCustomerViewController() {
     service: internCustomerService,
     options: {
       filter: search.trim()
-        ? [{ field: "name", operator: "$contL", value: search.trim() }]
+        ? [{ field: "name", operator: "$contUL", value: search.trim() }]
         : undefined,
     },
     enabled: canViewInternCustomer,

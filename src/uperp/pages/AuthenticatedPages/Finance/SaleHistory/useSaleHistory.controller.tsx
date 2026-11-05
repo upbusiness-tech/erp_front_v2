@@ -55,7 +55,13 @@ export function useSaleHistoryController() {
     return [
       ...(search ? [{ field: "code", operator: "$contL", value: search.trim() }] : []),
       ...(searchCustomerName
-        ? [{ field: "internCustomer.name", operator: "$contL", value: searchCustomerName.trim() }]
+        ? [
+            {
+              field: "internCustomer.name",
+              operator: "$contUL",
+              value: searchCustomerName.trim(),
+            },
+          ]
         : []),
       ...(typeFilter.length > 0 ? [{ field: "type", operator: "$in", value: typeFilter }] : []),
       ...(saleStatus.length > 0 ? [{ field: "status", operator: "$in", value: saleStatus }] : []),
