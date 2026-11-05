@@ -1,4 +1,4 @@
-import { ScanLine, StickyNote } from "lucide-react";
+import { ScanLine, StickyNote, View } from "lucide-react";
 import { BRAND } from "@/theme/colors";
 
 export const ProductSetting = {
@@ -13,5 +13,11 @@ export const ProductSetting = {
     key: "scan_product_by_code",
     description: "Escanear produtos via código de barras",
     icon: <ScanLine size={18} color={BRAND} />,
+  },
+  ViewProductOnExpandedMode: {
+    module: "Product",
+    key: "view_product_on_expanded_mode",
+    description: "Visualizar produtos em modo expandido",
+    icon: <View size={18} color={BRAND} />,
   },
 };

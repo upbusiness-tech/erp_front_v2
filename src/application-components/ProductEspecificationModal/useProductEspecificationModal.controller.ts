@@ -3,6 +3,7 @@ import { ProductModel } from "@/model/product.model";
 import { useSalesStore } from "@/stores/sales.store";
 import { calculeStockTotalByProductEspecification } from "@/uperp/common/formulas/productFormulas";
 import { isVariationSellable } from "@/uperp/common/util/productVariation";
+import { isQuantityAvailableForSale } from "@/uperp/common/util/saleCart";
 import { CartSaleItem } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
 import { ProductUnitOfMeasure } from "@/uperp/pages/AuthenticatedPages/Stock/StockProduct/types";
 import { message } from "antd";
@@ -13,6 +14,7 @@ type ProductEspecificationModalControllerProps = {
   product: ProductModel | undefined;
   onClose: () => void;
   selectedCustomer?: InternCustomerModel;
+  initialSpecificationId?: number;
 };
 
 export function useProductEspecificationModalController({
@@ -20,6 +22,7 @@ export function useProductEspecificationModalController({
   openProductEspecificationModal,
   product,
   selectedCustomer,
+  initialSpecificationId,
 }: ProductEspecificationModalControllerProps) {
   const [selectedSpecificationId, setSelectedSpecificationId] = useState<number | undefined>();
   const [qty, setQty] = useState(1);
@@ -77,14 +80,11 @@ export function useProductEspecificationModalController({
   const { saleItems, setSaleItems } = useSalesStore();
 
   const isQuantityAvaliable = () => {
-    if (!selectedSpecification || !selectedSpecification.isStockControlled) return true;
+    if (!selectedSpecification) return true;
 
     const requested = isNotStandardUnitOfMeasurement ? unitSold * qty : qty;
-    const inCart = saleItems
-      .filter((item) => item.productEspecificationId === selectedSpecification.id)
-      .reduce((total, item) => total + item.quantitySold * item.unitSold, 0);
 
-    return inCart + requested <= selectedSpecification.stockQuantity;
+    return isQuantityAvailableForSale(selectedSpecification, saleItems, requested);
   };
 
   const handleAddToComanda = () => {
@@ -127,9 +127,15 @@ export function useProductEspecificationModalController({
       setUnitSold(0);
       setNote(undefined);
       setSearchTerm("");
-      setSelectedSpecificationId(specifications.length === 1 ? specifications[0].id : undefined);
+      const initialSpecification = specifications.find(
+        (specification) => specification.id === initialSpecificationId,
+      );
+      setSelectedSpecificationId(
+        initialSpecification?.id ??
+          (specifications.length === 1 ? specifications[0].id : undefined),
+      );
     }
-  }, [openProductEspecificationModal, product?.id, specifications]);
+  }, [initialSpecificationId, openProductEspecificationModal, product?.id, specifications]);
 
   const hasSpecifications = specifications.length > 0;
   const hasAvailableSpecification = specifications.some(isVariationSellable);

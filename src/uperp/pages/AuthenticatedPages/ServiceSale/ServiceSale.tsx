@@ -7,6 +7,7 @@ import { SaleReceiptModal } from "@/application-components/SaleReceiptModal/Sale
 import { SearchBar } from "@/application-components/SearchBar/SearchBar";
 import InputNumberFormatted from "@/application-components/InputNumberFormated/InputNumberFormated";
 import { useSalesStore } from "@/stores/sales.store";
+import { ProductExpandedViewModel } from "@/model/product.model";
 import { Badge, Button, Card, Col, Drawer, Form, Grid, Input, Row, Space, Typography } from "antd";
 import { Briefcase, History, Package, Plus, ShoppingCart } from "lucide-react";
 import type { ISaleServiceForm } from "../CommonSale/types";
@@ -23,6 +24,9 @@ export const ServiceSale = () => {
     search,
     handleSearchChange,
     products,
+    isExpandedMode,
+    expandedProducts,
+    expandedTableColumns,
     total,
     isLoading,
     page,
@@ -34,6 +38,7 @@ export const ServiceSale = () => {
     handleCloseProductModal,
     openProductModal,
     selectedProduct,
+    initialSpecificationId,
     saleForm,
     saleItems,
     saleStep,
@@ -197,20 +202,37 @@ export const ServiceSale = () => {
             </Row>
 
             <div style={{ flex: 1, minHeight: 0, overflow: "auto" }}>
-              <GenericTable
-                rowKey="id"
-                columns={tableColumns}
-                data={products}
-                total={total}
-                size="small"
-                isLoading={isLoading}
-                page={page}
-                pageSize={pageSize}
-                onPageChange={handlePageChange}
-                onPageSizeChange={handlePageSizeChange}
-                onRowClick={handleOpenProductModal}
-                showTotal={false}
-              />
+              {isExpandedMode ? (
+                <GenericTable<ProductExpandedViewModel>
+                  rowKey="productEspecificationId"
+                  columns={expandedTableColumns}
+                  data={expandedProducts}
+                  total={total}
+                  size="small"
+                  isLoading={isLoading}
+                  page={page}
+                  pageSize={pageSize}
+                  onPageChange={handlePageChange}
+                  onPageSizeChange={handlePageSizeChange}
+                  onRowClick={handleOpenProductModal}
+                  showTotal={false}
+                />
+              ) : (
+                <GenericTable
+                  rowKey="id"
+                  columns={tableColumns}
+                  data={products}
+                  total={total}
+                  size="small"
+                  isLoading={isLoading}
+                  page={page}
+                  pageSize={pageSize}
+                  onPageChange={handlePageChange}
+                  onPageSizeChange={handlePageSizeChange}
+                  onRowClick={handleOpenProductModal}
+                  showTotal={false}
+                />
+              )}
             </div>
           </Card>
         </Col>
@@ -333,6 +355,8 @@ export const ServiceSale = () => {
         onClose={handleCloseProductModal}
         product={selectedProduct}
         selectedCustomer={selectedCustomer}
+        initialSpecificationId={initialSpecificationId}
+        fixedVariation={isExpandedMode}
       />
 
       {/* modal de recibo de venda */}

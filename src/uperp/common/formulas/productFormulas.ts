@@ -30,8 +30,8 @@ export const formatNumberWithBrasilianFormat = (value: number) =>
     maximumFractionDigits: 2,
   }).format(value);
 
-export const extractStockFormatByProduct = (product: ProductModel, value: number) => {
-  switch (product.unitOfMeasure) {
+export const extractStockFormatByUnit = (unitOfMeasure: string, value: number) => {
+  switch (unitOfMeasure) {
     case ProductUnitOfMeasure.GRAM:
       return `${formatNumberWithBrasilianFormat(value)} kg`;
     case ProductUnitOfMeasure.LITER:
@@ -43,6 +43,10 @@ export const extractStockFormatByProduct = (product: ProductModel, value: number
     default:
       return "";
   }
+};
+
+export const extractStockFormatByProduct = (product: ProductModel, value: number) => {
+  return extractStockFormatByUnit(product.unitOfMeasure, value);
 };
 
 export const calculeSalePriceRange = (variants: ProductEspecificationModel[]): string => {

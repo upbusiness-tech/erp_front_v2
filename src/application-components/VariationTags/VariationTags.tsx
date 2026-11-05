@@ -25,7 +25,7 @@ export const VariationTags = ({
     <Space size={4} wrap={wrap}>
       {parts.size && (
         <Tag color="volcano-inverse" style={{ margin: 0, fontSize, fontWeight: "bold" }}>
-          Tam. {parts.size}
+          {parts.size}
         </Tag>
       )}
       {parts.color && (

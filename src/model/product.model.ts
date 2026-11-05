@@ -5,17 +5,29 @@ import { ProductFiscalClassification } from "./productFiscalClassification.model
 import { SaleModel } from "./sale.model";
 import { UserModel } from "./user.model";
 
-export interface ProductExpandedViewModel extends DefaultIdModel {
-  name: string;
+export interface ProductExpandedViewModel {
+  companyUid: string;
+  productId: number;
+  productName: string;
+  productEspecificationId: number;
+  unitOfMeasure: string;
   productCategoryId: number;
   productCategoryName: string;
-  unitOfMeasure: string;
   code: string;
   size: string;
   color: string;
+  barcode: string;
+  brand: string;
   salePrice: number;
   costPrice: number;
   stockQuantity: number;
+  isStockControlled: boolean;
+  productPicture: string;
+  createdAt: string;
+  createdByUserEmployeeName: string;
+  supplierName: string;
+  productCategoryColor: string;
+  productSupplierId: number;
 }
 
 export interface ProductModel extends DefaultIdModel {
