@@ -34,6 +34,7 @@ export function CommonSale() {
     handleOpenProductModal,
     openProductModal,
     selectedProduct,
+    initialSpecificationId,
     saleForm,
     saleStep,
     saleItems,
@@ -300,6 +301,7 @@ export function CommonSale() {
         onClose={handleCloseProductModal}
         product={selectedProduct}
         selectedCustomer={selectedCustomer}
+        initialSpecificationId={initialSpecificationId}
       />
 
       {/* modal de recibo de venda */}

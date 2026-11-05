@@ -17,8 +17,6 @@ import {
 import InputNumberFormatted from "@/application-components/InputNumberFormated/InputNumberFormated";
 import { ProductGalleryModal } from "@/application-components/ProductGalleryModal/ProductGalleryModal";
 import { PlanNames } from "@/enums/plan.enum";
-import { useCompanySettingsStore } from "@/stores/companySettings.store";
-import { SettingsRef } from "@/uperp/common/settings/consts/settings.ref";
 import { ArrowLeft, Camera, Images, Plus, Trash2, X } from "lucide-react";
 import { ProductUnitOfMeasure } from "./types";
 import {
@@ -57,8 +55,6 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
     suppliers,
     currentCompany,
   } = useStockProductController({ isEdit });
-
-  const { hasSettingActive } = useCompanySettingsStore();
 
   const unitOfMeasure = Form.useWatch("unitOfMeasure", form);
 
@@ -315,13 +311,11 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
                         <Input placeholder="Código" />
                       </Form.Item>
                     </Col>
-                    {hasSettingActive(SettingsRef.Product.ScanProductByCode) && (
-                      <Col xs={12} md={3}>
-                        <Form.Item name={[field.name, "barcode"]} label="Código de barras">
-                          <Input placeholder="Código de barras" />
-                        </Form.Item>
-                      </Col>
-                    )}
+                    <Col xs={12} md={3}>
+                      <Form.Item name={[field.name, "barcode"]} label="Código de barras">
+                        <Input placeholder="Código de barras" />
+                      </Form.Item>
+                    </Col>
                     <Col xs={12} md={3}>
                       <Form.Item name={[field.name, "productSupplierId"]} label="Fornecedor">
                         <Select

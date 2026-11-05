@@ -2,6 +2,7 @@ import { useGenericTableFetch } from "@/application-components/GenericTable/useG
 import { printSaleReceipt } from "@/application-components/SaleReceiptModal/printSaleReceipt";
 import { SearchBarOption } from "@/application-components/SearchBar/SearchBar";
 import { SaleType } from "@/enums/sale.enum";
+import { useBarcodeScanner } from "@/hooks/useBarcodeScanner";
 import { useCacheManager } from "@/hooks/useCacheManager";
 import { useGetAllWithParams } from "@/hooks/useGetAllWithParams";
 import { ProductModel } from "@/model/product.model";
@@ -23,6 +24,9 @@ import {
 } from "@/uperp/common/formulas/productFormulas";
 import { createSaleReceipt } from "@/uperp/common/formulas/saleReceipt";
 import { SettingsRef } from "@/uperp/common/settings/consts/settings.ref";
+import { getVariationLabel, isVariationSellable } from "@/uperp/common/util/productVariation";
+import { buildScannedCartItem, isQuantityAvailableForSale } from "@/uperp/common/util/saleCart";
+import { ProductUnitOfMeasure } from "@/uperp/pages/AuthenticatedPages/Stock/StockProduct/types";
 import { Form, message, Space, Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
 import { BRAND } from "@/theme/colors";
@@ -194,11 +198,14 @@ export function useCommonSaleController() {
 
   const [openProductModal, setOpenProductModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<ProductModel | undefined>(undefined);
+  const [initialSpecificationId, setInitialSpecificationId] = useState<number | undefined>();
   const handleOpenProductModal = (p: ProductModel) => {
+    setInitialSpecificationId(undefined);
     setOpenProductModal(true);
     setSelectedProduct(p);
   };
   const handleCloseProductModal = () => {
+    setInitialSpecificationId(undefined);
     setOpenProductModal(false);
     setSelectedProduct(undefined);
   };
@@ -210,6 +217,69 @@ export function useCommonSaleController() {
 
   const handleCloseReceipt = () => {
     setReceiptSale(null);
+  };
+
+  const handleBarcodeScan = async (rawCode: string) => {
+    const code = rawCode.trim();
+    if (!code) return;
+
+    try {
+      const response = await productService.getAll<PaginatedResponse<ProductModel>>({
+        page: 1,
+        limit: 2,
+        filter: [
+          {
+            field: "productEspecifications.barcode",
+            operator: "$eq",
+            value: code,
+          },
+        ],
+      });
+
+      const matches = (response?.data ?? []).flatMap((product) =>
+        (product.productEspecifications ?? [])
+          .filter((specification) => specification.barcode === code)
+          .map((specification) => ({ product, specification })),
+      );
+
+      if (matches.length === 0) {
+        message.warning("Produto não encontrado para o código de barras lido.");
+        return;
+      }
+
+      if (matches.length > 1) {
+        message.warning("Código de barras duplicado. Ajuste o cadastro antes de vender.");
+        return;
+      }
+
+      const { product, specification } = matches[0];
+
+      if (!isVariationSellable(specification)) {
+        message.warning("Variação sem estoque disponível.");
+        return;
+      }
+
+      if (product.unitOfMeasure !== ProductUnitOfMeasure.UNIT) {
+        setSelectedProduct(product);
+        setInitialSpecificationId(specification.id);
+        setOpenProductModal(true);
+        return;
+      }
+
+      const currentSaleItems = useSalesStore.getState().saleItems;
+      if (!isQuantityAvailableForSale(specification, currentSaleItems, 1)) {
+        message.warning("Estoque insuficiente para adicionar este produto.");
+        return;
+      }
+
+      const scannedItem = buildScannedCartItem(product, specification);
+      useSalesStore.getState().setSaleItems([...currentSaleItems, scannedItem]);
+      message.success(
+        `${product.name} — ${getVariationLabel(specification)} adicionado à comanda.`,
+      );
+    } catch {
+      message.error("Não foi possível buscar o produto pelo código de barras.");
+    }
   };
 
   const { invalidateQuery } = useCacheManager();
@@ -300,6 +370,13 @@ export function useCommonSaleController() {
     invalidateQuery(productDashboardService);
   };
 
+  useBarcodeScanner({
+    enabled: hasSettingActive(SettingsRef.Product.ScanProductByCode),
+    onScan: handleBarcodeScan,
+    ignoreWhen: () =>
+      openProductModal || cartOpen || recentOpen || Boolean(receiptSale) || submiting,
+  });
+
   return {
     search,
     handleSearchChange,
@@ -318,6 +395,7 @@ export function useCommonSaleController() {
     handleCloseProductModal,
     openProductModal,
     selectedProduct,
+    initialSpecificationId,
     isCashFlowOpen,
     saleForm,
     saleItems,

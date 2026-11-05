@@ -46,6 +46,7 @@ type ProductEspecificationModalProps = {
   product: ProductModel | undefined;
   onClose: () => void;
   selectedCustomer?: InternCustomerModel;
+  initialSpecificationId?: number;
 };
 
 export const ProductEspecificationModal = ({
@@ -53,6 +54,7 @@ export const ProductEspecificationModal = ({
   product,
   onClose,
   selectedCustomer,
+  initialSpecificationId,
 }: ProductEspecificationModalProps) => {
   const {
     handleAddToComanda,
@@ -80,6 +82,7 @@ export const ProductEspecificationModal = ({
     product,
     onClose,
     selectedCustomer,
+    initialSpecificationId,
   });
 
   const { hasSettingActive } = useCompanySettingsStore();
