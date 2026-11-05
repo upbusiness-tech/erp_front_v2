@@ -5,7 +5,7 @@ import { SaleType } from "@/enums/sale.enum";
 import { useBarcodeScanner } from "@/hooks/useBarcodeScanner";
 import { useCacheManager } from "@/hooks/useCacheManager";
 import { useGetAllWithParams } from "@/hooks/useGetAllWithParams";
-import { ProductModel } from "@/model/product.model";
+import { ProductExpandedViewModel, ProductModel } from "@/model/product.model";
 import { ProductCategoryModel } from "@/model/productCategory.model";
 import { SaleModel, SaleReceiptModel } from "@/model/sale.model";
 import { CashFlowTransactionService } from "@/services/cashFlowTransaction.service";
@@ -16,27 +16,32 @@ import { StatsDashboardService } from "@/services/statsDashboard.service";
 import { useCashFlowStore } from "@/stores/cashFlow.store";
 import { useCompanySettingsStore } from "@/stores/companySettings.store";
 import { useSalesStore } from "@/stores/sales.store";
+import { BRAND } from "@/theme/colors";
 import { PaginatedResponse } from "@/types/crud.types";
 import {
   calculeSalePriceRange,
   calculeStockTotalByProductEspecification,
+  extractStockFormatByUnit,
+  formatPrice,
   showStockTotalByProductEspecification,
 } from "@/uperp/common/formulas/productFormulas";
 import { createSaleReceipt } from "@/uperp/common/formulas/saleReceipt";
 import { SettingsRef } from "@/uperp/common/settings/consts/settings.ref";
+import { toProductModelFromExpanded } from "@/uperp/common/util/productExpanded";
+import { buildExpandedFilter } from "@/uperp/common/util/productExpandedFilters";
 import { getVariationLabel, isVariationSellable } from "@/uperp/common/util/productVariation";
 import { buildScannedCartItem, isQuantityAvailableForSale } from "@/uperp/common/util/saleCart";
 import { ProductUnitOfMeasure } from "@/uperp/pages/AuthenticatedPages/Stock/StockProduct/types";
+import { CondOperator } from "@dataui/crud-request";
 import { Form, message, Space, Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
-import { BRAND } from "@/theme/colors";
 import { useMemo, useState } from "react";
 import { ICreateSaleForm, IPaymentMethodField, ISaleItemField } from "./types";
-import { CondOperator } from "@dataui/crud-request";
 
 const { Text } = Typography;
 
 const productService = new ProductService();
+const productExpandedService = new ProductService("expanded");
 const productCategoryService = new ProductCategoryService();
 const saleService = new SaleService();
 const cashFlowTransaction = new CashFlowTransactionService();
@@ -49,6 +54,7 @@ export function useCommonSaleController() {
   const [cartOpen, setCartOpen] = useState(false);
 
   const { hasSettingActive } = useCompanySettingsStore();
+  const isExpandedMode = hasSettingActive(SettingsRef.Product.ViewProductOnExpandedMode);
 
   const {
     productsView,
@@ -83,6 +89,10 @@ export function useCommonSaleController() {
     }) ?? [];
 
   const filter = useMemo(() => {
+    if (isExpandedMode) {
+      return buildExpandedFilter(categoryFilter, search);
+    }
+
     return [
       ...(search
         ? [{ field: "name", operator: CondOperator.CONTAINS_LOW, value: search.trim() }]
@@ -91,10 +101,10 @@ export function useCommonSaleController() {
         ? [{ field: "productCategoryId", operator: "$in", value: categoryFilter }]
         : []),
     ];
-  }, [categoryFilter, search]);
+  }, [categoryFilter, isExpandedMode, search]);
 
   const {
-    data: products,
+    data,
     total,
     isLoading,
     page,
@@ -102,13 +112,16 @@ export function useCommonSaleController() {
     handlePageChange,
     handlePageSizeChange,
     resetPage,
-  } = useGenericTableFetch<ProductModel>({
-    service: productService,
+  } = useGenericTableFetch<ProductModel | ProductExpandedViewModel>({
+    service: isExpandedMode ? productExpandedService : productService,
     options: {
       sort: { field: "createdAt", order: "ASC" },
       filter,
     },
   });
+
+  const products = isExpandedMode ? [] : (data as ProductModel[]);
+  const expandedProducts = isExpandedMode ? (data as ProductExpandedViewModel[]) : [];
 
   const {
     data: recentSales,
@@ -187,6 +200,53 @@ export function useCommonSaleController() {
     },
   ];
 
+  const expandedTableColumns: ColumnsType<ProductExpandedViewModel> = [
+    {
+      title: "Código",
+      dataIndex: "code",
+      render: (_, row) => row.code || `#${row.productEspecificationId}`,
+    },
+    {
+      title: "Produto",
+      dataIndex: "productName",
+    },
+    {
+      title: "Categoria",
+      dataIndex: "productCategoryId",
+      render: (_, row) => (
+        <Space>
+          <div
+            style={{
+              width: 10,
+              height: 10,
+              borderRadius: "50%",
+              background: row.productCategoryColor || BRAND,
+            }}
+          />
+          <Text strong>{row.productCategoryName || "-"}</Text>
+        </Space>
+      ),
+    },
+    { title: "Un.", dataIndex: "unitOfMeasure", width: 70, render: (u: string) => u || "—" },
+    {
+      title: "Preço",
+      dataIndex: "salePrice",
+      render: (_, row) => formatPrice(row.salePrice),
+    },
+    {
+      title: "Estoque",
+      dataIndex: "stockQuantity",
+      render: (_, row) => {
+        const value = row.stockQuantity;
+        return (
+          <Tag color={value > 5 ? "green" : value > 0 ? "orange" : "red"}>
+            {extractStockFormatByUnit(row.unitOfMeasure, value)}
+          </Tag>
+        );
+      },
+    },
+  ];
+
   const [recentOpen, setRecentOpen] = useState(false);
   const [receiptVariant, setReceiptVariant] = useState<"success" | "view">("success");
 
@@ -199,10 +259,16 @@ export function useCommonSaleController() {
   const [openProductModal, setOpenProductModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<ProductModel | undefined>(undefined);
   const [initialSpecificationId, setInitialSpecificationId] = useState<number | undefined>();
-  const handleOpenProductModal = (p: ProductModel) => {
-    setInitialSpecificationId(undefined);
+  const handleOpenProductModal = (p: ProductModel | ProductExpandedViewModel) => {
+    if (isExpandedMode) {
+      const expanded = p as ProductExpandedViewModel;
+      setSelectedProduct(toProductModelFromExpanded(expanded));
+      setInitialSpecificationId(expanded.productEspecificationId);
+    } else {
+      setInitialSpecificationId(undefined);
+      setSelectedProduct(p as ProductModel);
+    }
     setOpenProductModal(true);
-    setSelectedProduct(p);
   };
   const handleCloseProductModal = () => {
     setInitialSpecificationId(undefined);
@@ -383,6 +449,9 @@ export function useCommonSaleController() {
     productsView: Number(productsView),
     setProductsView,
     products,
+    isExpandedMode,
+    expandedProducts,
+    expandedTableColumns,
     total,
     isLoading,
     page,

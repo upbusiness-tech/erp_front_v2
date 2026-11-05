@@ -47,6 +47,7 @@ type ProductEspecificationModalProps = {
   onClose: () => void;
   selectedCustomer?: InternCustomerModel;
   initialSpecificationId?: number;
+  fixedVariation?: boolean;
 };
 
 export const ProductEspecificationModal = ({
@@ -55,6 +56,7 @@ export const ProductEspecificationModal = ({
   onClose,
   selectedCustomer,
   initialSpecificationId,
+  fixedVariation = false,
 }: ProductEspecificationModalProps) => {
   const {
     handleAddToComanda,
@@ -113,8 +115,10 @@ export const ProductEspecificationModal = ({
       ? selectedSpecification.stockQuantity
       : undefined;
 
-  const showNoVariationsAlert = !hasSpecifications;
-  const showNoAvailableAlert = hasSpecifications && !hasAvailableSpecification;
+  const showNoVariationsAlert = fixedVariation ? false : !hasSpecifications;
+  const showNoAvailableAlert = fixedVariation
+    ? false
+    : hasSpecifications && !hasAvailableSpecification;
   const showEmptySearch =
     searchTerm && visibleSpecifications.length === 0 && !selectedSpecification;
 
@@ -200,7 +204,7 @@ export const ProductEspecificationModal = ({
       </Row>
 
       {/* SEARCH */}
-      {showSearch && !showNoVariationsAlert && (
+      {showSearch && !showNoVariationsAlert && !fixedVariation && (
         <div style={{ marginBottom: 12 }}>
           <Input
             allowClear
@@ -212,136 +216,137 @@ export const ProductEspecificationModal = ({
       )}
 
       {/* VARIATION LIST */}
-      {showNoVariationsAlert ? (
-        <Alert
-          type="warning"
-          showIcon
-          message="Produto sem variações cadastradas"
-          style={{ marginBottom: 16 }}
-        />
-      ) : (
-        <>
-          {showNoAvailableAlert && (
-            <Alert
-              type="error"
-              showIcon
-              message="Nenhuma variação disponível em estoque"
-              style={{ marginBottom: 16 }}
-            />
-          )}
-          {showEmptySearch ? (
-            <Empty
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description="Nenhuma variação encontrada"
-              style={{ margin: "16px 0" }}
-            />
-          ) : (
-            <div style={{ marginBottom: 16 }}>
-              <Text
-                strong
-                style={{
-                  display: "block",
-                  fontSize: 12,
-                  textTransform: "uppercase",
-                  letterSpacing: 0.5,
-                  color: "#6b7280",
-                  marginBottom: 8,
-                }}
-              >
-                Variação
-              </Text>
-              <div
-                style={{
-                  maxHeight: "min(40vh, 320px)",
-                  overflowY: "auto",
-                  overscrollBehavior: "contain",
-                  paddingRight: 8,
-                  marginRight: -8,
-                  boxShadow:
-                    "inset 0 6px 6px -6px rgba(0,0,0,0.08), inset 0 -6px 6px -6px rgba(0,0,0,0.08)",
-                }}
-              >
-                <Radio.Group
-                  value={selectedSpecificationId}
-                  onChange={(e) => selectSpecification(e.target.value)}
-                  style={{ width: "100%", display: "flex", flexDirection: "column", gap: 6 }}
+      {!fixedVariation &&
+        (showNoVariationsAlert ? (
+          <Alert
+            type="warning"
+            showIcon
+            message="Produto sem variações cadastradas"
+            style={{ marginBottom: 16 }}
+          />
+        ) : (
+          <>
+            {showNoAvailableAlert && (
+              <Alert
+                type="error"
+                showIcon
+                message="Nenhuma variação disponível em estoque"
+                style={{ marginBottom: 16 }}
+              />
+            )}
+            {showEmptySearch ? (
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description="Nenhuma variação encontrada"
+                style={{ margin: "16px 0" }}
+              />
+            ) : (
+              <div style={{ marginBottom: 16 }}>
+                <Text
+                  strong
+                  style={{
+                    display: "block",
+                    fontSize: 12,
+                    textTransform: "uppercase",
+                    letterSpacing: 0.5,
+                    color: "#6b7280",
+                    marginBottom: 8,
+                  }}
                 >
-                  {visibleSpecifications.map((spec) => {
-                    const sellable = isVariationSellable(spec);
-                    const isDisabled = spec.isStockControlled && !sellable;
-                    const isSelected = spec.id === selectedSpecificationId;
+                  Variação
+                </Text>
+                <div
+                  style={{
+                    maxHeight: "min(40vh, 320px)",
+                    overflowY: "auto",
+                    overscrollBehavior: "contain",
+                    paddingRight: 8,
+                    marginRight: -8,
+                    boxShadow:
+                      "inset 0 6px 6px -6px rgba(0,0,0,0.08), inset 0 -6px 6px -6px rgba(0,0,0,0.08)",
+                  }}
+                >
+                  <Radio.Group
+                    value={selectedSpecificationId}
+                    onChange={(e) => selectSpecification(e.target.value)}
+                    style={{ width: "100%", display: "flex", flexDirection: "column", gap: 6 }}
+                  >
+                    {visibleSpecifications.map((spec) => {
+                      const sellable = isVariationSellable(spec);
+                      const isDisabled = spec.isStockControlled && !sellable;
+                      const isSelected = spec.id === selectedSpecificationId;
 
-                    return (
-                      <Radio
-                        key={spec.id}
-                        value={spec.id}
-                        disabled={isDisabled}
-                        style={{ margin: 0, width: "100%" }}
-                      >
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            flexWrap: "wrap",
-                            gap: 8,
-                            padding: "8px 12px",
-                            borderRadius: 8,
-                            border: `1px solid ${isSelected ? BRAND : "#e5e7eb"}`,
-                            background: isSelected ? BRAND_SOFT : "#fff",
-                            transition: "all 0.15s ease",
-                            width: "100%",
-                            opacity: isDisabled ? 0.6 : 1,
-                          }}
+                      return (
+                        <Radio
+                          key={spec.id}
+                          value={spec.id}
+                          disabled={isDisabled}
+                          style={{ margin: 0, width: "100%" }}
                         >
-                          <Text
-                            code
+                          <div
                             style={{
-                              fontSize: 13,
-                              fontWeight: "bold",
-                              color: "#6b7280",
-                              fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
-                              margin: 0,
+                              display: "flex",
+                              alignItems: "center",
+                              flexWrap: "wrap",
+                              gap: 8,
+                              padding: "8px 12px",
+                              borderRadius: 8,
+                              border: `1px solid ${isSelected ? BRAND : "#e5e7eb"}`,
+                              background: isSelected ? BRAND_SOFT : "#fff",
+                              transition: "all 0.15s ease",
+                              width: "100%",
+                              opacity: isDisabled ? 0.6 : 1,
                             }}
                           >
-                            {spec.code || `#${spec.id}`}
-                          </Text>
-                          <div style={{ flex: 1, minWidth: 120 }}>
-                            <VariationTags specification={spec} size="default" fallback={false} />
+                            <Text
+                              code
+                              style={{
+                                fontSize: 13,
+                                fontWeight: "bold",
+                                color: "#6b7280",
+                                fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                                margin: 0,
+                              }}
+                            >
+                              {spec.code || `#${spec.id}`}
+                            </Text>
+                            <div style={{ flex: 1, minWidth: 120 }}>
+                              <VariationTags specification={spec} size="default" fallback={false} />
+                            </div>
+                            <Text
+                              strong
+                              style={{
+                                color: BRAND_DARK,
+                                fontSize: 13,
+                                fontWeight: "bold",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {formatPrice(spec.salePrice || 0)}
+                            </Text>
+                            <Tag
+                              color={
+                                (spec.stockQuantity ?? 0) > 5
+                                  ? "green-inverse"
+                                  : (spec.stockQuantity ?? 0) > 0
+                                    ? "orange-inverse"
+                                    : "red-inverse"
+                              }
+                              style={{ margin: 0, fontSize: 13, fontWeight: "bold" }}
+                            >
+                              {extractStockFormatByProduct(product, spec.stockQuantity)}
+                              {isDisabled && " · Sem estoque"}
+                            </Tag>
                           </div>
-                          <Text
-                            strong
-                            style={{
-                              color: BRAND_DARK,
-                              fontSize: 13,
-                              fontWeight: "bold",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            {formatPrice(spec.salePrice || 0)}
-                          </Text>
-                          <Tag
-                            color={
-                              (spec.stockQuantity ?? 0) > 5
-                                ? "green-inverse"
-                                : (spec.stockQuantity ?? 0) > 0
-                                  ? "orange-inverse"
-                                  : "red-inverse"
-                            }
-                            style={{ margin: 0, fontSize: 13, fontWeight: "bold" }}
-                          >
-                            {extractStockFormatByProduct(product, spec.stockQuantity)}
-                            {isDisabled && " · Sem estoque"}
-                          </Tag>
-                        </div>
-                      </Radio>
-                    );
-                  })}
-                </Radio.Group>
+                        </Radio>
+                      );
+                    })}
+                  </Radio.Group>
+                </div>
               </div>
-            </div>
-          )}
-        </>
-      )}
+            )}
+          </>
+        ))}
 
       {/* QUANTITY */}
       {!showNoVariationsAlert && (

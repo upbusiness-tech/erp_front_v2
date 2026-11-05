@@ -12,7 +12,8 @@ import { PaginatedResponse } from "@/types/crud.types";
 import { Form, message } from "antd";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { IProductCreateFields, IProductVariantField, ProductUnitOfMeasure } from "./types";
+import { IProductCreateFields, ProductUnitOfMeasure } from "./types";
+import type { VariantDiff } from "./editor/types";
 import { CsosnEnum, OriginEnum, PisCofinsCstEnum } from "@/enums/productFiscal.enum";
 import { useAuthStore } from "@/stores/auth.store";
 
@@ -128,11 +129,20 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
 
   const [loading, setloading] = useState(false);
 
-  const submitProduct = async () => {
+  const saveProduct = async ({
+    productFields,
+    variantDiff,
+  }: {
+    productFields: IProductCreateFields;
+    variantDiff: VariantDiff;
+  }): Promise<{ ok: boolean; product?: ProductModel }> => {
     try {
       setloading(true);
-      const values = form.getFieldsValue(true);
-      const fiscal = values.productFiscalClassification;
+      const { variants: _variants, ...productFieldsWithoutVariants } = productFields;
+      const values: Record<string, unknown> = { ...productFieldsWithoutVariants };
+
+      const fiscal = values.productFiscalClassification as
+        IProductCreateFields["productFiscalClassification"] | undefined;
       const hasFiscalValue = fiscal
         ? Object.values(fiscal).some(
             (value) => value !== null && value !== undefined && value !== "",
@@ -148,32 +158,24 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
       } else {
         values.productPicture = selectedPictureUrl ?? null;
       }
-      if (isEdit && id) {
-        const variants: IProductVariantField[] = values.variants.map((p: IProductVariantField) => {
-          return {
-            id: p.id,
-            barcode: p.barcode,
-            costPrice: Number(p.costPrice),
-            salePrice: Number(p.salePrice),
-            code: p.code,
-            isStockControlled: p.isStockControlled,
-            stockQuantity: p.stockQuantity,
-            size: p.size,
-            color: p.color,
-            brand: p.brand,
-            productSupplierId: p.productSupplierId,
-          };
-        });
-        values.variants = variants;
-        await productService.update(id, values);
-      } else {
-        await productService.create(values);
-      }
+
+      const payload = {
+        ...values,
+        variants: variantDiff.variants,
+        ...(isEdit ? { idsToDelete: variantDiff.idsToDelete } : {}),
+      };
+
+      const saved =
+        isEdit && id
+          ? await productService.update<ProductModel>(id, payload)
+          : await productService.create<ProductModel>(payload);
+
       invalidateQuery(productService);
       message.success(`Produto ${isEdit ? "atualizado" : "cadastrado"} com sucesso`);
-      navigate(-1);
+      return { ok: true, product: saved ?? undefined };
     } catch (error) {
       message.error(`Erro ao ${isEdit ? "atualizar" : "cadastrar"} produto.`);
+      return { ok: false };
     } finally {
       setloading(false);
     }
@@ -188,12 +190,6 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
 
   useEffect(() => {
     if (isEdit && productToEdit) {
-      const variants: IProductVariantField[] = productToEdit.productEspecifications.map((pe) => {
-        return {
-          ...pe,
-        };
-      });
-
       const fiscalFromClassification = productToEdit.productFiscalClassification;
 
       const fiscalClassificationValues = {
@@ -214,7 +210,6 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
         name: productToEdit.name,
         productCategoryId: productToEdit.productCategoryId,
         unitOfMeasure: productToEdit.unitOfMeasure as ProductUnitOfMeasure,
-        variants,
         ...(hasFiscalClassification
           ? { productFiscalClassification: fiscalClassificationValues }
           : {}),
@@ -233,7 +228,8 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
     form,
     categories,
     isLoadingCategories,
-    submitProduct,
+    saveProduct,
+    productToEdit,
     handleGoBack,
     pendingFile,
     selectedPictureUrl,
