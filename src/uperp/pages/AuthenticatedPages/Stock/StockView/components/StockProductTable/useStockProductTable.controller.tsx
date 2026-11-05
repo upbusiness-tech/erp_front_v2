@@ -96,7 +96,7 @@ export function useStockProductTableController({
     }
 
     return [
-      ...(search.trim() ? [{ field: "name", operator: "$contL", value: search.trim() }] : []),
+      ...(search.trim() ? [{ field: "name", operator: "$contUL", value: search.trim() }] : []),
       ...(categoryFilter.length
         ? [{ field: "productCategoryId", operator: "$in", value: categoryFilter }]
         : []),

@@ -32,7 +32,6 @@ import { buildExpandedFilter } from "@/uperp/common/util/productExpandedFilters"
 import { getVariationLabel, isVariationSellable } from "@/uperp/common/util/productVariation";
 import { buildScannedCartItem, isQuantityAvailableForSale } from "@/uperp/common/util/saleCart";
 import { ProductUnitOfMeasure } from "@/uperp/pages/AuthenticatedPages/Stock/StockProduct/types";
-import { CondOperator } from "@dataui/crud-request";
 import { Form, message, Space, Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
 import { useMemo, useState } from "react";
@@ -94,9 +93,7 @@ export function useCommonSaleController() {
     }
 
     return [
-      ...(search
-        ? [{ field: "name", operator: CondOperator.CONTAINS_LOW, value: search.trim() }]
-        : []),
+      ...(search ? [{ field: "name", operator: "$contUL", value: search.trim() }] : []),
       ...(categoryFilter.length > 0
         ? [{ field: "productCategoryId", operator: "$in", value: categoryFilter }]
         : []),
