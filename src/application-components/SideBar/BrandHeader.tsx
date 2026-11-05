@@ -1,5 +1,6 @@
 import { Typography } from "antd";
 import { Store } from "lucide-react";
+import { BRAND } from "@/theme/colors";
 
 const { Title } = Typography;
 
@@ -26,7 +27,7 @@ export function BrandHeader({ dark, collapsed }: BrandHeaderProps) {
           width: 36,
           height: 36,
           borderRadius: 8,
-          background: "#F26B1F",
+          background: BRAND,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",

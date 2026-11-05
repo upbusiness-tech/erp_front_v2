@@ -1,11 +1,13 @@
 import { InternCustomerSpecialPriceModel } from "@/model/internCustomerPrice.model";
 import { calculateOrderItem, formatPrice } from "@/uperp/common/formulas/productFormulas";
-import { productUnitFormat } from "@/uperp/common/util/productForm";
+import { productUnitFormat } from "@/uperp/common/util/productForm.util";
 import { CartSaleItem } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
 import { ProductUnitOfMeasure } from "@/uperp/pages/AuthenticatedPages/Stock/StockProduct/types";
+import { VariationTags } from "@/application-components/VariationTags/VariationTags";
 import { Button, InputNumber, List, Row, Space, Tag, Typography } from "antd";
 import { ChevronDown, ChevronRight, Percent, Star, Trash2, X } from "lucide-react";
 import { useState } from "react";
+import { BRAND, WARNING, BRAND_TEXT_STRONG } from "@/theme/colors";
 import { useOrderProductItemController } from "./useOrderProductItem.controller";
 
 const { Text } = Typography;
@@ -91,20 +93,7 @@ export const OrderProductItem = ({
         }
         description={
           <Space direction="vertical" size={2} style={{ width: "100%" }}>
-            {(item.productEspecification.size || item.productEspecification.color) && (
-              <Space size={4} wrap>
-                {item.productEspecification.size && (
-                  <Tag color="orange" style={{ margin: 0 }}>
-                    Tam. {item.productEspecification.size}
-                  </Tag>
-                )}
-                {item.productEspecification.color && (
-                  <Tag color="default" style={{ margin: 0 }}>
-                    {item.productEspecification.color}
-                  </Tag>
-                )}
-              </Space>
-            )}
+            <VariationTags specification={item.productEspecification} wrap />
             {item.note && (
               <Text type="secondary" italic style={{ fontSize: 13 }}>
                 "{item.note}"
@@ -122,7 +111,7 @@ export const OrderProductItem = ({
                   {formatPrice(effective)}
                 </Text>{" "}
                 por{" "}
-                <Text strong style={{ color: "#F26B1F", fontSize: 13 }}>
+                <Text strong style={{ color: BRAND, fontSize: 13 }}>
                   {formatPrice(itemPrice)}
                 </Text>
               </Text>
@@ -155,16 +144,16 @@ export const OrderProductItem = ({
                   onClick={() => setExpanded(!expanded)}
                 >
                   <Space size={4}>
-                    <Star size={12} style={{ color: "#F59E0B" }} />
-                    <Text strong style={{ fontSize: 12, color: "#92400E" }}>
+                    <Star size={12} style={{ color: WARNING }} />
+                    <Text strong style={{ fontSize: 12, color: BRAND_TEXT_STRONG }}>
                       Preço especial: {formatPrice(specialPriceAvailable.specialPrice)} (-
                       {discountPercent}%)
                     </Text>
                   </Space>
                   {expanded ? (
-                    <ChevronDown size={14} style={{ color: "#92400E" }} />
+                    <ChevronDown size={14} style={{ color: BRAND_TEXT_STRONG }} />
                   ) : (
-                    <ChevronRight size={14} style={{ color: "#92400E" }} />
+                    <ChevronRight size={14} style={{ color: BRAND_TEXT_STRONG }} />
                   )}
                 </div>
                 {expanded && (

@@ -4,6 +4,7 @@ import {
   SaleModel,
   SaleReceiptModel,
   SaleReceiptPaymentModel,
+  SaleReceiptServiceModel,
 } from "@/model/sale.model";
 import {
   calculateGrossSubtotal,
@@ -39,41 +40,51 @@ export const formatUnitSoldAmount = (unitOfMeasure?: string, unitSold?: number):
 };
 
 const getItemUnitPrice = (item: SaleItemModel): number => {
-  const normalPrice = toNumber(item.productEspecification.salePrice);
+  const normalPrice = toNumber(item.productSnapshot.salePrice);
   const specialPrice = toNumber(item.internCustomerPrice?.specialPrice);
   const hasSpecialPrice = item.isEspecialPrice && item.internCustomerPrice?.specialPrice != null;
   return hasSpecialPrice ? specialPrice : normalPrice;
 };
 
 export const calculateSaleSubtotal = (sale: SaleModel): number =>
-  calculateGrossSubtotal(sale.items);
+  calculateGrossSubtotal(sale.items, sale.services);
 
 export const createSaleReceipt = (sale: SaleModel): SaleReceiptModel => {
   const items = sale.items.map((item) => {
     const unitPrice = getItemUnitPrice(item);
-    const normalPrice = toNumber(item.productEspecification.salePrice);
+    const unitSold = Number(item.unitSold);
+    const normalPrice = toNumber(item.productSnapshot.salePrice);
     const hasSpecialPrice = item.isEspecialPrice && item.internCustomerPrice?.specialPrice != null;
     const quantity = Number(item.quantitySold);
     const itemDiscount = toNumber(item.discountInfo?.value);
-    const lineTotal = Math.max(unitPrice * quantity - itemDiscount, 0);
+    const lineTotal = Math.max(unitPrice * unitSold * quantity - itemDiscount, 0);
 
     return {
       id: item.id,
-      name: item.product.name,
+      name: item.productSnapshot.product?.name ?? "Produto",
       quantity,
       originalUnitPrice: normalPrice,
       unitPrice,
       lineTotal,
       hasSpecialPrice,
-      size: item.productEspecification.size || undefined,
-      color: item.productEspecification.color || undefined,
-      brand: item.productEspecification.brand || undefined,
-      unitOfMeasure: item.product.unitOfMeasure || undefined,
+      code: item.productSnapshot.code || undefined,
+      size: item.productSnapshot.size || undefined,
+      color: item.productSnapshot.color || undefined,
+      brand: item.productSnapshot.brand || undefined,
+      unitOfMeasure: item.productSnapshot.product?.unitOfMeasure || undefined,
       unitSold: toNumber(item.unitSold) || 1,
       note: item.note || undefined,
       discountValue: itemDiscount > 0 ? itemDiscount : undefined,
     };
   });
+
+  const services: SaleReceiptServiceModel[] = (sale.services ?? []).map((service) => ({
+    id: service.id,
+    description: service.description,
+    onwerEmployee: service.onwerEmployee,
+    amount: toNumber(service.amount),
+    discountValue: toNumber(service.discount?.value) || undefined,
+  }));
 
   const payments: SaleReceiptPaymentModel[] = sale.payments.map((payment) => ({
     id: payment.id,
@@ -81,7 +92,7 @@ export const createSaleReceipt = (sale: SaleModel): SaleReceiptModel => {
     amount: toNumber(payment.amount),
   }));
 
-  const subtotal = calculateGrossSubtotal(sale.items);
+  const subtotal = calculateGrossSubtotal(sale.items, sale.services);
   const specialPriceTotal = calculateSpecialPriceSavings(sale.items);
   const itemDiscountTotal = calculateItemDiscountsTotal(sale.items);
   const saleDiscountValue = toNumber(sale.discount?.value);
@@ -94,6 +105,7 @@ export const createSaleReceipt = (sale: SaleModel): SaleReceiptModel => {
     date: sale.createdAt || "",
     customerName: sale.internCustomer?.name || "Consumidor final",
     items,
+    services,
     payments,
     subtotal,
     specialPriceTotal,

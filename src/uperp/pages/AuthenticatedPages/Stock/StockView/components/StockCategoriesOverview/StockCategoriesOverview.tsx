@@ -5,6 +5,7 @@ import { Pencil, Plus, Trash2 } from "lucide-react";
 import { EditCategoryModal } from "./components/EditCategoryModal/EditCategoryModal";
 import { useStockCategoriesOverviewController } from "./useStockCategoriesOverview.controller";
 import { StockCategoryStats } from "../StockCategoryStats/StockCategoryStats";
+import { BRAND } from "@/theme/colors";
 
 const { Text } = Typography;
 
@@ -65,7 +66,7 @@ export const StockCategoriesOverview = () => {
                     width: 12,
                     height: 12,
                     borderRadius: "50%",
-                    background: r.color ?? "#F26B1F",
+                    background: r.color ?? BRAND,
                   }}
                 />
                 <Text strong>{n}</Text>

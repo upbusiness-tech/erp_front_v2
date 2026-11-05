@@ -29,8 +29,8 @@ export const StockCategoryStats = () => {
               <Statistic
                 title="Categoria mais vendida"
                 value={topCategory?.categoryName || "—"}
-                prefix={<Crown size={16} color="#F26B1F" />}
-                valueStyle={{ fontSize: 18, color: "#F26B1F" }}
+                prefix={<Crown size={16} color={BRAND} />}
+                valueStyle={{ fontSize: 18, color: BRAND }}
               />
               {topCategory && (
                 <Text type="secondary" style={{ fontSize: 12 }}>
@@ -55,7 +55,7 @@ export const StockCategoryStats = () => {
                 value={totalRevenue}
                 precision={2}
                 prefix="R$"
-                valueStyle={{ color: "#F26B1F" }}
+                valueStyle={{ color: BRAND }}
               />
             </Card>
           </Col>

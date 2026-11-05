@@ -1,6 +1,7 @@
 import { Button, Modal, Typography } from "antd";
 import { AlertTriangle } from "lucide-react";
 import { ReactNode } from "react";
+import { DANGER } from "@/theme/colors";
 
 const { Text, Title } = Typography;
 
@@ -54,7 +55,7 @@ export const ConfirmDangerModal = ({
           margin: "0 auto 16px",
         }}
       >
-        <AlertTriangle size={28} color="#DC2626" />
+        <AlertTriangle size={28} color={DANGER} />
       </div>
       <Title level={4} style={{ margin: "0 0 8px" }}>
         {title}

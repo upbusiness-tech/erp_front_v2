@@ -10,12 +10,14 @@ import { StatsDashboardService } from "@/services/statsDashboard.service";
 import { formatDateFromApi } from "@/uperp/common/dates";
 import { formatPrice } from "@/uperp/common/formulas/productFormulas";
 import { formatUnitSoldAmount, SALE_PAYMENT_LABEL } from "@/uperp/common/formulas/saleReceipt";
+import { getVariationLabel } from "@/uperp/common/util/productVariation";
 import { PermissionsRef } from "@/uperp/common/permissions/const/permissions.ref";
+import { BRAND, DANGER, SUCCESS } from "@/theme/colors";
 import { Button, Divider, List, message, Modal, Row, Space, Tag, Typography } from "antd";
 import { CheckCircle2, CreditCard, Percent, Printer, Share2, Star } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { printSaleReceipt } from "./printSaleReceipt";
-import { shareSaleReceipt } from "./shareSaleReceipt";
+import { generateSaleReceiptFile, shareSaleReceipt } from "./shareSaleReceipt";
 
 const { Title, Text } = Typography;
 
@@ -41,6 +43,31 @@ export const SaleReceiptModal = ({
   const [sharing, setSharing] = useState(false);
   const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
 
+  // Pré-gera o PDF do comprovante assim que ele aparece na tela. Assim o
+  // navigator.share() roda imediatamente no gesto do clique, dentro da janela
+  // de "transient user activation" (~5s em mobile), sem o atraso do html2canvas.
+  const sharePdfPromiseRef = useRef<Promise<File | null> | null>(null);
+
+  useEffect(() => {
+    if (!receiptSale) return;
+    let cancelled = false;
+
+    const startGeneration = () => {
+      if (sharePdfPromiseRef.current) return;
+      sharePdfPromiseRef.current = generateSaleReceiptFile(receiptSale)
+        .then((file) => (cancelled ? null : file))
+        .catch(() => null as File | null);
+    };
+
+    // Pequeno atraso para a abertura do modal/animação fluir sem jank antes
+    // da geração (leve, pois roda isolada num iframe) iniciar.
+    const delay = window.setTimeout(startGeneration, 250);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(delay);
+    };
+  }, [receiptSale]);
+
   const handlePrint = async () => {
     if (!receiptSale) return;
 
@@ -60,7 +87,8 @@ export const SaleReceiptModal = ({
 
     try {
       setSharing(true);
-      const result = await shareSaleReceipt(receiptSale);
+      const file = (await sharePdfPromiseRef.current) || undefined;
+      const result = await shareSaleReceipt(receiptSale, file);
       message.success(result === "shared" ? "Comprovante compartilhado" : "Comprovante baixado");
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") return;
@@ -121,7 +149,7 @@ export const SaleReceiptModal = ({
           receiptSale ? (
             variant === "success" ? (
               <Space>
-                <CheckCircle2 size={20} color="#16A34A" />
+                <CheckCircle2 size={20} color={SUCCESS} />
                 <span>Venda realizada com sucesso</span>
               </Space>
             ) : (
@@ -184,7 +212,7 @@ export const SaleReceiptModal = ({
                 Cliente: {receiptSale.customerName || "Consumidor final"}
               </Text>
               {receiptSale.sale.status === SaleStatus.CANCELED && (
-                <Text strong style={{ display: "block", marginTop: 8, color: "#DC2626" }}>
+                <Text strong style={{ display: "block", marginTop: 8, color: DANGER }}>
                   Venda cancelada
                   {receiptSale.sale.canceledAt
                     ? ` em ${formatDateFromApi(receiptSale.sale.canceledAt)}`
@@ -193,56 +221,83 @@ export const SaleReceiptModal = ({
               )}
             </div>
 
-            <Divider style={{ margin: "14px 0 10px" }}>Itens</Divider>
-            <List
-              size="small"
-              dataSource={receiptSale.items}
-              renderItem={(item) => (
-                <List.Item>
-                  <List.Item.Meta
-                    title={
-                      <Space size={6} wrap>
-                        <Text strong>{item.name}</Text>
-                        {item.hasSpecialPrice && (
-                          <Tag color="gold" icon={<Star size={11} />} style={{ margin: 0 }}>
-                            Preço especial
-                          </Tag>
-                        )}
-                        {item.discountValue != null && item.discountValue > 0 && (
-                          <Tag color="red" icon={<Percent size={11} />} style={{ margin: 0 }}>
-                            {formatPrice(item.discountValue)}
-                          </Tag>
-                        )}
-                      </Space>
-                    }
-                    description={
-                      <Space direction="vertical" size={0}>
-                        <Text type="secondary" style={{ fontSize: 12 }}>
-                          {formatUnitSoldAmount(item.unitOfMeasure, item.unitSold) ?? item.quantity}{" "}
-                          × {formatPrice(item.unitPrice)}
-                          {item.size ? ` · Tam. ${item.size}` : ""}
-                          {item.color ? ` · ${item.color}` : ""}
-                        </Text>
-                        {item.hasSpecialPrice && (
+            <Divider style={{ margin: "14px 0 10px" }}>Itens & Serviços</Divider>
+            {receiptSale?.sale?.items && receiptSale?.sale?.items?.length > 0 && (
+              <List
+                size="small"
+                dataSource={receiptSale.items}
+                renderItem={(item) => (
+                  <List.Item>
+                    <List.Item.Meta
+                      title={
+                        <Space size={6} wrap>
+                          <Text strong>{item.name}</Text>
+                          {item.hasSpecialPrice && (
+                            <Tag color="gold" icon={<Star size={11} />} style={{ margin: 0 }}>
+                              Preço especial
+                            </Tag>
+                          )}
+                          {item.discountValue != null && item.discountValue > 0 && (
+                            <Tag color="red" icon={<Percent size={11} />} style={{ margin: 0 }}>
+                              {formatPrice(item.discountValue)}
+                            </Tag>
+                          )}
+                        </Space>
+                      }
+                      description={
+                        <Space direction="vertical" size={0}>
                           <Text type="secondary" style={{ fontSize: 12 }}>
-                            De <Text delete>{formatPrice(item.originalUnitPrice)}</Text> por{" "}
-                            <Text strong style={{ color: "#B45309" }}>
-                              {formatPrice(item.unitPrice)}
+                            {formatUnitSoldAmount(item.unitOfMeasure, item.unitSold) ??
+                              item.quantity}{" "}
+                            × {formatPrice(item.unitPrice)}
+                            {getVariationLabel(item) ? ` · ${getVariationLabel(item)}` : ""}
+                          </Text>
+                          {item.hasSpecialPrice && (
+                            <Text type="secondary" style={{ fontSize: 12 }}>
+                              De <Text delete>{formatPrice(item.originalUnitPrice)}</Text> por{" "}
+                              <Text strong style={{ color: "#B45309" }}>
+                                {formatPrice(item.unitPrice)}
+                              </Text>
                             </Text>
+                          )}
+                          {item.note && (
+                            <Text italic type="secondary" style={{ fontSize: 11 }}>
+                              "{item.note}"
+                            </Text>
+                          )}
+                        </Space>
+                      }
+                    />
+                    <Text strong>{formatPrice(item.lineTotal)}</Text>
+                  </List.Item>
+                )}
+              />
+            )}
+            {receiptSale?.sale?.services && receiptSale?.sale?.services?.length > 0 && (
+              <List
+                size="small"
+                dataSource={receiptSale.sale.services}
+                renderItem={(item) => (
+                  <List.Item>
+                    <List.Item.Meta
+                      title={
+                        <Space size={6} wrap>
+                          <Text strong>{item.description}</Text>
+                        </Space>
+                      }
+                      description={
+                        <Space direction="vertical" size={0}>
+                          <Text italic style={{ fontSize: 13 }}>
+                            Funcionário: {item.onwerEmployee}
                           </Text>
-                        )}
-                        {item.note && (
-                          <Text italic type="secondary" style={{ fontSize: 11 }}>
-                            "{item.note}"
-                          </Text>
-                        )}
-                      </Space>
-                    }
-                  />
-                  <Text strong>{formatPrice(item.lineTotal)}</Text>
-                </List.Item>
-              )}
-            />
+                        </Space>
+                      }
+                    />
+                    <Text strong>{formatPrice(item.amount)}</Text>
+                  </List.Item>
+                )}
+              />
+            )}
 
             <Divider style={{ margin: "14px 0 10px" }}>Resumo</Divider>
             <Row justify="space-between" style={{ marginBottom: 4 }}>
@@ -271,7 +326,7 @@ export const SaleReceiptModal = ({
               <Title level={4} style={{ margin: 0 }}>
                 Total
               </Title>
-              <Title level={4} style={{ margin: 0, color: "#F26B1F" }}>
+              <Title level={4} style={{ margin: 0, color: BRAND }}>
                 {formatPrice(receiptSale.total)}
               </Title>
             </Row>
@@ -280,7 +335,7 @@ export const SaleReceiptModal = ({
             {receiptSale.payments.map((payment) => (
               <Row key={payment.id} justify="space-between" style={{ marginBottom: 5 }}>
                 <Space>
-                  <CreditCard size={14} color="#F26B1F" />
+                  <CreditCard size={14} color={BRAND} />
                   <Text>{SALE_PAYMENT_LABEL[payment.type] || payment.type}</Text>
                 </Space>
                 <Text strong>{formatPrice(payment.amount)}</Text>
@@ -292,10 +347,10 @@ export const SaleReceiptModal = ({
             </Row>
             {receiptSale.change > 0 && (
               <Row justify="space-between" style={{ marginTop: 4 }}>
-                <Text strong style={{ color: "#16A34A" }}>
+                <Text strong style={{ color: SUCCESS }}>
                   Troco
                 </Text>
-                <Text strong style={{ color: "#16A34A" }}>
+                <Text strong style={{ color: SUCCESS }}>
                   {formatPrice(receiptSale.change)}
                 </Text>
               </Row>

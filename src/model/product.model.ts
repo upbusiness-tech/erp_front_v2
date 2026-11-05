@@ -30,6 +30,12 @@ export interface ProductModel extends DefaultIdModel {
   createByUser: UserModel;
 }
 
+export interface GalleryModel extends DefaultIdModel {
+  productPicture: string;
+  companyUid: string;
+  createdAt?: string;
+}
+
 export interface ProductTransactionRecord extends DefaultIdModel {
   type: ProductTransactionType;
   value: number;

@@ -7,6 +7,7 @@ import { StatsDashboardService } from "@/services/statsDashboard.service";
 import { extractStockFormatByProduct } from "@/uperp/common/formulas/productFormulas";
 import dayjs from "dayjs";
 import { useEffect } from "react";
+import { INFO, SUCCESS } from "@/theme/colors";
 import type { GeneralStatsByProduct, TransactionOverviewByProduct } from "./types";
 
 export function useProductStatsModalController({ product }: { product: ProductModel | null }) {
@@ -67,13 +68,13 @@ export function useProductStatsModalController({ product }: { product: ProductMo
       case ProductTransactionType.SUBTRACTION:
         return {
           label: "Venda",
-          color: "#16A34A",
+          color: SUCCESS,
           description: `Venda #${transaction.saleCode} de ${extractStockFormatByProduct(product, transaction.value)}`,
         };
       case ProductTransactionType.PLUS:
         return {
           label: "Reposição",
-          color: "#2563EB",
+          color: INFO,
           description: `Reposição de ${extractStockFormatByProduct(product, transaction.value)} (${[transaction.brand, transaction.color, transaction.size].join(" - ")})`,
         };
       default:

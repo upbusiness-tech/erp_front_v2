@@ -1,5 +1,6 @@
 import { Card, Col, Divider, Row, Space, Switch, Typography } from "antd";
 import { Palette } from "lucide-react";
+import { BRAND, BRAND_SOFT } from "@/theme/colors";
 import { useSettingsController } from "./useSettings.controller";
 
 const { Title, Text } = Typography;
@@ -34,7 +35,7 @@ export function Settings() {
                           width: 36,
                           height: 36,
                           borderRadius: 8,
-                          background: "#FFF7ED",
+                          background: BRAND_SOFT,
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
@@ -77,14 +78,14 @@ export function Settings() {
                     width: 36,
                     height: 36,
                     borderRadius: 8,
-                    background: "#FFF7ED",
+                    background: BRAND_SOFT,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     flexShrink: 0,
                   }}
                 >
-                  <Palette size={18} color="#F26B1F" />
+                  <Palette size={18} color={BRAND} />
                 </div>
                 <div>
                   <Text strong style={{ display: "block" }}>

@@ -1,4 +1,5 @@
 import { PaymentMethod } from "@/enums/payment.enum";
+import { SaleType } from "@/enums/sale.enum";
 import { useGetAllWithParams } from "@/hooks/useGetAllWithParams";
 import { InternCustomerModel } from "@/model/internCustomer.model";
 import { InternCustomerSpecialPriceModel } from "@/model/internCustomerPrice.model";
@@ -22,7 +23,7 @@ import { useMemo, useState } from "react";
 export type OrderSteps = "items" | "payment";
 
 const internCustomerService = new InternCustomerService();
-export function useOrderContentController() {
+export function useOrderContentController({ saleType }: { saleType: SaleType }) {
   const {
     saleItems,
     setSaleItems,
@@ -34,9 +35,18 @@ export function useOrderContentController() {
     setSelectedCustomer,
     saleDiscount,
     setSaleDiscount,
+    saleServices,
   } = useSalesStore();
 
   const { currentCashFlow } = useCashFlowStore();
+
+  const isGoToPaymentDisabled = () => {
+    if (saleType === SaleType.SERVICE) {
+      return saleServices.length === 0;
+    } else {
+      return saleItems.length === 0;
+    }
+  };
 
   const removeSaleItem = (id: number) => {
     setSaleItems(saleItems.filter((item) => item.id !== id));
@@ -84,7 +94,7 @@ export function useOrderContentController() {
   const [pMethod, setpMethod] = useState<PaymentMethod>(PaymentMethod.CASH);
   const [pValue, setpValue] = useState<number>(0);
 
-  const total = calculateTotalCartItems(saleItems, saleDiscount);
+  const total = calculateTotalCartItems(saleItems, saleServices, saleDiscount);
   const paid = calculateTotalPayments(payments);
   const remaining = calculateRemainingSaleOnOrderContent(total, payments);
   const change = calculateChangeSaleOnOrderContent(total, payments);
@@ -128,7 +138,7 @@ export function useOrderContentController() {
   const [customerDetailsOpen, setCustomerDetailsOpen] = useState(false);
   const [saleDiscountExpanded, setSaleDiscountExpanded] = useState(false);
 
-  const grossSubtotal = calculateGrossSubtotal(saleItems);
+  const grossSubtotal = calculateGrossSubtotal(saleItems, saleServices);
   const specialPriceSavings = calculateSpecialPriceSavings(saleItems);
   const itemDiscountsTotal = calculateItemDiscountsTotal(saleItems);
   const saleDiscountValue = saleDiscount?.value ?? 0;
@@ -283,5 +293,7 @@ export function useOrderContentController() {
     setItemForSpecialPrice,
     setDiscountModalOpen,
     setItemForDiscount,
+    saleServices,
+    isGoToPaymentDisabled,
   };
 }

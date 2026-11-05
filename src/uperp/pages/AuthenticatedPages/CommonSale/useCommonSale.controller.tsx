@@ -25,8 +25,10 @@ import { createSaleReceipt } from "@/uperp/common/formulas/saleReceipt";
 import { SettingsRef } from "@/uperp/common/settings/consts/settings.ref";
 import { Form, message, Space, Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
+import { BRAND } from "@/theme/colors";
 import { useMemo, useState } from "react";
 import { ICreateSaleForm, IPaymentMethodField, ISaleItemField } from "./types";
+import { CondOperator } from "@dataui/crud-request";
 
 const { Text } = Typography;
 
@@ -48,6 +50,7 @@ export function useCommonSaleController() {
     productsView,
     setProductsView,
     saleItems,
+    saleServices,
     payments,
     saleStep,
     resetSale,
@@ -57,11 +60,14 @@ export function useCommonSaleController() {
 
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
-  const handleCategoryFilterChange = (values: string | string[]) =>
+  const handleCategoryFilterChange = (values: string | string[]) => {
     setCategoryFilter(values as string[]);
+    resetPage();
+  };
 
   const handleSearchChange = (value: string | string[]) => {
     setSearch(value as string);
+    resetPage();
   };
 
   const { data: productCategories } =
@@ -74,7 +80,9 @@ export function useCommonSaleController() {
 
   const filter = useMemo(() => {
     return [
-      ...(search ? [{ field: "name", operator: "$contL", value: search.trim() }] : []),
+      ...(search
+        ? [{ field: "name", operator: CondOperator.CONTAINS_LOW, value: search.trim() }]
+        : []),
       ...(categoryFilter.length > 0
         ? [{ field: "productCategoryId", operator: "$in", value: categoryFilter }]
         : []),
@@ -93,7 +101,7 @@ export function useCommonSaleController() {
   } = useGenericTableFetch<ProductModel>({
     service: productService,
     options: {
-      sort: { field: "name", order: "ASC" },
+      sort: { field: "createdAt", order: "ASC" },
       filter,
     },
   });
@@ -120,6 +128,7 @@ export function useCommonSaleController() {
         { field: "items.internCustomerPrice" },
         { field: "internCustomer" },
         { field: "payments" },
+        { field: "services" },
       ],
     },
   });
@@ -128,23 +137,6 @@ export function useCommonSaleController() {
     {
       title: "Produto",
       dataIndex: "name",
-    },
-    {
-      title: "Variação (Tam, cor, marca)",
-      render: (n: string, p: ProductModel) => (
-        <Space direction="vertical" size={0}>
-          {p.productEspecifications.map((pe) => (
-            <Space size={4}>
-              {pe.size && (
-                <Tag style={{ margin: 0 }} color="orange">
-                  {pe.size}
-                </Tag>
-              )}
-              {pe.color && <Tag style={{ margin: 0 }}>{pe.color}</Tag>}
-            </Space>
-          ))}
-        </Space>
-      ),
     },
     {
       title: "Categoria",
@@ -157,7 +149,7 @@ export function useCommonSaleController() {
                 width: 10,
                 height: 10,
                 borderRadius: "50%",
-                background: `${p.productCategory?.color || "#F26B1F"}`,
+                background: p.productCategory?.color || BRAND,
               }}
             />
             <Text strong>{p.productCategory?.name || "-"}</Text>
@@ -222,7 +214,7 @@ export function useCommonSaleController() {
 
   const { invalidateQuery } = useCacheManager();
 
-  const handleSubmitSale = async () => {
+  const handleSubmitSale = async (type: SaleType) => {
     try {
       setsubmiting(true);
       if (!currentCashFlow || currentCashFlow.isClosed) {
@@ -253,14 +245,37 @@ export function useCommonSaleController() {
 
       const data: ICreateSaleForm = {
         cashFlowId: currentCashFlow.id,
-        type: SaleType.NORMAL,
+        type,
         items,
         payments: paymentsConverted,
         internCustomerId: selectedCustomer?.id,
         discount: saleDiscount?.value != null ? saleDiscount : undefined,
       };
 
+      if (type === SaleType.SERVICE) {
+        data.services = saleServices;
+      }
+
       const sale = await saleService.create<SaleModel>(data);
+
+      // O POST nem sempre devolve os serviços aninhados na resposta. Reanexa os
+      // serviços enviados para o comprovante exibi-los junto com os itens e
+      // para o modal/PDF mostrarem a lista de serviços corretamente.
+      if (
+        type === SaleType.SERVICE &&
+        saleServices.length > 0 &&
+        (!sale.services || sale.services.length === 0)
+      ) {
+        sale.services = saleServices.map((service, index) => ({
+          id: -(index + 1),
+          description: service.description,
+          onwerEmployee: service.onwerEmployee,
+          amount: service.amount,
+          discount: { value: 0 },
+          saleId: sale.id,
+        }));
+      }
+
       invalidateQueries();
       setReceiptVariant("success");
       setReceiptSale(createSaleReceipt(sale));

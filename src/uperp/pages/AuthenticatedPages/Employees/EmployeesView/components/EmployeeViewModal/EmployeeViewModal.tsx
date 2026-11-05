@@ -3,6 +3,7 @@ import { EmployeesPaths } from "@/routes/AuthenticatedRoutes/Employees/routes";
 import { Avatar, Button, Descriptions, Empty, Modal, Space, Tag, Typography } from "antd";
 import { Pencil, ShieldCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { BRAND } from "@/theme/colors";
 
 const { Text, Title } = Typography;
 
@@ -24,7 +25,7 @@ export const EmployeeViewModal = ({ employee, onCancel }: EmployeeViewModalProps
       title={
         employee ? (
           <Space>
-            <Avatar style={{ background: "#F26B1F" }}>{employee.name.charAt(0)}</Avatar>
+            <Avatar style={{ background: BRAND }}>{employee.name.charAt(0)}</Avatar>
             {employee.name}
           </Space>
         ) : (
@@ -61,7 +62,7 @@ export const EmployeeViewModal = ({ employee, onCancel }: EmployeeViewModalProps
 
           <Title level={5} style={{ marginTop: 16 }}>
             <Space size={6}>
-              <ShieldCheck size={16} color="#F26B1F" /> Permissões
+              <ShieldCheck size={16} color={BRAND} /> Permissões
             </Space>
           </Title>
           {employee.user.permissions?.length ? (

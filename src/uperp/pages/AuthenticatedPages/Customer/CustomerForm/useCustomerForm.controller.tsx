@@ -11,6 +11,7 @@ import { ColumnsType } from "antd/es/table";
 import { TableProps } from "antd/lib/table";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { BRAND } from "@/theme/colors";
 import { IVariationSelection } from "./components/SpecialPriceVariationModal";
 import { ICustomerCreateForm, ICustomerSpecialPrice, ILinkedVariation } from "./types";
 const { Text } = Typography;
@@ -142,7 +143,7 @@ export function useCustomerFormController({ isEdit }: { isEdit?: boolean }) {
               width: 10,
               height: 10,
               borderRadius: "50%",
-              background: `${p.productCategory?.color || "#F26B1F"}`,
+              background: p.productCategory?.color || BRAND,
             }}
           />
           <Text strong>{p.productCategory?.name || "-"}</Text>

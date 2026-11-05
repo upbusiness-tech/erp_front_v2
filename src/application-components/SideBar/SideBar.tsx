@@ -1,12 +1,23 @@
 import { Avatar, Button, Drawer, Dropdown, Layout, Menu, Space, Typography } from "antd";
 import { ChevronDown, LogOut, Menu as MenuIcon, Settings, Users } from "lucide-react";
 import { Outlet, useNavigate } from "react-router-dom";
+import { BRAND } from "@/theme/colors";
 import { BrandHeader } from "./BrandHeader";
-import { titles, PageKey } from "./SideBar.consts";
+import { pageKeyToPath, titles, PageKey } from "./SideBar.consts";
 import { useSideBarController } from "./useSideBar.controller";
 
 const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
+
+function openInNewTab(path: string) {
+  const anchor = document.createElement("a");
+  anchor.href = path;
+  anchor.target = "_blank";
+  anchor.rel = "noopener noreferrer";
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+}
 
 export function SideBar() {
   const {
@@ -32,7 +43,16 @@ export function SideBar() {
       theme={dark ? "dark" : "light"}
       mode="inline"
       selectedKeys={[currentPage]}
-      onClick={(e) => handleMenuClick(e.key as PageKey)}
+      onClick={(e) => {
+        const key = e.key as PageKey;
+
+        if (e.domEvent.ctrlKey || e.domEvent.metaKey) {
+          openInNewTab(pageKeyToPath[key]);
+          return;
+        }
+
+        handleMenuClick(key);
+      }}
       items={menuItems}
       style={{ borderRight: 0, paddingTop: 8 }}
     />
@@ -128,7 +148,7 @@ export function SideBar() {
             }}
           >
             <Space style={{ cursor: "pointer" }} size={6}>
-              <Avatar size={isMobile ? "small" : "default"} style={{ background: "#F26B1F" }}>
+              <Avatar size={isMobile ? "small" : "default"} style={{ background: BRAND }}>
                 {userName.charAt(0)}
               </Avatar>
               {!isMobile && (

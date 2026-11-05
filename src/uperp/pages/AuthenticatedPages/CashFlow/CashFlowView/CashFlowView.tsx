@@ -15,6 +15,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { CashFlowTransactionModal } from "./CashFlowTransactionModal/CashFlowTransactionModal";
+import { BRAND, BRAND_SOFT, BRAND_BORDER, DANGER, INFO, SUCCESS } from "@/theme/colors";
 import { CloseCashFlowModal } from "./CloseCashFlowModal/CloseCashFlowModal";
 import { useCashFlowViewController } from "./useCashFlowView.controller";
 
@@ -59,13 +60,13 @@ export const CashFlowView = () => {
       />
 
       <Card
-        style={{ marginBottom: 16, borderLeft: "4px solid #16A34A" }}
+        style={{ marginBottom: 16, borderLeft: `4px solid ${SUCCESS}` }}
         styles={{ body: { padding: 16 } }}
       >
         <Row align="middle" justify="space-between" gutter={[16, 12]}>
           <Col>
             <Space align="center">
-              <LockOpen color="#16A34A" size={24} />
+              <LockOpen color={SUCCESS} size={24} />
               <div>
                 <Text type="secondary" style={{ fontSize: 12 }}>
                   Caixa Aberto
@@ -109,7 +110,7 @@ export const CashFlowView = () => {
               title="Vendas"
               value={formatPrice(salesData?.amount ?? 0)}
               precision={2}
-              valueStyle={{ color: "#16A34A" }}
+              valueStyle={{ color: SUCCESS }}
               prefix={<TrendingUp size={16} />}
             />
           </Card>
@@ -120,7 +121,7 @@ export const CashFlowView = () => {
               title="Reposições"
               value={formatPrice(replacementData?.amount ?? 0)}
               precision={2}
-              valueStyle={{ color: "#2563EB" }}
+              valueStyle={{ color: INFO }}
               prefix={<ArrowDownCircle size={16} />}
             />
           </Card>
@@ -131,18 +132,18 @@ export const CashFlowView = () => {
               title="Sangrias"
               value={formatPrice(sangriasData?.amount ?? 0)}
               precision={2}
-              valueStyle={{ color: "#DC2626" }}
+              valueStyle={{ color: DANGER }}
               prefix={<TrendingDown size={16} />}
             />
           </Card>
         </Col>
       </Row>
 
-      <Card style={{ marginBottom: 16, background: "#FFF7ED", borderColor: "#FED7AA" }}>
+      <Card style={{ marginBottom: 16, background: BRAND_SOFT, borderColor: BRAND_BORDER }}>
         <Row align="middle" justify="space-between">
           <Col>
             <Text type="secondary">Saldo estimado</Text>
-            <Title level={2} style={{ margin: 0, color: "#F26B1F" }}>
+            <Title level={2} style={{ margin: 0, color: BRAND }}>
               {formatPrice(
                 calculeCashFlowEstimetedAmount(
                   Number(sangriasData?.amount ?? []),

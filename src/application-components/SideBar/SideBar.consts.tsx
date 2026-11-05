@@ -35,34 +35,34 @@ export type PageKey =
 
 export const menu: { key: PageKey; label: string; icon: React.ReactNode }[] = [
   { key: "balcao", label: "Venda Balcão", icon: <Store size={16} /> },
-  { key: "caixa", label: "Caixa", icon: <Wallet size={16} /> },
   { key: "servico", label: "Venda Serviço", icon: <Briefcase size={16} /> },
+  { key: "caixa", label: "Caixa", icon: <Wallet size={16} /> },
   { key: "estoque", label: "Estoque", icon: <Boxes size={16} /> },
-  { key: "financas", label: "Finanças & Relatórios", icon: <BarChart3 size={16} /> },
+  { key: "financas", label: "Finanças", icon: <BarChart3 size={16} /> },
   { key: "clientes", label: "Clientes", icon: <Users size={16} /> },
   { key: "funcionarios", label: "Funcionários", icon: <UserCog size={16} /> },
   { key: "empresa", label: "Empresa", icon: <Building2 size={16} /> },
-  { key: "planos", label: "Planos & Mensalidades", icon: <CreditCard size={16} /> },
+  { key: "planos", label: "Mensalidades", icon: <CreditCard size={16} /> },
   { key: "configuracoes", label: "Configurações", icon: <Settings size={16} /> },
 ];
 
 export const titles: Record<PageKey, string> = {
   balcao: "Venda Balcão",
-  caixa: "Caixa",
   servico: "Venda Serviço",
+  caixa: "Caixa",
   estoque: "Estoque",
-  financas: "Finanças & Relatórios",
+  financas: "Finanças",
   clientes: "Clientes",
   funcionarios: "Funcionários",
   empresa: "Empresa",
-  planos: "Planos & Mensalidades",
+  planos: "Mensalidades",
   configuracoes: "Configurações",
 };
 
 export const pageKeyToPath: Record<PageKey, string> = {
   balcao: SalesPaths.COMMON_SALE,
-  caixa: CashierPaths.BASE,
   servico: SalesPaths.SERVICE_SALE,
+  caixa: CashierPaths.BASE,
   estoque: StockPaths.BASE,
   financas: FinancePaths.BASE,
   clientes: CustomersPaths.BASE,
@@ -74,8 +74,8 @@ export const pageKeyToPath: Record<PageKey, string> = {
 
 export const pathToPageKey: Record<string, PageKey> = {
   [SalesPaths.COMMON_SALE]: "balcao",
-  [CashierPaths.BASE]: "caixa",
   [SalesPaths.SERVICE_SALE]: "servico",
+  [CashierPaths.BASE]: "caixa",
   [StockPaths.BASE]: "estoque",
   [FinancePaths.BASE]: "financas",
   [CustomersPaths.BASE]: "clientes",
@@ -87,13 +87,13 @@ export const pathToPageKey: Record<string, PageKey> = {
 
 export const pageKeyRequiresPermission: Record<PageKey, string> = {
   balcao: SideBarPermissions.AccessCommonSaleSection.name,
-  caixa: SideBarPermissions.AccessCashSection.name,
   servico: SideBarPermissions.AccessServiceSaleSection.name,
+  caixa: SideBarPermissions.AccessCashSection.name,
   estoque: SideBarPermissions.AccessStockSection.name,
   financas: SideBarPermissions.AccessFinanceSection.name,
   clientes: SideBarPermissions.AccessInternClientsSection.name,
   funcionarios: SideBarPermissions.AccessEmployeeSection.name,
   empresa: SideBarPermissions.AccessCompanySection.name,
-  planos: SideBarPermissions.AccessInvoicesSection.name,
+  planos: SideBarPermissions.AccessSubscriptionsSection.name,
   configuracoes: SideBarPermissions.AccessSettingsSection.name,
 };

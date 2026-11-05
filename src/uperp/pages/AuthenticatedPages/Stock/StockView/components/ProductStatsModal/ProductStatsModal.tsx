@@ -18,6 +18,7 @@ import {
 } from "antd";
 import { Calendar, FileText, Package, Tag, TrendingUp, User } from "lucide-react";
 import { useProductStatsModalController } from "./useProductStatsModal.controller";
+import { DANGER, SUCCESS } from "@/theme/colors";
 
 const { Text } = Typography;
 
@@ -94,7 +95,7 @@ export const ProductStatsModal = ({ product, open, onClose }: ProductStatsModalP
             </Space>
           }
         >
-          {product.createByUser.employee.name}
+          {product?.createByUser?.employee?.name}
         </Descriptions.Item>
         <Descriptions.Item
           label={
@@ -136,7 +137,7 @@ export const ProductStatsModal = ({ product, open, onClose }: ProductStatsModalP
                   value={stats?.netProfit ?? 0}
                   precision={2}
                   prefix="R$"
-                  valueStyle={{ color: "#16A34A" }}
+                  valueStyle={{ color: SUCCESS }}
                 />
               )}
             </Card>
@@ -152,7 +153,7 @@ export const ProductStatsModal = ({ product, open, onClose }: ProductStatsModalP
                   precision={2}
                   prefix="R$"
                   valueStyle={{
-                    color: (stats?.grossProfit ?? 0) >= 0 ? "#16A34A" : "#DC2626",
+                    color: (stats?.grossProfit ?? 0) >= 0 ? SUCCESS : DANGER,
                   }}
                 />
               )}
@@ -168,7 +169,7 @@ export const ProductStatsModal = ({ product, open, onClose }: ProductStatsModalP
           value={filteredCost}
           precision={2}
           prefix={<TrendingDown size={14} />}
-          valueStyle={{ color: "#DC2626" }}
+          valueStyle={{ color: DANGER }}
         />
       </Card> */}
 
@@ -177,12 +178,12 @@ export const ProductStatsModal = ({ product, open, onClose }: ProductStatsModalP
       {/* Timeline de transacoes */}
       <Text strong style={{ display: "block", marginBottom: 12 }}>
         <Space>
-          <TrendingUp size={14} /> Timeline de Transacoes
+          <TrendingUp size={14} /> Timeline de Transações
         </Space>
       </Text>
 
       {productTransactionsData.length === 0 ? (
-        <Text type="secondary">Nenhuma transacao encontrada no periodo selecionado.</Text>
+        <Text type="secondary">Nenhuma transação encontrada no período selecionado.</Text>
       ) : (
         <div style={{ maxHeight: 320, overflowY: "auto", paddingRight: 8 }}>
           <Timeline

@@ -13,6 +13,7 @@ import { CashierPaths } from "@/routes/AuthenticatedRoutes/Cashier/routes";
 import { CashFlowHistorySalesTable } from "./CashFlowHistorySalesTable/CashFlowHistorySalesTable";
 import { CashFlowHistoryTransactionTable } from "./CashFlowHistoryTransactionTable/CashFlowHistoryTransactionTable";
 import { useCashFlowHistoryController } from "./useCashFlowHistory.controller";
+import { BRAND, BRAND_SOFT, BRAND_BORDER, DANGER, INFO, SUCCESS } from "@/theme/colors";
 
 const { Text, Title } = Typography;
 
@@ -63,7 +64,7 @@ export const CashFlowHistory = () => {
               value={0}
               precision={2}
               prefix="R$"
-              valueStyle={{ color: "#16A34A" }}
+              valueStyle={{ color: SUCCESS }}
             />
           </Card>
         </Col>
@@ -74,7 +75,7 @@ export const CashFlowHistory = () => {
               value={0}
               precision={2}
               prefix="R$"
-              valueStyle={{ color: "#2563EB" }}
+              valueStyle={{ color: INFO }}
             />
           </Card>
         </Col>
@@ -85,7 +86,7 @@ export const CashFlowHistory = () => {
               value={0}
               precision={2}
               prefix="R$"
-              valueStyle={{ color: "#DC2626" }}
+              valueStyle={{ color: DANGER }}
             />
           </Card>
         </Col>
@@ -118,7 +119,7 @@ export const CashFlowHistory = () => {
             <Card
               title={
                 <Space>
-                  <Wallet size={16} color="#F26B1F" />
+                  <Wallet size={16} color={BRAND} />
                   Detalhes — {cashFlowselected.code}
                 </Space>
               }
@@ -164,7 +165,7 @@ export const CashFlowHistory = () => {
                   {cashFlowselected?.closedAt ? (
                     <Text>{formatDateFromApi(cashFlowselected?.closedAt)}</Text>
                   ) : (
-                    <Text strong style={{ color: "#16A34A" }}>
+                    <Text strong style={{ color: SUCCESS }}>
                       Caixa aberto
                     </Text>
                   )}
@@ -175,14 +176,14 @@ export const CashFlowHistory = () => {
                 </Row>
               </Space>
 
-              <div style={{ marginTop: 12, padding: 12, background: "#FFF7ED", borderRadius: 8 }}>
+              <div style={{ marginTop: 12, padding: 12, background: BRAND_SOFT, borderRadius: 8 }}>
                 <Row justify="space-between">
                   <Text>Valor inicial</Text>
                   <Text>R$ {cashFlowselected.initialBalance}</Text>
                 </Row>
                 <Row justify="space-between">
                   <Text>+ Vendas</Text>
-                  <Text style={{ color: "#16A34A" }}>{formatPrice(salesData?.amount ?? 0)}</Text>
+                  <Text style={{ color: SUCCESS }}>{formatPrice(salesData?.amount ?? 0)}</Text>
                 </Row>
                 <Row justify="space-between">
                   <Text>+ Reposições</Text>
@@ -192,14 +193,14 @@ export const CashFlowHistory = () => {
                 </Row>
                 <Row justify="space-between">
                   <Text>- Sangrias</Text>
-                  <Text style={{ color: "#DC2626" }}>{formatPrice(sangriasData?.amount ?? 0)}</Text>
+                  <Text style={{ color: DANGER }}>{formatPrice(sangriasData?.amount ?? 0)}</Text>
                 </Row>
-                <div style={{ borderTop: "1px dashed #FED7AA", margin: "8px 0" }} />
+                <div style={{ borderTop: `1px dashed ${BRAND_BORDER}`, margin: "8px 0" }} />
                 <Row justify="space-between">
                   <Title level={5} style={{ margin: 0 }}>
                     Saldo estimado (Sistema)
                   </Title>
-                  <Title level={5} style={{ margin: 0, color: "#F26B1F" }}>
+                  <Title level={5} style={{ margin: 0, color: BRAND }}>
                     {formatPrice(expectedAmount)}
                   </Title>
                 </Row>
@@ -211,7 +212,7 @@ export const CashFlowHistory = () => {
                     </Row>
                     <Row justify="space-between">
                       <Text>Diferença</Text>
-                      <Text strong style={{ color: (diff ?? 0) < 0 ? "#DC2626" : "#16A34A" }}>
+                      <Text strong style={{ color: (diff ?? 0) < 0 ? DANGER : SUCCESS }}>
                         {formatPrice(expectedAmount - cashFlowselected.closingBalance)}
                       </Text>
                     </Row>

@@ -19,6 +19,7 @@ import { TableProps } from "antd/lib/table";
 import { Eye, Pencil } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { BRAND } from "@/theme/colors";
 const { Text } = Typography;
 
 const productService = new ProductService();
@@ -112,7 +113,7 @@ export function useStockProductTableController({
     service: productService,
     options: {
       join: [{ field: "createByUser" }, { field: "createByUser.employee" }],
-      sort: { field: "name", order: "ASC" },
+      sort: { field: "createdAt", order: "ASC" },
       filter,
     },
   });
@@ -154,23 +155,6 @@ export function useStockProductTableController({
       dataIndex: "name",
     },
     {
-      title: "Variação (Tam, cor, marca)",
-      render: (n: string, p: ProductModel) => (
-        <Space direction="vertical" size={0}>
-          {p.productEspecifications.map((pe) => (
-            <Space size={4}>
-              {pe.size && (
-                <Tag style={{ margin: 0 }} color="orange">
-                  {pe.size}
-                </Tag>
-              )}
-              {pe.color && <Tag style={{ margin: 0 }}>{pe.color}</Tag>}
-            </Space>
-          ))}
-        </Space>
-      ),
-    },
-    {
       title: "Categoria",
       dataIndex: "productCategoryId",
       render: (_, p: ProductModel) =>
@@ -181,7 +165,7 @@ export function useStockProductTableController({
                 width: 10,
                 height: 10,
                 borderRadius: "50%",
-                background: `${p.productCategory?.color || "#F26B1F"}`,
+                background: p.productCategory?.color || BRAND,
               }}
             />
             <Text strong>{p.productCategory?.name || "-"}</Text>
@@ -233,7 +217,6 @@ export function useStockProductTableController({
       width: 110,
       render: (_, p) => (
         <Space>
-          <Button size="small" icon={<Eye size={14} />} onClick={() => onViewStats?.(p)} />
           <Button
             size="small"
             icon={<Pencil size={14} />}

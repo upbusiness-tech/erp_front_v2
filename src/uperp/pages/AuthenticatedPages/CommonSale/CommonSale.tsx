@@ -11,6 +11,8 @@ import { AppstoreOutlined, BarsOutlined } from "@ant-design/icons";
 import { Badge, Button, Card, Col, Drawer, Grid, Row, Segmented, Space } from "antd";
 import { History, ShoppingCart } from "lucide-react";
 import { useCommonSaleController } from "./useCommonSale.controller";
+import { SaleType } from "@/enums/sale.enum";
+import { DANGER } from "@/theme/colors";
 
 const { useBreakpoint } = Grid;
 
@@ -66,25 +68,54 @@ export function CommonSale() {
 
   return (
     <>
-      <Row gutter={16} style={{ minHeight: "calc(100vh - 112px)" }} align="stretch">
-        <Col xs={24} lg={16} style={{ display: "flex", flexDirection: "column" }}>
-          {!isMobile ? (
-            <CashFlowStatus onShowRecentSales={() => setRecentOpen(true)} />
-          ) : (
-            <Button
-              style={{ marginBottom: "5px" }}
-              icon={<History size={14} />}
-              onClick={() => setRecentOpen(true)}
-            >
-              Ver vendas recentes
-            </Button>
-          )}
+      <Row
+        gutter={16}
+        style={{
+          ...(isMobile ? { minHeight: "calc(100vh - 112px)" } : { height: "calc(100vh - 112px)" }),
+        }}
+        align="stretch"
+      >
+        <Col
+          xs={24}
+          lg={16}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            minHeight: 0,
+            height: isMobile ? undefined : "100%",
+          }}
+        >
+          <div style={{ flexShrink: 0 }}>
+            {!isMobile ? (
+              <CashFlowStatus onShowRecentSales={() => setRecentOpen(true)} />
+            ) : (
+              <Button
+                style={{ marginBottom: "5px" }}
+                icon={<History size={14} />}
+                onClick={() => setRecentOpen(true)}
+              >
+                Ver vendas recentes
+              </Button>
+            )}
+          </div>
 
           <Card
-            style={{ flex: 1, display: "flex", flexDirection: "column" }}
-            styles={{ body: { flex: 1, display: "flex", flexDirection: "column" } }}
+            style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}
+            styles={{
+              body: {
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                minHeight: 0,
+                overflow: isMobile
+                  ? undefined
+                  : productsView === EProductView.CARDS
+                    ? "hidden"
+                    : "auto",
+              },
+            }}
           >
-            <Row gutter={12} style={{ marginBottom: 16 }} align="top">
+            <Row gutter={12} style={{ marginBottom: 16, flexShrink: 0 }} align="top">
               <Col flex="auto">
                 <SearchBar
                   searches={[
@@ -131,6 +162,7 @@ export function CommonSale() {
                 onPageChange={handlePageChange}
                 onPageSizeChange={handlePageSizeChange}
                 onClickProduct={handleOpenProductModal}
+                fitToHeight={!isMobile}
               />
             ) : (
               <GenericTable
@@ -151,7 +183,11 @@ export function CommonSale() {
         </Col>
 
         {!isMobile && (
-          <Col xs={0} lg={8} style={{ display: "flex", flexDirection: "column" }}>
+          <Col
+            xs={0}
+            lg={8}
+            style={{ display: "flex", flexDirection: "column", minHeight: 0, height: "100%" }}
+          >
             <Card
               title={
                 <Space>
@@ -166,10 +202,27 @@ export function CommonSale() {
                   </Button>
                 )
               }
-              style={{ flex: 1, display: "flex", flexDirection: "column" }}
-              styles={{ body: { flex: 1, overflowY: "auto" } }}
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                minHeight: 0,
+              }}
+              styles={{
+                body: {
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  minHeight: 0,
+                  overflow: "hidden",
+                },
+              }}
             >
-              <OrderContent submitingSale={submiting} handleSubmitSale={handleSubmitSale} />
+              <OrderContent
+                submitingSale={submiting}
+                handleSubmitSale={handleSubmitSale}
+                saleType={SaleType.NORMAL}
+              />
             </Card>
           </Col>
         )}
@@ -185,7 +238,7 @@ export function CommonSale() {
             zIndex: 1000,
           }}
         >
-          <Badge count={cartCount} offset={[-6, 6]} color="#DC2626">
+          <Badge count={cartCount} offset={[-6, 6]} color={DANGER}>
             <Button
               type="primary"
               shape="circle"
@@ -219,7 +272,11 @@ export function CommonSale() {
         onClose={() => setCartOpen(false)}
         width={Math.min(420, typeof window !== "undefined" ? window.innerWidth - 24 : 360)}
       >
-        <OrderContent submitingSale={submiting} handleSubmitSale={handleSubmitSale} />
+        <OrderContent
+          submitingSale={submiting}
+          handleSubmitSale={handleSubmitSale}
+          saleType={SaleType.NORMAL}
+        />
       </Drawer>
 
       {/* modal de vendas recentes */}
@@ -242,7 +299,6 @@ export function CommonSale() {
         openProductEspecificationModal={openProductModal}
         onClose={handleCloseProductModal}
         product={selectedProduct}
-        form={saleForm}
         selectedCustomer={selectedCustomer}
       />
 

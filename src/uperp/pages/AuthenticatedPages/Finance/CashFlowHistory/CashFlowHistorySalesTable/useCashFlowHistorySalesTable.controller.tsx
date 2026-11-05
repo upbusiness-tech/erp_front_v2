@@ -6,9 +6,11 @@ import { formatDateFromApi } from "@/uperp/common/dates";
 import { formatPrice } from "@/uperp/common/formulas/productFormulas";
 import { calculateTotalCartItems } from "@/uperp/common/formulas/saleFormulas";
 import { createSaleReceipt, SALE_PAYMENT_LABEL } from "@/uperp/common/formulas/saleReceipt";
+import { mapSaleStatus, mapSaleType } from "@/uperp/common/util/sale.util";
 import { Space, Tag } from "antd";
 import { ColumnsType } from "antd/es/table";
 import { useState } from "react";
+import { BRAND } from "@/theme/colors";
 
 const saleService = new SaleService();
 
@@ -37,6 +39,7 @@ export function useCashFlowHistorySalesTableController({ cashFlowId }: { cashFlo
         { field: "items.internCustomerPrice" },
         { field: "internCustomer" },
         { field: "payments" },
+        { field: "services" },
       ],
     },
   });
@@ -50,16 +53,19 @@ export function useCashFlowHistorySalesTableController({ cashFlowId }: { cashFlo
       render: (v?: string) => (v ? formatDateFromApi(v) : "—"),
     },
     {
+      title: "Status",
+      dataIndex: "status",
+      width: 50,
+      render: (_, sale: SaleModel) => (
+        <Tag color={mapSaleStatus[sale.status].color}>{sale.status}</Tag>
+      ),
+    },
+    {
       title: "Tipo",
       dataIndex: "type",
       width: 50,
       render: (t: SaleType) => {
-        const map: Record<SaleType, { label: string; color: string }> = {
-          [SaleType.NORMAL]: { label: "Balcão", color: "orange" },
-          [SaleType.SERVICE]: { label: "Serviço", color: "blue" },
-          [SaleType.PDV]: { label: "PDV", color: "purple" },
-        };
-        const { label, color } = map[t] || { label: t, color: "default" };
+        const { label, color } = mapSaleType[t] || { label: t, color: "default" };
         return <Tag color={color}>{label}</Tag>;
       },
     },
@@ -68,8 +74,8 @@ export function useCashFlowHistorySalesTableController({ cashFlowId }: { cashFlo
       align: "right",
       width: 50,
       render: (_, sale: SaleModel) => (
-        <strong style={{ color: "#F26B1F" }}>
-          {formatPrice(calculateTotalCartItems(sale.items, sale.discount))}
+        <strong style={{ color: BRAND }}>
+          {formatPrice(calculateTotalCartItems(sale.items, sale.services ?? [], sale.discount))}
         </strong>
       ),
     },

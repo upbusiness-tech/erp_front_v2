@@ -11,6 +11,7 @@ import { Button, Card, Col, Form, Input, message, Row, Space, Typography } from 
 import { Lock, LockOpen } from "lucide-react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { DANGER } from "@/theme/colors";
 
 const { Title, Text } = Typography;
 
@@ -45,7 +46,7 @@ export const CashFlowOpen = () => {
       {canOpenCashFlow ? (
         <Row justify="center">
           <Col xs={24} md={14} lg={10}>
-            <Card style={{ borderTop: "4px solid #DC2626" }} styles={{ body: { padding: 32 } }}>
+            <Card style={{ borderTop: `4px solid ${DANGER}` }} styles={{ body: { padding: 32 } }}>
               <Space
                 direction="vertical"
                 align="center"
@@ -62,7 +63,7 @@ export const CashFlowOpen = () => {
                     justifyContent: "center",
                   }}
                 >
-                  <Lock color="#DC2626" size={32} />
+                  <Lock color={DANGER} size={32} />
                 </div>
                 <Title level={3} style={{ margin: 0 }}>
                   Caixa Fechado

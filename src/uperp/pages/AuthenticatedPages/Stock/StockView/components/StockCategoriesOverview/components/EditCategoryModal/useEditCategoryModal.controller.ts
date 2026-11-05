@@ -2,6 +2,7 @@ import { ProductCategoryModel } from "@/model/productCategory.model";
 import { ProductCategoryService } from "@/services/productCategory.service";
 import { Form, message } from "antd";
 import { useEffect, useState } from "react";
+import { BRAND } from "@/theme/colors";
 
 const productCategoryService = new ProductCategoryService();
 
@@ -11,21 +12,19 @@ interface UseEditCategoryModalProps {
   onSuccess: () => void;
 }
 
-const DEFAULT_COLOR = "#F26B1F";
-
 export function useEditCategoryModal({
   editingCat,
   onClose,
   onSuccess,
 }: UseEditCategoryModalProps) {
   const [form] = Form.useForm<{ name: string }>();
-  const [color, setColor] = useState(DEFAULT_COLOR);
+  const [color, setColor] = useState(BRAND);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (editingCat) {
       form.setFieldsValue({ name: editingCat.name });
-      setColor(editingCat.color ?? DEFAULT_COLOR);
+      setColor(editingCat.color ?? BRAND);
     }
   }, [editingCat, form]);
 

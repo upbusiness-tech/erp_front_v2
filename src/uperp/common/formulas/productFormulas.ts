@@ -18,16 +18,22 @@ export const showStockTotalByProductEspecification = (
   variants: ProductEspecificationModel[],
   stock?: number,
 ) => {
-  if (stock) return extractStockFormatByProduct(product, stock);
+  if (stock !== undefined) return extractStockFormatByProduct(product, stock);
   const total = calculeStockTotalByProductEspecification(variants);
 
   return extractStockFormatByProduct(product, total);
 };
 
+export const formatNumberWithBrasilianFormat = (value: number) =>
+  new Intl.NumberFormat("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+
 export const extractStockFormatByProduct = (product: ProductModel, value: number) => {
   switch (product.unitOfMeasure) {
     case ProductUnitOfMeasure.GRAM:
-      return `${value.toFixed(3)} g`;
+      return `${formatNumberWithBrasilianFormat(value)} kg`;
     case ProductUnitOfMeasure.LITER:
       return `${value.toFixed(3)} l`;
     case ProductUnitOfMeasure.METER:

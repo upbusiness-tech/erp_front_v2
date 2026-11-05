@@ -5,6 +5,7 @@ import { InternCustomerService } from "@/services/internCustomer.service";
 import { formatPrice } from "@/uperp/common/formulas/productFormulas";
 import { Button, Descriptions, Empty, Modal, Space, Table, Tabs, Tag, Typography } from "antd";
 import { Pencil } from "lucide-react";
+import { BRAND } from "@/theme/colors";
 const { Text } = Typography;
 
 type SalesTotalByInternCustomer = {
@@ -135,7 +136,7 @@ export const CustomerDetailsModal = ({
                       title: "Preço especial",
                       width: 130,
                       render: (_, v: InternCustomerSpecialPriceModel) => (
-                        <Text strong style={{ color: "#F26B1F" }}>
+                        <Text strong style={{ color: BRAND }}>
                           R$ {Number(v.specialPrice).toFixed(2)}
                         </Text>
                       ),
