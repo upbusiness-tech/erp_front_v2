@@ -130,7 +130,7 @@ export function VariantDrawer({
         <Space style={{ display: "flex", justifyContent: "flex-end" }}>
           <Button onClick={handleClose}>Descartar</Button>
           <Button type="primary" onClick={handleSave} disabled={hasErrors}>
-            Salvar variação
+            Adicionar
           </Button>
         </Space>
       }
