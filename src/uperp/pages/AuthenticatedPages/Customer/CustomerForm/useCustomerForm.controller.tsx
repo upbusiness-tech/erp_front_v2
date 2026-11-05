@@ -46,7 +46,7 @@ export function useCustomerFormController({ isEdit }: { isEdit?: boolean }) {
     service: productService,
     options: {
       filter: search.trim()
-        ? [{ field: "name", operator: "$contL", value: search.trim() }]
+        ? [{ field: "name", operator: "$contUL", value: search.trim() }]
         : undefined,
       sort: { field: "name", order: "ASC" },
     },

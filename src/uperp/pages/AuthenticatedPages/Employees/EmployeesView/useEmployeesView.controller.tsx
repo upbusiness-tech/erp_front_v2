@@ -59,7 +59,7 @@ export default function useEmployeesViewController() {
         order: "ASC",
       },
       filter: search.trim()
-        ? [{ field: "name", operator: "$contL", value: search.trim() }]
+        ? [{ field: "name", operator: "$contUL", value: search.trim() }]
         : undefined,
     },
     { enabled: canViewEmployee },

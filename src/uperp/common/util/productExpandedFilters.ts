@@ -1,6 +1,6 @@
 export type ExpandedFilter = {
   field: string;
-  operator: "$contL" | "$in";
+  operator: "$contL" | "$contUL" | "$in";
   value: string | string[];
 };
 
@@ -22,7 +22,7 @@ export const buildExpandedFilter = (
       ? [
           {
             field: "productName",
-            operator: "$contL" as const,
+            operator: "$contUL" as const,
             value: formatSearchOnExpandedView(search),
           },
         ]
