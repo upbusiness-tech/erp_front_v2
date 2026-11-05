@@ -1,14 +1,17 @@
 import { GenericTable } from "@/application-components/GenericTable/GenericTable";
+import { ExpandedProductCardList } from "@/application-components/ExpandedProductCardList/ExpandedProductCardList";
 import { ProductCardList } from "@/application-components/ProductCardList/ProductCardList";
 import { SearchBar } from "@/application-components/SearchBar/SearchBar";
-import type { ProductModel } from "@/model/product.model";
-import { Grid } from "antd";
+import type { ProductExpandedViewModel, ProductModel } from "@/model/product.model";
+import { ProductService } from "@/services/product.service";
+import { Grid, message } from "antd";
 import { useState } from "react";
 import { ProductStatsModal } from "../ProductStatsModal/ProductStatsModal";
 import { useStockProductTableController } from "./useStockProductTable.controller";
 import { STOCK_STATUS_OPTIONS, UNIT_OF_MEASURE_OPTIONS } from "./consts";
 
 const { useBreakpoint } = Grid;
+const productService = new ProductService();
 
 export const StockProductTable = () => {
   const screens = useBreakpoint();
@@ -22,6 +25,16 @@ export const StockProductTable = () => {
     setIsStatsModalOpen(true);
   };
 
+  const handleExpandedRowClick = async (record: ProductExpandedViewModel) => {
+    try {
+      const parent = await productService.getById<ProductModel>(record.productId);
+      setSelectedProduct(parent);
+      setIsStatsModalOpen(true);
+    } catch {
+      message.error("Não foi possível carregar o produto.");
+    }
+  };
+
   const handleCloseStatsModal = () => {
     setIsStatsModalOpen(false);
     setSelectedProduct(null);
@@ -29,7 +42,10 @@ export const StockProductTable = () => {
 
   const {
     tableColumns,
-    data,
+    expandedTableColumns,
+    isExpandedMode,
+    products,
+    expandedProducts,
     total,
     isLoading,
     page,
@@ -101,20 +117,46 @@ export const StockProductTable = () => {
         ]}
       />
       {isMobile ? (
-        <ProductCardList
-          products={data}
+        isExpandedMode ? (
+          <ExpandedProductCardList
+            products={expandedProducts}
+            total={total}
+            page={page}
+            pageSize={pageSize}
+            isLoading={isLoading}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+            onClickProduct={handleExpandedRowClick}
+          />
+        ) : (
+          <ProductCardList
+            products={products}
+            total={total}
+            page={page}
+            pageSize={pageSize}
+            isLoading={isLoading}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+            onClickProduct={handleRowClick}
+          />
+        )
+      ) : isExpandedMode ? (
+        <GenericTable<ProductExpandedViewModel>
+          rowKey="productEspecificationId"
+          columns={expandedTableColumns}
+          data={expandedProducts}
           total={total}
+          isLoading={isLoading}
           page={page}
           pageSize={pageSize}
-          isLoading={isLoading}
           onPageChange={handlePageChange}
           onPageSizeChange={handlePageSizeChange}
-          onClickProduct={handleRowClick}
+          onRowClick={handleExpandedRowClick}
         />
       ) : (
         <GenericTable
           columns={tableColumns}
-          data={data}
+          data={products}
           total={total}
           isLoading={isLoading}
           page={page}

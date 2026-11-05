@@ -22,7 +22,7 @@ export const createReceiptHtml = (receipt: SaleReceiptModel) => {
       (item) => `
         <article class="item">
           <div class="line strong"><span>${escapeHtml(item.name)}</span><span>${formatPrice(item.lineTotal)}</span></div>
-          <div class="muted">${formatUnitSoldAmount(item.unitOfMeasure, item.unitSold) ?? item.quantity} x ${formatPrice(item.unitPrice)}${item.size ? ` · Tam. ${escapeHtml(item.size)}` : ""}${item.color ? ` · ${escapeHtml(item.color)}` : ""}</div>
+          <div class="muted">${formatUnitSoldAmount(item.unitOfMeasure, item.unitSold) ?? item.quantity} x ${formatPrice(item.unitPrice)}${item.size ? ` · ${escapeHtml(item.size)}` : ""}${item.color ? ` · ${escapeHtml(item.color)}` : ""}</div>
           ${item.hasSpecialPrice ? `<div class="special">PREÇO ESPECIAL · De ${formatPrice(item.originalUnitPrice)} por ${formatPrice(item.unitPrice)}</div>` : ""}
           ${item.discountValue != null && item.discountValue > 0 ? `<div class="discount">DESCONTO: -${formatPrice(item.discountValue)}</div>` : ""}
           ${item.note ? `<div class="muted">Obs.: ${escapeHtml(item.note)}</div>` : ""}

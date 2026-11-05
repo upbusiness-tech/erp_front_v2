@@ -8,6 +8,7 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
+    "test": "node --test",
     "lint": "eslint .",
     "format": "prettier --write .",
     "generate:controller": "bash scripts/generate-controller.sh"

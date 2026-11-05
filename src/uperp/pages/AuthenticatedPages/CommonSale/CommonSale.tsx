@@ -2,7 +2,9 @@ import { CashFlowStatus } from "@/application-components/CashFlowStatus/CashFlow
 import { GenericTable } from "@/application-components/GenericTable/GenericTable";
 import { OrderContent } from "@/application-components/OrderContent/OrderContent";
 import { ProductCardList } from "@/application-components/ProductCardList/ProductCardList";
+import { ExpandedProductCardList } from "@/application-components/ExpandedProductCardList/ExpandedProductCardList";
 import { ProductEspecificationModal } from "@/application-components/ProductEspecificationModal/ProductEspecificationModal";
+import { ProductExpandedViewModel } from "@/model/product.model";
 import { RecentSalesModal } from "@/application-components/RecentSalesModal/RecentSalesModal";
 import { SaleReceiptModal } from "@/application-components/SaleReceiptModal/SaleReceiptModal";
 import { SearchBar } from "@/application-components/SearchBar/SearchBar";
@@ -23,6 +25,9 @@ export function CommonSale() {
     productsView,
     setProductsView,
     products,
+    isExpandedMode,
+    expandedProducts,
+    expandedTableColumns,
     total,
     isLoading,
     page,
@@ -34,6 +39,7 @@ export function CommonSale() {
     handleOpenProductModal,
     openProductModal,
     selectedProduct,
+    initialSpecificationId,
     saleForm,
     saleStep,
     saleItems,
@@ -153,16 +159,44 @@ export function CommonSale() {
             </Row>
 
             {productsView === EProductView.CARDS ? (
-              <ProductCardList
-                products={products}
+              isExpandedMode ? (
+                <ExpandedProductCardList
+                  products={expandedProducts}
+                  total={total}
+                  page={page}
+                  pageSize={pageSize}
+                  isLoading={isLoading}
+                  onPageChange={handlePageChange}
+                  onPageSizeChange={handlePageSizeChange}
+                  onClickProduct={handleOpenProductModal}
+                  fitToHeight={!isMobile}
+                />
+              ) : (
+                <ProductCardList
+                  products={products}
+                  total={total}
+                  page={page}
+                  pageSize={pageSize}
+                  isLoading={isLoading}
+                  onPageChange={handlePageChange}
+                  onPageSizeChange={handlePageSizeChange}
+                  onClickProduct={handleOpenProductModal}
+                  fitToHeight={!isMobile}
+                />
+              )
+            ) : isExpandedMode ? (
+              <GenericTable<ProductExpandedViewModel>
+                rowKey="productEspecificationId"
+                columns={expandedTableColumns}
+                data={expandedProducts}
                 total={total}
+                isLoading={isLoading}
                 page={page}
                 pageSize={pageSize}
-                isLoading={isLoading}
                 onPageChange={handlePageChange}
                 onPageSizeChange={handlePageSizeChange}
-                onClickProduct={handleOpenProductModal}
-                fitToHeight={!isMobile}
+                onRowClick={handleOpenProductModal}
+                showTotal={false}
               />
             ) : (
               <GenericTable
@@ -300,6 +334,8 @@ export function CommonSale() {
         onClose={handleCloseProductModal}
         product={selectedProduct}
         selectedCustomer={selectedCustomer}
+        initialSpecificationId={initialSpecificationId}
+        fixedVariation={isExpandedMode}
       />
 
       {/* modal de recibo de venda */}
