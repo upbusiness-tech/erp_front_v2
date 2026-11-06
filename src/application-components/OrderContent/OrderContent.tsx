@@ -3,6 +3,7 @@ import { formatPrice } from "@/uperp/common/formulas/productFormulas";
 import {
   Avatar,
   Button,
+  Checkbox,
   Divider,
   Empty,
   Input,
@@ -30,11 +31,13 @@ import { ApplySpecialPriceModal } from "../ApplySpecialPriceModal/ApplySpecialPr
 import { CustomerDetailsModal } from "../CustomerDetailsModal/CustomerDetailsModal";
 import InputNumberFormatted from "../InputNumberFormated/InputNumberFormated";
 import { ItemDiscountModal } from "../ItemDiscountModal/ItemDiscountModal";
+import { NegotiatedPriceModal } from "../NegotiatedPriceModal/NegotiatedPriceModal";
 import { OrderProductItem } from "../OrderProductItem/OrderProductItem";
 import { useOrderContentController } from "./useOrderContent.controller";
 import { PAYMENT_LABEL } from "@/uperp/common/consts";
 import { OrderServiceItem } from "../OrderServiceItem/OrderServiceItem";
 import { SaleType } from "@/enums/sale.enum";
+import { InternCustomerType } from "@/enums/internCustomer.enum";
 import { BRAND, DANGER, SUCCESS, BRAND_SOFT } from "@/theme/colors";
 
 const { Title, Text } = Typography;
@@ -54,6 +57,11 @@ export const OrderContent = ({ handleSubmitSale, submitingSale, saleType }: Orde
     isLoadingCustomers,
     selectedCustomer,
     setselectedCustomer,
+    isolatedCustomer,
+    isIsolatedCustomerActive,
+    isIsolatedCustomerInvalid,
+    handleToggleIsolatedCustomer,
+    handleIsolatedCustomerChange,
     getSpecialPriceForItem,
     goToPayment,
     payments,
@@ -71,6 +79,14 @@ export const OrderContent = ({ handleSubmitSale, submitingSale, saleType }: Orde
     total,
     saleDiscount,
     specialPriceModalOpen,
+    negotiatedPriceModalOpen,
+    itemForNegotiatedPrice,
+    setNegotiatedPriceModalOpen,
+    setItemForNegotiatedPrice,
+    isNegotiatedPriceEnabled,
+    handleOpenNegotiatedPriceModal,
+    handleApplyNegotiatedPrice,
+    handleRemoveNegotiatedPrice,
     discountModalOpen,
     itemForDiscount,
     customerDetailsOpen,
@@ -123,13 +139,25 @@ export const OrderContent = ({ handleSubmitSale, submitingSale, saleType }: Orde
         {saleStep === "items" ? (
           <>
             <div style={{ flexShrink: 0 }}>
+              <Checkbox
+                checked={isIsolatedCustomerActive}
+                onChange={(e) => handleToggleIsolatedCustomer(e.target.checked)}
+                style={{ marginBottom: 8 }}
+              >
+                Cliente avulso (sem cadastro)
+              </Checkbox>
               <Text type="secondary" style={{ fontSize: 14 }}>
                 Cliente
               </Text>
               <Select
                 showSearch
                 allowClear
-                placeholder="Selecionar cliente (opcional)"
+                disabled={isIsolatedCustomerActive}
+                placeholder={
+                  isIsolatedCustomerActive
+                    ? "Cliente avulso selecionado"
+                    : "Selecionar cliente (opcional)"
+                }
                 value={selectedCustomer?.id || undefined}
                 loading={isLoadingCustomers}
                 onChange={(v) => {
@@ -141,6 +169,42 @@ export const OrderContent = ({ handleSubmitSale, submitingSale, saleType }: Orde
                 suffixIcon={<User size={14} />}
                 options={customers?.map((c) => ({ value: c.id, label: c.name }))}
               />
+              {isIsolatedCustomerActive && (
+                <Space direction="vertical" size={6} style={{ width: "100%", marginTop: 8 }}>
+                  <Input
+                    placeholder="Nome (obrigatório ao informar outros dados)"
+                    value={isolatedCustomer?.name ?? ""}
+                    status={isIsolatedCustomerInvalid ? "error" : undefined}
+                    onChange={(e) => handleIsolatedCustomerChange("name", e.target.value)}
+                  />
+                  <Select
+                    allowClear
+                    placeholder="Tipo (opcional)"
+                    value={isolatedCustomer?.type}
+                    onChange={(v) => handleIsolatedCustomerChange("type", v)}
+                    style={{ width: "100%" }}
+                    options={Object.values(InternCustomerType).map((type) => ({
+                      value: type,
+                      label: type,
+                    }))}
+                  />
+                  <Input
+                    placeholder="Endereço (opcional)"
+                    value={isolatedCustomer?.address ?? ""}
+                    onChange={(e) => handleIsolatedCustomerChange("address", e.target.value)}
+                  />
+                  <Input
+                    placeholder="Telefone (opcional)"
+                    value={isolatedCustomer?.phoneNumber ?? ""}
+                    onChange={(e) => handleIsolatedCustomerChange("phoneNumber", e.target.value)}
+                  />
+                  {isIsolatedCustomerInvalid && (
+                    <Text type="danger" style={{ fontSize: 12 }}>
+                      Informe o nome do cliente avulso.
+                    </Text>
+                  )}
+                </Space>
+              )}
               {selectedCustomer && (
                 <div
                   style={{
@@ -218,6 +282,12 @@ export const OrderContent = ({ handleSubmitSale, submitingSale, saleType }: Orde
                         }
                         onApplySpecialPrice={handleOpenSpecialPriceModal}
                         onRemoveSpecialPrice={handleRemoveSpecialPrice}
+                        onOpenNegotiatedPrice={
+                          selectedCustomer || !isNegotiatedPriceEnabled
+                            ? undefined
+                            : handleOpenNegotiatedPriceModal
+                        }
+                        onRemoveNegotiatedPrice={handleRemoveNegotiatedPrice}
                         onOpenDiscount={handleOpenDiscountModal}
                       />
                     )}
@@ -471,7 +541,7 @@ export const OrderContent = ({ handleSubmitSale, submitingSale, saleType }: Orde
                 block
                 size="large"
                 icon={<CheckCircle2 size={16} />}
-                disabled={paid < (total ?? 0) - 0.001}
+                disabled={isIsolatedCustomerInvalid || paid < (total ?? 0) - 0.001}
                 onClick={async () => {
                   await handleSubmitSale(saleType);
                   setpValue(0);
@@ -498,6 +568,21 @@ export const OrderContent = ({ handleSubmitSale, submitingSale, saleType }: Orde
         onCancel={() => {
           setSpecialPriceModalOpen(false);
           setItemForSpecialPrice(null);
+        }}
+      />
+
+      <NegotiatedPriceModal
+        open={negotiatedPriceModalOpen}
+        item={itemForNegotiatedPrice}
+        onApply={handleApplyNegotiatedPrice}
+        onRemove={(item) => {
+          handleRemoveNegotiatedPrice(item);
+          setNegotiatedPriceModalOpen(false);
+          setItemForNegotiatedPrice(null);
+        }}
+        onCancel={() => {
+          setNegotiatedPriceModalOpen(false);
+          setItemForNegotiatedPrice(null);
         }}
       />
 

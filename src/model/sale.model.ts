@@ -1,12 +1,15 @@
 import { PaymentMethod } from "@/enums/payment.enum";
-import { SaleStatus, SaleType } from "@/enums/sale.enum";
+import { SaleStatus, SaleType, SpecialPriceSource } from "@/enums/sale.enum";
 import { DefaultIdModel } from "./base.model";
 import { InternCustomerSpecialPriceModel } from "./internCustomerPrice.model";
 import { ProductModel } from "./product.model";
 import { ProductEspecificationModel } from "./productEspecification.model";
 import { UserModel } from "./user.model";
 import { InternCustomerModel } from "./internCustomer.model";
-import { DiscountInfo } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
+import type {
+  DiscountInfo,
+  IsolatedCustomerForm,
+} from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
 import { ProductUnitOfMeasure } from "@/uperp/pages/AuthenticatedPages/Stock/StockProduct/types";
 
 export type ApiMoney = string | number | null;
@@ -16,6 +19,7 @@ export interface SaleItemModel extends DefaultIdModel {
   unitSold: number;
   unitOfMeasure: ProductUnitOfMeasure;
   isEspecialPrice: boolean;
+  specialPriceSource: SpecialPriceSource;
   productSnapshot: ProductEspecificationModel;
   salePriceSnapshot: number;
   specialPriceSnapshot: number;
@@ -48,6 +52,7 @@ export interface SaleModel extends DefaultIdModel {
   discount?: DiscountInfo;
   internCustomerId?: number | null;
   internCustomer?: InternCustomerModel | null;
+  isolatedCustomer?: IsolatedCustomerForm | null;
   soldByUserUid?: string | null;
   soldByUser?: SaleUserModel | null;
   cashFlowId: number;
@@ -74,6 +79,7 @@ export interface SaleReceiptItemModel {
   unitPrice: number;
   lineTotal: number;
   hasSpecialPrice: boolean;
+  specialPriceSource?: SpecialPriceSource;
   code?: string;
   size?: string;
   color?: string;

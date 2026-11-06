@@ -8,6 +8,7 @@ import { formatDateFromApi } from "@/uperp/common/dates";
 import { formatPrice } from "@/uperp/common/formulas/productFormulas";
 import { calculateTotalCartItems } from "@/uperp/common/formulas/saleFormulas";
 import { createSaleReceipt, SALE_PAYMENT_LABEL } from "@/uperp/common/formulas/saleReceipt";
+import { getSaleCustomerLabel } from "@/uperp/common/util/isolatedCustomer";
 import { mapSaleStatus, mapSaleType } from "@/uperp/common/util/sale.util";
 import { Space, Tag } from "antd";
 import { ColumnsType } from "antd/es/table";
@@ -141,7 +142,7 @@ export function useSaleHistoryController() {
     },
     {
       title: "Cliente",
-      render: (_, sale: SaleModel) => sale.internCustomer?.name || "—",
+      render: (_, sale: SaleModel) => getSaleCustomerLabel(sale),
     },
     {
       title: "Itens",

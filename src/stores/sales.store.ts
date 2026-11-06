@@ -3,6 +3,7 @@ import {
   CartSaleItem,
   DiscountInfo,
   ISaleServiceForm,
+  IsolatedCustomerForm,
   PaymentItem,
 } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
 import { create } from "zustand";
@@ -32,9 +33,23 @@ interface SalesState {
   setSaleStep: (step: OrderSteps) => void;
   selectedCustomer: InternCustomerModel | undefined;
   setSelectedCustomer: (customer: InternCustomerModel | undefined) => void;
+  isolatedCustomer?: IsolatedCustomerForm;
+  setIsolatedCustomer: (customer: IsolatedCustomerForm | undefined) => void;
   saleDiscount?: DiscountInfo;
   setSaleDiscount: (d: DiscountInfo | undefined) => void;
 }
+
+const clearCustomerTablePrice = (item: CartSaleItem): CartSaleItem => ({
+  ...item,
+  isEspecialPrice: false,
+  internCustomerPriceId: undefined,
+  internCustomerPrice: undefined,
+});
+
+const clearNegotiatedPrice = (item: CartSaleItem): CartSaleItem => ({
+  ...item,
+  specialPrice: undefined,
+});
 
 export const useSalesStore = create<SalesState>((set, get) => ({
   productsView: localStorage.getItem(PRODUCT_VIEW_STORAGE_NAME)
@@ -65,6 +80,7 @@ export const useSalesStore = create<SalesState>((set, get) => ({
       saleServices: [],
       payments: [],
       selectedCustomer: undefined,
+      isolatedCustomer: undefined,
       saleStep: "items",
       saleDiscount: undefined,
     });
@@ -76,20 +92,28 @@ export const useSalesStore = create<SalesState>((set, get) => ({
   selectedCustomer: undefined,
   setSelectedCustomer: (customer) => {
     const currentItems = get().saleItems;
-    const hasSpecialPrices = currentItems.some((item) => item.isEspecialPrice);
-    if (hasSpecialPrices && !customer) {
+    if (customer) {
       set({
         selectedCustomer: customer,
-        saleItems: currentItems.map((item) => ({
-          ...item,
-          isEspecialPrice: false,
-          internCustomerPriceId: undefined,
-          internCustomerPrice: undefined,
-        })),
+        isolatedCustomer: undefined,
+        saleItems: currentItems.map(clearNegotiatedPrice),
       });
-    } else {
-      set({ selectedCustomer: customer });
+      return;
     }
+
+    set({
+      selectedCustomer: undefined,
+      saleItems: currentItems.map(clearCustomerTablePrice),
+    });
+  },
+  isolatedCustomer: undefined,
+  setIsolatedCustomer: (customer) => {
+    const currentItems = get().saleItems;
+    set({
+      isolatedCustomer: customer,
+      selectedCustomer: undefined,
+      saleItems: currentItems.map(clearCustomerTablePrice),
+    });
   },
   saleDiscount: undefined,
   setSaleDiscount: (d) => {
