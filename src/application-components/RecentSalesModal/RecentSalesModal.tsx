@@ -8,6 +8,7 @@ import { Button, Grid, Modal, Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
 import { Receipt } from "lucide-react";
 import { RecentSaleCardList } from "./RecentSaleCardList";
+import { getSaleCustomerLabel } from "@/uperp/common/util/isolatedCustomer";
 import { mapSaleStatus } from "@/uperp/common/util/sale.util";
 import { BRAND } from "@/theme/colors";
 
@@ -74,7 +75,7 @@ export const RecentSalesModal = ({
     },
     {
       title: "Cliente",
-      render: (_, sale: SaleModel) => sale.internCustomer?.name || "—",
+      render: (_, sale: SaleModel) => getSaleCustomerLabel(sale),
     },
     {
       title: "Total",

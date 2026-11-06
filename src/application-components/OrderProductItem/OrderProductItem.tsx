@@ -1,11 +1,12 @@
 import { InternCustomerSpecialPriceModel } from "@/model/internCustomerPrice.model";
 import { calculateOrderItem, formatPrice } from "@/uperp/common/formulas/productFormulas";
+import { resolveItemUnitPrice } from "@/uperp/common/formulas/unitPrice";
 import { productUnitFormat } from "@/uperp/common/util/productForm.util";
 import { CartSaleItem } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
 import { ProductUnitOfMeasure } from "@/uperp/pages/AuthenticatedPages/Stock/StockProduct/types";
 import { VariationTags } from "@/application-components/VariationTags/VariationTags";
 import { Button, InputNumber, List, Row, Space, Tag, Typography } from "antd";
-import { ChevronDown, ChevronRight, Percent, Star, Trash2, X } from "lucide-react";
+import { ChevronDown, ChevronRight, DollarSign, Percent, Star, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { BRAND, WARNING, BRAND_TEXT_STRONG } from "@/theme/colors";
 import { useOrderProductItemController } from "./useOrderProductItem.controller";
@@ -17,6 +18,8 @@ type OrderProductItemProps = {
   specialPriceAvailable?: InternCustomerSpecialPriceModel;
   onApplySpecialPrice?: (item: CartSaleItem) => void;
   onRemoveSpecialPrice?: (item: CartSaleItem) => void;
+  onOpenNegotiatedPrice?: (item: CartSaleItem) => void;
+  onRemoveNegotiatedPrice?: (item: CartSaleItem) => void;
   onOpenDiscount?: (item: CartSaleItem) => void;
 };
 
@@ -25,14 +28,17 @@ export const OrderProductItem = ({
   specialPriceAvailable,
   onApplySpecialPrice,
   onRemoveSpecialPrice,
+  onOpenNegotiatedPrice,
+  onRemoveNegotiatedPrice,
   onOpenDiscount,
 }: OrderProductItemProps) => {
   const { removeSaleItem, updateSaleItemQuantity } = useOrderProductItemController();
   const [expanded, setExpanded] = useState(false);
 
   const effective = item.productEspecification.salePrice;
-  const itemPrice = item.internCustomerPrice?.specialPrice ?? item.productEspecification.salePrice;
-  const hasSpecial = item.isEspecialPrice;
+  const itemPrice = resolveItemUnitPrice(item);
+  const hasNegotiated = item.specialPrice != null;
+  const hasSpecial = item.isEspecialPrice || hasNegotiated;
   const hasDiscount = item.discountInfo?.value != null && item.discountInfo.value > 0;
   const discountValue = Number(item.discountInfo?.value ?? 0);
   const lineTotal = calculateOrderItem(item);
@@ -48,6 +54,16 @@ export const OrderProductItem = ({
   return (
     <List.Item
       actions={[
+        onOpenNegotiatedPrice && (
+          <Button
+            key="n"
+            size="small"
+            type="text"
+            icon={<DollarSign size={14} />}
+            onClick={() => onOpenNegotiatedPrice(item)}
+            title="Preço negociado"
+          />
+        ),
         onOpenDiscount && (
           <Button
             key="d"
@@ -72,7 +88,24 @@ export const OrderProductItem = ({
         title={
           <Space>
             {item.product.name}
-            {hasSpecial && (
+            {hasNegotiated && (
+              <>
+                <Tag color="cyan" style={{ margin: 0 }} icon={<DollarSign size={10} />}>
+                  Negociado
+                </Tag>
+                <Button
+                  size="small"
+                  type="text"
+                  danger
+                  icon={<X size={12} />}
+                  onClick={() => onRemoveNegotiatedPrice?.(item)}
+                  style={{ padding: 0, height: "auto" }}
+                >
+                  Remover
+                </Button>
+              </>
+            )}
+            {!hasNegotiated && item.isEspecialPrice && (
               <>
                 <Tag color="gold" style={{ margin: 0 }} icon={<Star size={10} />}>
                   Especial

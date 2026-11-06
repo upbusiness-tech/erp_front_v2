@@ -188,7 +188,7 @@ export const ProductStatsModal = ({ product, open, onClose }: ProductStatsModalP
         <div style={{ maxHeight: 320, overflowY: "auto", paddingRight: 8 }}>
           <Timeline
             items={productTransactionsData.map((t) => {
-              const { label, color, description } = getTransactionLabel(t);
+              const { label, color, description, variant } = getTransactionLabel(t);
               return {
                 color,
                 children: (
@@ -210,6 +210,9 @@ export const ProductStatsModal = ({ product, open, onClose }: ProductStatsModalP
                     </Space>
                     <div>
                       <Text style={{ fontSize: 13 }}>{description}</Text>
+                    </div>
+                    <div>
+                      <Text style={{ fontSize: 13 }}>Variação: </Text> {variant}
                     </div>
                     <div>
                       <Text type="secondary" style={{ fontSize: 11 }}>

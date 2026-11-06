@@ -1,4 +1,5 @@
 import { round2 } from "@/uperp/common/formulas/saleFormulas";
+import { resolveItemUnitPrice } from "@/uperp/common/formulas/unitPrice";
 import { CartSaleItem, DiscountInfo } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
 import { useEffect, useState } from "react";
 
@@ -22,9 +23,7 @@ export function useItemDiscountModalController({
   const [reason, setReason] = useState("");
   const [lastEdited, setLastEdited] = useState<LastEdited>(null);
 
-  const effectivePrice = item?.isEspecialPrice
-    ? Number(item.internCustomerPrice?.specialPrice ?? 0)
-    : Number(item?.productEspecification.salePrice ?? 0);
+  const effectivePrice = item ? resolveItemUnitPrice(item) : 0;
 
   const quantity = Number(item?.quantitySold ?? 0);
   const lineTotal = effectivePrice * quantity;

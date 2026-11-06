@@ -5,6 +5,7 @@ import { formatDateFromApi } from "@/uperp/common/dates";
 import { formatPrice } from "@/uperp/common/formulas/productFormulas";
 import { calculateTotalCartItems } from "@/uperp/common/formulas/saleFormulas";
 import { SALE_PAYMENT_LABEL } from "@/uperp/common/formulas/saleReceipt";
+import { getSaleCustomerLabel } from "@/uperp/common/util/isolatedCustomer";
 import { Button, Card, Space, Tag, Typography } from "antd";
 import { Receipt } from "lucide-react";
 import { BRAND } from "@/theme/colors";
@@ -99,7 +100,7 @@ export const RecentSaleCard = ({
         <Text type="secondary" style={{ fontSize: 12, display: "block" }}>
           Cliente
         </Text>
-        <Text style={{ fontSize: 13 }}>{sale.internCustomer?.name || "—"}</Text>
+        <Text style={{ fontSize: 13 }}>{getSaleCustomerLabel(sale)}</Text>
       </div>
 
       <div

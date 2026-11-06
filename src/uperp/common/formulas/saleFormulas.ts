@@ -1,10 +1,13 @@
-import { ProductEspecificationModel } from "@/model/productEspecification.model";
-import { SaleItemModel, SaleModel, SaleServiceModel } from "@/model/sale.model";
-import {
+import type { ProductEspecificationModel } from "@/model/productEspecification.model";
+import type { SaleItemModel, SaleModel, SaleServiceModel } from "@/model/sale.model";
+import type {
   CartSaleItem,
   ISaleServiceForm,
   PaymentItem,
 } from "../../pages/AuthenticatedPages/CommonSale/types";
+import { calculateSpecialPriceSavings } from "./unitPrice.ts";
+
+export { calculateSpecialPriceSavings };
 
 export type SaleItemLike = SaleItemModel | CartSaleItem;
 
@@ -17,11 +20,6 @@ const getItemSpecification = (item: SaleItemLike): ProductEspecificationModel | 
   isSaleItemModel(item) ? item.productSnapshot : item.productEspecification;
 
 const getItemSalePrice = (item: SaleItemLike) => Number(getItemSpecification(item)?.salePrice ?? 0);
-
-const getItemSpecialPrice = (item: SaleItemLike) =>
-  isSaleItemModel(item)
-    ? Number(item.specialPriceSnapshot ?? 0)
-    : Number(item.internCustomerPrice?.specialPrice ?? 0);
 
 export const calculateGrossSubtotal = (
   items: SaleItemLike[],
@@ -36,15 +34,6 @@ export const calculateGrossSubtotal = (
   }, 0);
 
   return totalItems + (totalService ?? 0);
-};
-
-export const calculateSpecialPriceSavings = (items: SaleItemLike[]) => {
-  return items.reduce((acc, item) => {
-    if (!item.isEspecialPrice || !item.internCustomerPrice?.specialPrice) return acc;
-    const normal = getItemSalePrice(item);
-    const special = getItemSpecialPrice(item);
-    return acc + (normal - special) * Number(item.quantitySold) * Number(item.unitSold);
-  }, 0);
 };
 
 export const calculateItemDiscountsTotal = (items: SaleItemLike[]) => {

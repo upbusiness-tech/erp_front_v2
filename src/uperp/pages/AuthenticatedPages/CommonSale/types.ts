@@ -1,3 +1,4 @@
+import { InternCustomerType } from "@/enums/internCustomer.enum";
 import { PaymentMethod } from "@/enums/payment.enum";
 import { SaleType } from "@/enums/sale.enum";
 import { InternCustomerSpecialPriceModel } from "@/model/internCustomerPrice.model";
@@ -10,12 +11,20 @@ export interface DiscountInfo {
   reason?: string;
 }
 
+export interface IsolatedCustomerForm {
+  name?: string;
+  type?: InternCustomerType;
+  address?: string;
+  phoneNumber?: string;
+}
+
 export interface ICreateSaleForm {
   type: SaleType;
   cashFlowId: number;
   items: ISaleItemField[];
   payments: IPaymentMethodField[];
   internCustomerId?: number;
+  isolatedCustomer?: IsolatedCustomerForm;
   discount?: DiscountInfo;
   services?: ISaleServiceForm[];
 }
@@ -33,6 +42,7 @@ export interface ISaleItemField {
   unitOfMeasure: string;
   isEspecialPrice: boolean;
   internCustomerPriceId?: number;
+  specialPrice?: number;
   productId: number;
   productEspecificationId: number;
   discountInfo?: DiscountInfo;

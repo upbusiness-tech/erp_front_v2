@@ -18,16 +18,19 @@ const formatDate = (value: string) => {
 
 export const createReceiptHtml = (receipt: SaleReceiptModel) => {
   const items = receipt.items
-    .map(
-      (item) => `
+    .map((item) => {
+      const specialPriceLabel =
+        item.specialPriceSource === "NEGOTIATED" ? "PREÇO NEGOCIADO" : "PREÇO ESPECIAL";
+
+      return `
         <article class="item">
           <div class="line strong"><span>${escapeHtml(item.name)}</span><span>${formatPrice(item.lineTotal)}</span></div>
           <div class="muted">${formatUnitSoldAmount(item.unitOfMeasure, item.unitSold) ?? item.quantity} x ${formatPrice(item.unitPrice)}${item.size ? ` · ${escapeHtml(item.size)}` : ""}${item.color ? ` · ${escapeHtml(item.color)}` : ""}</div>
-          ${item.hasSpecialPrice ? `<div class="special">PREÇO ESPECIAL · De ${formatPrice(item.originalUnitPrice)} por ${formatPrice(item.unitPrice)}</div>` : ""}
+          ${item.hasSpecialPrice ? `<div class="special">${specialPriceLabel} · De ${formatPrice(item.originalUnitPrice)} por ${formatPrice(item.unitPrice)}</div>` : ""}
           ${item.discountValue != null && item.discountValue > 0 ? `<div class="discount">DESCONTO: -${formatPrice(item.discountValue)}</div>` : ""}
           ${item.note ? `<div class="muted">Obs.: ${escapeHtml(item.note)}</div>` : ""}
-        </article>`,
-    )
+        </article>`;
+    })
     .join("");
   const services = receipt.services
     .map(
