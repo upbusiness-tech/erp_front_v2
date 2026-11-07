@@ -2,6 +2,7 @@ import { GenericTable } from "@/application-components/GenericTable/GenericTable
 import { ExpandedProductCardList } from "@/application-components/ExpandedProductCardList/ExpandedProductCardList";
 import { ProductCardList } from "@/application-components/ProductCardList/ProductCardList";
 import { SearchBar } from "@/application-components/SearchBar/SearchBar";
+import { useBarcodeScanner } from "@/hooks/useBarcodeScanner";
 import type { ProductExpandedViewModel, ProductModel } from "@/model/product.model";
 import { ProductService } from "@/services/product.service";
 import { Grid, message } from "antd";
@@ -19,6 +20,9 @@ export const StockProductTable = () => {
 
   const [selectedProduct, setSelectedProduct] = useState<ProductModel | null>(null);
   const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
+  const [selectedProductEspecification, setSelectedProductEspecification] = useState<
+    number | undefined
+  >(undefined);
 
   const handleRowClick = (record: ProductModel) => {
     setSelectedProduct(record);
@@ -27,6 +31,7 @@ export const StockProductTable = () => {
 
   const handleExpandedRowClick = async (record: ProductExpandedViewModel) => {
     try {
+      setSelectedProductEspecification(record.productEspecificationId);
       const parent = await productService.getById<ProductModel>(record.productId);
       setSelectedProduct(parent);
       setIsStatsModalOpen(true);
@@ -44,6 +49,7 @@ export const StockProductTable = () => {
     tableColumns,
     expandedTableColumns,
     isExpandedMode,
+    scanProductEnabled,
     products,
     expandedProducts,
     total,
@@ -54,6 +60,8 @@ export const StockProductTable = () => {
     handlePageSizeChange,
     search,
     handleSearchChange,
+    barcodeSearch,
+    handleBarcodeSearchChange,
     categoryFilter,
     handleCategoryFilterChange,
     supplierFilter,
@@ -68,6 +76,13 @@ export const StockProductTable = () => {
     onViewStats: handleRowClick,
   });
 
+  useBarcodeScanner({
+    enabled: scanProductEnabled,
+    minLength: 3,
+    onScan: (code) => handleBarcodeSearchChange(code.trim()),
+    ignoreWhen: () => isStatsModalOpen,
+  });
+
   return (
     <>
       <SearchBar
@@ -77,6 +92,12 @@ export const StockProductTable = () => {
             value: search,
             onChange: handleSearchChange,
             placeholder: "Buscar por nome",
+          },
+          {
+            name: "barcode",
+            value: barcodeSearch,
+            onChange: handleBarcodeSearchChange,
+            placeholder: "Buscar por código de barras",
           },
           {
             name: "category",
@@ -170,6 +191,7 @@ export const StockProductTable = () => {
         product={selectedProduct}
         open={isStatsModalOpen}
         onClose={handleCloseStatsModal}
+        productEspecificationId={selectedProductEspecification}
       />
     </>
   );

@@ -5,6 +5,7 @@ import { InternCustomerModel } from "@/model/internCustomer.model";
 import { InternCustomerSpecialPriceModel } from "@/model/internCustomerPrice.model";
 import { InternCustomerService } from "@/services/internCustomer.service";
 import { useCashFlowStore } from "@/stores/cashFlow.store";
+import { useCompanySettingsStore } from "@/stores/companySettings.store";
 import { useSalesStore } from "@/stores/sales.store";
 import { PaginatedResponse } from "@/types/crud.types";
 import {
@@ -16,7 +17,13 @@ import {
   calculateTotalCartItems,
   calculateTotalPayments,
 } from "@/uperp/common/formulas/saleFormulas";
-import { CartSaleItem, DiscountInfo } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
+import { SettingsRef } from "@/uperp/common/settings/consts/settings.ref";
+import { isIsolatedCustomerFormInvalid } from "@/uperp/common/util/isolatedCustomer";
+import {
+  CartSaleItem,
+  DiscountInfo,
+  IsolatedCustomerForm,
+} from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
 import { message } from "antd";
 import { useMemo, useState } from "react";
 
@@ -33,14 +40,22 @@ export function useOrderContentController({ saleType }: { saleType: SaleType }) 
     setSaleStep,
     selectedCustomer,
     setSelectedCustomer,
+    isolatedCustomer,
+    setIsolatedCustomer,
     saleDiscount,
     setSaleDiscount,
     saleServices,
   } = useSalesStore();
 
   const { currentCashFlow } = useCashFlowStore();
+  const { hasSettingActive } = useCompanySettingsStore();
+  const isNegotiatedPriceEnabled = hasSettingActive(SettingsRef.Sale.NegotiatedSalePrice);
+
+  const isIsolatedCustomerActive = isolatedCustomer !== undefined;
+  const isIsolatedCustomerInvalid = isIsolatedCustomerFormInvalid(isolatedCustomer);
 
   const isGoToPaymentDisabled = () => {
+    if (isIsolatedCustomerInvalid) return true;
     if (saleType === SaleType.SERVICE) {
       return saleServices.length === 0;
     } else {
@@ -84,6 +99,10 @@ export function useOrderContentController({ saleType }: { saleType: SaleType }) 
   };
 
   const goToPayment = () => {
+    if (isIsolatedCustomerInvalid) {
+      message.warning("Informe o nome do cliente avulso para continuar.");
+      return;
+    }
     if (currentCashFlow?.isClosed) {
       message.warning("Abra o caixa antes de finalizar uma venda.");
       return;
@@ -133,6 +152,8 @@ export function useOrderContentController({ saleType }: { saleType: SaleType }) 
 
   const [specialPriceModalOpen, setSpecialPriceModalOpen] = useState(false);
   const [itemForSpecialPrice, setItemForSpecialPrice] = useState<CartSaleItem | null>(null);
+  const [negotiatedPriceModalOpen, setNegotiatedPriceModalOpen] = useState(false);
+  const [itemForNegotiatedPrice, setItemForNegotiatedPrice] = useState<CartSaleItem | null>(null);
   const [discountModalOpen, setDiscountModalOpen] = useState(false);
   const [itemForDiscount, setItemForDiscount] = useState<CartSaleItem | null>(null);
   const [customerDetailsOpen, setCustomerDetailsOpen] = useState(false);
@@ -183,6 +204,55 @@ export function useOrderContentController({ saleType }: { saleType: SaleType }) 
           : i,
       ),
     );
+  };
+
+  const handleOpenNegotiatedPriceModal = (item: CartSaleItem) => {
+    if (!isNegotiatedPriceEnabled) {
+      message.warning("Preço negociado está desabilitado nas configurações da empresa.");
+      return;
+    }
+
+    if (selectedCustomer) {
+      message.warning("Preço negociado não está disponível com cliente cadastrado.");
+      return;
+    }
+    setItemForNegotiatedPrice(item);
+    setNegotiatedPriceModalOpen(true);
+  };
+
+  const handleApplyNegotiatedPrice = (price: number) => {
+    if (!itemForNegotiatedPrice || price <= 0) return;
+
+    setSaleItems(
+      saleItems.map((item) =>
+        item.id === itemForNegotiatedPrice.id
+          ? {
+              ...item,
+              specialPrice: price,
+              internCustomerPriceId: undefined,
+              internCustomerPrice: undefined,
+            }
+          : item,
+      ),
+    );
+
+    setNegotiatedPriceModalOpen(false);
+    setItemForNegotiatedPrice(null);
+  };
+
+  const handleRemoveNegotiatedPrice = (item: CartSaleItem) => {
+    setSaleItems(saleItems.map((i) => (i.id === item.id ? { ...i, specialPrice: undefined } : i)));
+  };
+
+  const handleToggleIsolatedCustomer = (active: boolean) => {
+    setIsolatedCustomer(active ? {} : undefined);
+  };
+
+  const handleIsolatedCustomerChange = <K extends keyof IsolatedCustomerForm>(
+    field: K,
+    value: IsolatedCustomerForm[K],
+  ) => {
+    setIsolatedCustomer({ ...(isolatedCustomer ?? {}), [field]: value });
   };
 
   const handleOpenDiscountModal = (item: CartSaleItem) => {
@@ -247,6 +317,11 @@ export function useOrderContentController({ saleType }: { saleType: SaleType }) 
     isLoadingCustomers,
     selectedCustomer,
     setselectedCustomer: setSelectedCustomer,
+    isolatedCustomer,
+    isIsolatedCustomerActive,
+    isIsolatedCustomerInvalid,
+    handleToggleIsolatedCustomer,
+    handleIsolatedCustomerChange,
     specialPriceMap,
     getSpecialPriceForItem,
     applyItemDiscount,
@@ -268,6 +343,10 @@ export function useOrderContentController({ saleType }: { saleType: SaleType }) 
     changePreview,
     saleDiscount,
     specialPriceModalOpen,
+    negotiatedPriceModalOpen,
+    itemForNegotiatedPrice,
+    setNegotiatedPriceModalOpen,
+    setItemForNegotiatedPrice,
     discountModalOpen,
     itemForDiscount,
     customerDetailsOpen,
@@ -276,6 +355,10 @@ export function useOrderContentController({ saleType }: { saleType: SaleType }) 
     handleOpenSpecialPriceModal,
     handleApplySpecialPrice,
     handleRemoveSpecialPrice,
+    isNegotiatedPriceEnabled,
+    handleOpenNegotiatedPriceModal,
+    handleApplyNegotiatedPrice,
+    handleRemoveNegotiatedPrice,
     handleOpenDiscountModal,
     handleApplyItemDiscount,
     handleRemoveItemDiscount,

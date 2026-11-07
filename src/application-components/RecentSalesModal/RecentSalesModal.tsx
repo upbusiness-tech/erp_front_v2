@@ -1,18 +1,18 @@
 import { GenericTable } from "@/application-components/GenericTable/GenericTable";
-import { SaleStatus, SaleType } from "@/enums/sale.enum";
+import { SaleType } from "@/enums/sale.enum";
 import { SaleModel } from "@/model/sale.model";
+import { BRAND } from "@/theme/colors";
 import { formatDateFromApi } from "@/uperp/common/dates";
 import { formatPrice } from "@/uperp/common/formulas/productFormulas";
 import { calculateTotalCartItems } from "@/uperp/common/formulas/saleFormulas";
-import { Button, Grid, Modal, Tag, Typography } from "antd";
+import { getSaleCustomerLabel } from "@/uperp/common/util/isolatedCustomer";
+import { mapSaleStatus } from "@/uperp/common/util/sale.util";
+import { Button, Grid, Modal, Tag } from "antd";
 import { ColumnsType } from "antd/es/table";
 import { Receipt } from "lucide-react";
 import { RecentSaleCardList } from "./RecentSaleCardList";
-import { mapSaleStatus } from "@/uperp/common/util/sale.util";
-import { BRAND } from "@/theme/colors";
 
 const { useBreakpoint } = Grid;
-const { Text } = Typography;
 
 type RecentSalesModalProps = {
   open: boolean;
@@ -74,7 +74,7 @@ export const RecentSalesModal = ({
     },
     {
       title: "Cliente",
-      render: (_, sale: SaleModel) => sale.internCustomer?.name || "—",
+      render: (_, sale: SaleModel) => getSaleCustomerLabel(sale),
     },
     {
       title: "Total",

@@ -1,5 +1,5 @@
 import { ConfirmDangerModal } from "@/application-components/ConfirmDangerModal/ConfirmDangerModal";
-import { SaleStatus } from "@/enums/sale.enum";
+import { SaleStatus, SpecialPriceSource } from "@/enums/sale.enum";
 import { useCacheManager } from "@/hooks/useCacheManager";
 import { useHasPermission } from "@/hooks/useHasPermission";
 import { SaleReceiptModel } from "@/model/sale.model";
@@ -14,7 +14,7 @@ import { getVariationLabel } from "@/uperp/common/util/productVariation";
 import { PermissionsRef } from "@/uperp/common/permissions/const/permissions.ref";
 import { BRAND, DANGER, SUCCESS } from "@/theme/colors";
 import { Button, Divider, List, message, Modal, Row, Space, Tag, Typography } from "antd";
-import { CheckCircle2, CreditCard, Percent, Printer, Share2, Star } from "lucide-react";
+import { CheckCircle2, CreditCard, DollarSign, Percent, Printer, Share2, Star } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { printSaleReceipt } from "./printSaleReceipt";
 import { generateSaleReceiptFile, shareSaleReceipt } from "./shareSaleReceipt";
@@ -233,8 +233,24 @@ export const SaleReceiptModal = ({
                         <Space size={6} wrap>
                           <Text strong>{item.name}</Text>
                           {item.hasSpecialPrice && (
-                            <Tag color="gold" icon={<Star size={11} />} style={{ margin: 0 }}>
-                              Preço especial
+                            <Tag
+                              color={
+                                item.specialPriceSource === SpecialPriceSource.NEGOTIATED
+                                  ? "cyan"
+                                  : "gold"
+                              }
+                              icon={
+                                item.specialPriceSource === SpecialPriceSource.NEGOTIATED ? (
+                                  <DollarSign size={11} />
+                                ) : (
+                                  <Star size={11} />
+                                )
+                              }
+                              style={{ margin: 0 }}
+                            >
+                              {item.specialPriceSource === SpecialPriceSource.NEGOTIATED
+                                ? "Preço negociado"
+                                : "Preço especial"}
                             </Tag>
                           )}
                           {item.discountValue != null && item.discountValue > 0 && (

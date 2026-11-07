@@ -27,6 +27,10 @@ import {
 } from "@/uperp/common/formulas/productFormulas";
 import { createSaleReceipt } from "@/uperp/common/formulas/saleReceipt";
 import { SettingsRef } from "@/uperp/common/settings/consts/settings.ref";
+import {
+  isIsolatedCustomerFormInvalid,
+  toIsolatedCustomerPayload,
+} from "@/uperp/common/util/isolatedCustomer";
 import { toProductModelFromExpanded } from "@/uperp/common/util/productExpanded";
 import { buildExpandedFilter } from "@/uperp/common/util/productExpandedFilters";
 import { getVariationLabel, isVariationSellable } from "@/uperp/common/util/productVariation";
@@ -64,6 +68,7 @@ export function useCommonSaleController() {
     saleStep,
     resetSale,
     selectedCustomer,
+    isolatedCustomer,
     saleDiscount,
   } = useSalesStore();
 
@@ -248,7 +253,6 @@ export function useCommonSaleController() {
   const [receiptVariant, setReceiptVariant] = useState<"success" | "view">("success");
 
   const handleViewRecentSale = (sale: SaleModel) => {
-    setRecentOpen(false);
     setReceiptVariant("view");
     setReceiptSale(createSaleReceipt(sale));
   };
@@ -355,7 +359,13 @@ export function useCommonSaleController() {
         return;
       }
 
+      if (isIsolatedCustomerFormInvalid(isolatedCustomer)) {
+        message.error("Informe o nome do cliente avulso.");
+        return;
+      }
+
       const items: ISaleItemField[] = saleItems.map((s) => {
+        const hasNegotiatedPrice = s.specialPrice != null;
         return {
           isEspecialPrice: s.isEspecialPrice,
           note: s.note,
@@ -363,7 +373,8 @@ export function useCommonSaleController() {
           productId: s.productId,
           quantitySold: s.quantitySold,
           unitSold: s.unitSold,
-          internCustomerPriceId: s.internCustomerPriceId,
+          specialPrice: hasNegotiatedPrice ? s.specialPrice : undefined,
+          internCustomerPriceId: hasNegotiatedPrice ? undefined : s.internCustomerPriceId,
           discountInfo: s.discountInfo,
           unitOfMeasure: s.unitOfMeasure,
         };
@@ -381,7 +392,8 @@ export function useCommonSaleController() {
         type,
         items,
         payments: paymentsConverted,
-        internCustomerId: selectedCustomer?.id,
+        internCustomerId: isolatedCustomer ? undefined : selectedCustomer?.id,
+        isolatedCustomer: toIsolatedCustomerPayload(isolatedCustomer),
         discount: saleDiscount?.value != null ? saleDiscount : undefined,
       };
 

@@ -38,13 +38,18 @@ export const buildExpandedStockFilter = ({
   unitFilter,
   supplierFilter,
   search,
+  barcodeSearch,
 }: {
   categoryFilter: string[];
   unitFilter: string[];
   supplierFilter: string[];
   search: string;
+  barcodeSearch?: string;
 }): ExpandedFilter[] => [
   ...buildExpandedFilter(categoryFilter, search),
+  ...(barcodeSearch?.trim()
+    ? [{ field: "barcode", operator: "$contL" as const, value: barcodeSearch.trim() }]
+    : []),
   ...(unitFilter.length
     ? [{ field: "unitOfMeasure", operator: "$in" as const, value: unitFilter }]
     : []),

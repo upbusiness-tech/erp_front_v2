@@ -1,5 +1,5 @@
-import { PaymentMethod } from "@/enums/payment.enum";
-import {
+import type { PaymentMethod } from "@/enums/payment.enum";
+import type {
   SaleItemModel,
   SaleModel,
   SaleReceiptModel,
@@ -10,13 +10,15 @@ import {
   calculateGrossSubtotal,
   calculateItemDiscountsTotal,
   calculateSpecialPriceSavings,
-} from "./saleFormulas";
+} from "./saleFormulas.ts";
+import { resolveItemUnitPrice } from "./unitPrice.ts";
+import { getSaleCustomerLabel } from "../util/isolatedCustomer.ts";
 
 export const SALE_PAYMENT_LABEL: Record<PaymentMethod, string> = {
-  [PaymentMethod.PIX]: "PIX",
-  [PaymentMethod.CREDIT]: "Crédito",
-  [PaymentMethod.DEBIT]: "Débito",
-  [PaymentMethod.CASH]: "Dinheiro",
+  PIX: "PIX",
+  CREDITO: "Crédito",
+  DEBITO: "Débito",
+  DINHEIRO: "Dinheiro",
 };
 
 const toNumber = (value: string | number | null | undefined) => Number(value ?? 0);
@@ -39,12 +41,7 @@ export const formatUnitSoldAmount = (unitOfMeasure?: string, unitSold?: number):
   return Number(unitSold).toFixed(format.precision).replace(".", ",") + format.suffix;
 };
 
-const getItemUnitPrice = (item: SaleItemModel): number => {
-  const normalPrice = toNumber(item.productSnapshot.salePrice);
-  const specialPrice = toNumber(item.internCustomerPrice?.specialPrice);
-  const hasSpecialPrice = item.isEspecialPrice && item.internCustomerPrice?.specialPrice != null;
-  return hasSpecialPrice ? specialPrice : normalPrice;
-};
+const getItemUnitPrice = (item: SaleItemModel): number => resolveItemUnitPrice(item);
 
 export const calculateSaleSubtotal = (sale: SaleModel): number =>
   calculateGrossSubtotal(sale.items, sale.services);
@@ -54,7 +51,9 @@ export const createSaleReceipt = (sale: SaleModel): SaleReceiptModel => {
     const unitPrice = getItemUnitPrice(item);
     const unitSold = Number(item.unitSold);
     const normalPrice = toNumber(item.productSnapshot.salePrice);
-    const hasSpecialPrice = item.isEspecialPrice && item.internCustomerPrice?.specialPrice != null;
+    const hasSpecialPrice =
+      (item.specialPriceSource != null && item.specialPriceSource !== "CATALOG") ||
+      unitPrice !== normalPrice;
     const quantity = Number(item.quantitySold);
     const itemDiscount = toNumber(item.discountInfo?.value);
     const lineTotal = Math.max(unitPrice * unitSold * quantity - itemDiscount, 0);
@@ -67,6 +66,7 @@ export const createSaleReceipt = (sale: SaleModel): SaleReceiptModel => {
       unitPrice,
       lineTotal,
       hasSpecialPrice,
+      specialPriceSource: item.specialPriceSource,
       code: item.productSnapshot.code || undefined,
       size: item.productSnapshot.size || undefined,
       color: item.productSnapshot.color || undefined,
@@ -103,7 +103,7 @@ export const createSaleReceipt = (sale: SaleModel): SaleReceiptModel => {
     sale,
     code: sale.code || String(sale.id),
     date: sale.createdAt || "",
-    customerName: sale.internCustomer?.name || "Consumidor final",
+    customerName: getSaleCustomerLabel(sale, "Consumidor final"),
     items,
     services,
     payments,

@@ -1,4 +1,4 @@
-import { Banknote, FileText } from "lucide-react";
+import { BadgePercent, Banknote, FileText } from "lucide-react";
 import { BRAND } from "@/theme/colors";
 
 export const SaleSetting = {
@@ -13,5 +13,11 @@ export const SaleSetting = {
     key: "generate_sale_proof_document",
     description: "Gerar comprovantes ao realizar venda",
     icon: <FileText size={18} color={BRAND} />,
+  },
+  NegotiatedSalePrice: {
+    module: "Sale",
+    key: "negotiated_sale_price",
+    description: "Permitir preço negociado por item na venda",
+    icon: <BadgePercent size={18} color={BRAND} />,
   },
 };

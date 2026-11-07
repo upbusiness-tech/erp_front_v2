@@ -1,7 +1,8 @@
 import { ProductModel } from "@/model/product.model";
 import { ProductEspecificationModel } from "@/model/productEspecification.model";
-import { CartSaleItem } from "@/uperp/pages/AuthenticatedPages/CommonSale/types";
 import { ProductUnitOfMeasure } from "@/uperp/pages/AuthenticatedPages/Stock/StockProduct/types";
+
+export { calculateOrderItem } from "./unitPrice.ts";
 
 export const calculeStockTotalByProductEspecification = (
   variants: ProductEspecificationModel[],
@@ -68,16 +69,4 @@ export const calculeSalePriceRange = (variants: ProductEspecificationModel[]): s
 
 export const formatPrice = (v: string | number) => {
   return `R$ ${Number(v).toFixed(2).replace(".", ",")}`;
-};
-
-export const calculateOrderItem = (item: CartSaleItem) => {
-  const itemPrice = item.isEspecialPrice
-    ? item.internCustomerPrice?.specialPrice
-    : item.productEspecification.salePrice;
-
-  const itemUnitSold = item.unitSold;
-
-  const itemQuantitySold = item.quantitySold;
-
-  return (itemPrice ?? 0) * itemUnitSold * itemQuantitySold;
 };
