@@ -46,17 +46,24 @@ export const SaleReceiptModal = ({
   // Pré-gera o PDF do comprovante assim que ele aparece na tela. Assim o
   // navigator.share() roda imediatamente no gesto do clique, dentro da janela
   // de "transient user activation" (~5s em mobile), sem o atraso do html2canvas.
-  const sharePdfPromiseRef = useRef<Promise<File | null> | null>(null);
+  //
+  // O cache é chaveado pelo id da venda: o modal permanece montado entre
+  // aberturas (só `receiptSale` alterna), então guardar apenas a Promise fazia
+  // o PDF da primeira venda ser reaproveitado em todas as seguintes.
+  const sharePdfRef = useRef<{ saleId: number; promise: Promise<File | null> } | null>(null);
 
   useEffect(() => {
     if (!receiptSale) return;
+    const saleId = receiptSale.sale.id;
     let cancelled = false;
 
     const startGeneration = () => {
-      if (sharePdfPromiseRef.current) return;
-      sharePdfPromiseRef.current = generateSaleReceiptFile(receiptSale)
+      const cached = sharePdfRef.current;
+      if (cached && cached.saleId === saleId) return;
+      const promise = generateSaleReceiptFile(receiptSale)
         .then((file) => (cancelled ? null : file))
         .catch(() => null as File | null);
+      sharePdfRef.current = { saleId, promise };
     };
 
     // Pequeno atraso para a abertura do modal/animação fluir sem jank antes
@@ -65,6 +72,9 @@ export const SaleReceiptModal = ({
     return () => {
       cancelled = true;
       window.clearTimeout(delay);
+      // Libera o cache da venda que saiu de tela para nunca compartilhar um
+      // PDF de outra venda.
+      if (sharePdfRef.current?.saleId === saleId) sharePdfRef.current = null;
     };
   }, [receiptSale]);
 
@@ -87,7 +97,11 @@ export const SaleReceiptModal = ({
 
     try {
       setSharing(true);
-      const file = (await sharePdfPromiseRef.current) || undefined;
+      const cached = sharePdfRef.current;
+      const file =
+        cached && cached.saleId === receiptSale.sale.id
+          ? ((await cached.promise) ?? undefined)
+          : undefined;
       const result = await shareSaleReceipt(receiptSale, file);
       message.success(result === "shared" ? "Comprovante compartilhado" : "Comprovante baixado");
     } catch (error) {
