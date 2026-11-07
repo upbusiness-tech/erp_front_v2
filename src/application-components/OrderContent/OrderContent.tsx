@@ -116,6 +116,9 @@ export const OrderContent = ({ handleSubmitSale, submitingSale, saleType }: Orde
     isGoToPaymentDisabled,
   } = useOrderContentController({ saleType });
 
+  const totalCents = Math.round((total ?? 0) * 100);
+  const paidCents = Math.round(paid * 100);
+
   return (
     <>
       <div
@@ -541,7 +544,7 @@ export const OrderContent = ({ handleSubmitSale, submitingSale, saleType }: Orde
                 block
                 size="large"
                 icon={<CheckCircle2 size={16} />}
-                disabled={isIsolatedCustomerInvalid || paid < (total ?? 0) - 0.001}
+                disabled={isIsolatedCustomerInvalid || paidCents < totalCents}
                 onClick={async () => {
                   await handleSubmitSale(saleType);
                   setpValue(0);

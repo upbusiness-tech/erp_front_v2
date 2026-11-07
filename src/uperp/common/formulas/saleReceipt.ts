@@ -10,6 +10,8 @@ import {
   calculateGrossSubtotal,
   calculateItemDiscountsTotal,
   calculateSpecialPriceSavings,
+  calculateTotalCartItems,
+  round2,
 } from "./saleFormulas.ts";
 import { resolveItemUnitPrice } from "./unitPrice.ts";
 import { getSaleCustomerLabel } from "../util/isolatedCustomer.ts";
@@ -56,7 +58,7 @@ export const createSaleReceipt = (sale: SaleModel): SaleReceiptModel => {
       unitPrice !== normalPrice;
     const quantity = Number(item.quantitySold);
     const itemDiscount = toNumber(item.discountInfo?.value);
-    const lineTotal = Math.max(unitPrice * unitSold * quantity - itemDiscount, 0);
+    const lineTotal = round2(Math.max(round2(unitPrice * unitSold * quantity) - itemDiscount, 0));
 
     return {
       id: item.id,
@@ -96,8 +98,8 @@ export const createSaleReceipt = (sale: SaleModel): SaleReceiptModel => {
   const specialPriceTotal = calculateSpecialPriceSavings(sale.items);
   const itemDiscountTotal = calculateItemDiscountsTotal(sale.items);
   const saleDiscountValue = toNumber(sale.discount?.value);
-  const total = Math.max(subtotal - specialPriceTotal - itemDiscountTotal - saleDiscountValue, 0);
-  const paid = payments.reduce((t, payment) => t + payment.amount, 0);
+  const total = calculateTotalCartItems(sale.items, sale.services ?? [], sale.discount);
+  const paid = round2(payments.reduce((t, payment) => t + round2(payment.amount), 0));
 
   return {
     sale,
@@ -113,6 +115,6 @@ export const createSaleReceipt = (sale: SaleModel): SaleReceiptModel => {
     saleDiscountValue,
     total,
     paid,
-    change: Math.max(paid - total, 0),
+    change: Math.max(round2(paid - total), 0),
   };
 };

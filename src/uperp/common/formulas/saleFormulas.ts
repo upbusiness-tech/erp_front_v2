@@ -5,7 +5,7 @@ import type {
   ISaleServiceForm,
   PaymentItem,
 } from "../../pages/AuthenticatedPages/CommonSale/types";
-import { calculateSpecialPriceSavings } from "./unitPrice.ts";
+import { calculateSpecialPriceSavings, resolveItemUnitPrice } from "./unitPrice.ts";
 
 export { calculateSpecialPriceSavings };
 
@@ -20,6 +20,25 @@ const getItemSpecification = (item: SaleItemLike): ProductEspecificationModel | 
   isSaleItemModel(item) ? item.productSnapshot : item.productEspecification;
 
 const getItemSalePrice = (item: SaleItemLike) => Number(getItemSpecification(item)?.salePrice ?? 0);
+
+// Espelha resolveItemUnitPrice do backend: usa o preço especial apenas quando
+// o item realmente foi vendido com preço especial e o snapshot existe.
+const resolveItemPrice = (item: SaleItemLike) => {
+  if (isSaleItemModel(item)) {
+    return item.isEspecialPrice && item.specialPriceSnapshot != null
+      ? Number(item.specialPriceSnapshot)
+      : Number(item.salePriceSnapshot ?? getItemSalePrice(item));
+  }
+
+  return resolveItemUnitPrice(item);
+};
+
+export const calculateItemNet = (item: SaleItemLike) => {
+  const gross = round2(resolveItemPrice(item) * Number(item.quantitySold) * Number(item.unitSold));
+  const discount = round2(Number(item.discountInfo?.value ?? 0));
+
+  return round2(gross - discount);
+};
 
 export const calculateGrossSubtotal = (
   items: SaleItemLike[],
@@ -43,20 +62,13 @@ export const calculateItemDiscountsTotal = (items: SaleItemLike[]) => {
 };
 
 export const calculateItemsTotal = (items: SaleItemLike[]) => {
-  const gross = calculateGrossSubtotal(items, []);
-  const savings = calculateSpecialPriceSavings(items);
-  const itemDiscounts = calculateItemDiscountsTotal(items);
-  return Math.max(gross - savings - itemDiscounts, 0);
+  return items.reduce((acc, item) => round2(acc + calculateItemNet(item)), 0);
 };
 
 export const calculateServiceItemsTotal = (
   saleServices: ISaleServiceForm[] | SaleServiceModel[],
 ) => {
-  const totalService = saleServices?.reduce((acc, item) => {
-    return acc + Number(item.amount);
-  }, 0);
-
-  return totalService;
+  return saleServices.reduce((acc, item) => round2(acc + round2(Number(item.amount))), 0);
 };
 
 export const calculateTotalCartItems = (
@@ -64,27 +76,26 @@ export const calculateTotalCartItems = (
   saleServices: ISaleServiceForm[] | SaleServiceModel[] | undefined,
   saleDiscount?: { value?: number } | null,
 ) => {
-  let itemsTotal = calculateItemsTotal(items);
-  if (saleServices) itemsTotal += calculateServiceItemsTotal(saleServices);
-  const discount = Number(saleDiscount?.value ?? 0);
-  return Math.max(itemsTotal - discount, 0);
+  const itemsTotal = calculateItemsTotal(items);
+  const servicesTotal = calculateServiceItemsTotal(saleServices ?? []);
+  const subtotal = round2(itemsTotal + servicesTotal);
+  const discount = round2(Number(saleDiscount?.value ?? 0));
+
+  return Math.max(round2(subtotal - discount), 0);
 };
 
 export const calculateRemainingSaleOnOrderContent = (total: number, payments: PaymentItem[]) => {
   const totalPayments = calculateTotalPayments(payments);
-  return Math.max(total - totalPayments, 0);
+  return Math.max(round2(total - totalPayments), 0);
 };
 
 export const calculateChangeSaleOnOrderContent = (total: number, payments: PaymentItem[]) => {
   const totalPayments = calculateTotalPayments(payments);
-  return Math.max(totalPayments - total, 0);
+  return Math.max(round2(totalPayments - total), 0);
 };
 
 export const calculateSaleService = (services: SaleServiceModel[]) => {
-  const totalServices = services.reduce((acc, service) => {
-    return acc + service.amount;
-  }, 0);
-  return totalServices;
+  return calculateServiceItemsTotal(services);
 };
 
 export const calculateSaleTotal = (sale: SaleModel) => {
@@ -92,8 +103,7 @@ export const calculateSaleTotal = (sale: SaleModel) => {
 };
 
 export const calculateTotalPayments = (payments: PaymentItem[]) => {
-  const total = payments.reduce((acc, payment) => {
-    return acc + payment.amount;
-  }, 0);
-  return total;
+  return round2(
+    payments.reduce((total, payment) => total + round2(Number(payment.amount ?? 0)), 0),
+  );
 };

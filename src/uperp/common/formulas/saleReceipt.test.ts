@@ -50,7 +50,13 @@ describe("createSaleReceipt", () => {
   it("uses specialPriceSnapshot as the applied unit price and savings", () => {
     const receipt = createSaleReceipt(
       sale({
-        items: [saleItem({ specialPriceSnapshot: 28, specialPriceSource: "NEGOTIATED" })],
+        items: [
+          saleItem({
+            isEspecialPrice: true,
+            specialPriceSnapshot: 28,
+            specialPriceSource: "NEGOTIATED",
+          }),
+        ],
         payments: [{ id: 1, type: "DINHEIRO", amount: 21 }],
       }),
     );
@@ -66,7 +72,13 @@ describe("createSaleReceipt", () => {
   it("keeps the customer table source on the receipt item", () => {
     const receipt = createSaleReceipt(
       sale({
-        items: [saleItem({ specialPriceSnapshot: 30, specialPriceSource: "CUSTOMER_TABLE" })],
+        items: [
+          saleItem({
+            isEspecialPrice: true,
+            specialPriceSnapshot: 30,
+            specialPriceSource: "CUSTOMER_TABLE",
+          }),
+        ],
         payments: [{ id: 1, type: "DINHEIRO", amount: 22.5 }],
       }),
     );

@@ -16,6 +16,7 @@ import {
   calculateSpecialPriceSavings,
   calculateTotalCartItems,
   calculateTotalPayments,
+  round2,
 } from "@/uperp/common/formulas/saleFormulas";
 import { SettingsRef } from "@/uperp/common/settings/consts/settings.ref";
 import { isIsolatedCustomerFormInvalid } from "@/uperp/common/util/isolatedCustomer";
@@ -130,7 +131,7 @@ export function useOrderContentController({ saleType }: { saleType: SaleType }) 
     if (pValue === 0) {
       payments.push({
         id: Math.random() * 1000,
-        amount: remaining,
+        amount: round2(remaining),
         type: pMethod,
       });
       setPayments(payments);
@@ -138,7 +139,7 @@ export function useOrderContentController({ saleType }: { saleType: SaleType }) 
     }
     payments.push({
       id: Math.random() * 1000,
-      amount: pValue,
+      amount: round2(pValue),
       type: pMethod,
     });
     setpValue(0);
