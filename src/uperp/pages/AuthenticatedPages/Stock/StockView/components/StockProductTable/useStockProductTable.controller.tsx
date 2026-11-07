@@ -41,15 +41,22 @@ export function useStockProductTableController({
   onViewStats?: (product: ProductModel) => void;
 } = {}) {
   const [search, setSearch] = useState("");
+  const [barcodeSearch, setBarcodeSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
   const [supplierFilter, setSupplierFilter] = useState<string[]>([]);
   const [unitFilter, setUnitFilter] = useState<string[]>([]);
   const [stockStatusFilter, setStockStatusFilter] = useState<string[]>([]);
   const { hasSettingActive } = useCompanySettingsStore();
   const isExpandedMode = hasSettingActive(SettingsRef.Product.ViewProductOnExpandedMode);
+  const scanProductEnabled = hasSettingActive(SettingsRef.Product.ScanProductByCode);
 
   const handleSearchChange = (value: string | string[]) => {
     setSearch(value as string);
+    resetPage();
+  };
+
+  const handleBarcodeSearchChange = (value: string | string[]) => {
+    setBarcodeSearch(value as string);
     resetPage();
   };
 
@@ -92,11 +99,26 @@ export function useStockProductTableController({
 
   const filter = useMemo(() => {
     if (isExpandedMode) {
-      return buildExpandedStockFilter({ categoryFilter, unitFilter, supplierFilter, search });
+      return buildExpandedStockFilter({
+        categoryFilter,
+        unitFilter,
+        supplierFilter,
+        search,
+        barcodeSearch,
+      });
     }
 
     return [
       ...(search.trim() ? [{ field: "name", operator: "$contUL", value: search.trim() }] : []),
+      ...(barcodeSearch.trim()
+        ? [
+            {
+              field: "productEspecifications.barcode",
+              operator: "$contL",
+              value: barcodeSearch.trim(),
+            },
+          ]
+        : []),
       ...(categoryFilter.length
         ? [{ field: "productCategoryId", operator: "$in", value: categoryFilter }]
         : []),
@@ -113,7 +135,7 @@ export function useStockProductTableController({
         ? [{ field: "unitOfMeasure", operator: "$in", value: unitFilter }]
         : []),
     ];
-  }, [categoryFilter, isExpandedMode, search, supplierFilter, unitFilter]);
+  }, [barcodeSearch, categoryFilter, isExpandedMode, search, supplierFilter, unitFilter]);
 
   const {
     data: fetchedData,
@@ -310,6 +332,7 @@ export function useStockProductTableController({
     tableColumns,
     expandedTableColumns,
     isExpandedMode,
+    scanProductEnabled,
     data,
     products,
     expandedProducts,
@@ -322,6 +345,8 @@ export function useStockProductTableController({
     resetPage,
     search,
     handleSearchChange,
+    barcodeSearch,
+    handleBarcodeSearchChange,
     categoryFilter,
     handleCategoryFilterChange,
     supplierFilter,

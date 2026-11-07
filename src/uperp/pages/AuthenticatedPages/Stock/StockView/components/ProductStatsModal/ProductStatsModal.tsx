@@ -4,6 +4,7 @@ import { formatDateFromApi } from "@/uperp/common/dates";
 import { extractStockFormatByProduct } from "@/uperp/common/formulas/productFormulas";
 import { getProductSupplierNames } from "@/uperp/common/util/productConsts";
 import {
+  Button,
   Card,
   Col,
   Descriptions,
@@ -16,7 +17,7 @@ import {
   Timeline,
   Typography,
 } from "antd";
-import { Calendar, FileText, Package, Tag, TrendingUp, User } from "lucide-react";
+import { Calendar, FileText, Package, Pencil, Tag, TrendingUp, User } from "lucide-react";
 import { useProductStatsModalController } from "./useProductStatsModal.controller";
 import { DANGER, SUCCESS } from "@/theme/colors";
 
@@ -26,9 +27,15 @@ type ProductStatsModalProps = {
   product: ProductModel | null;
   open: boolean;
   onClose: () => void;
+  productEspecificationId?: number | undefined;
 };
 
-export const ProductStatsModal = ({ product, open, onClose }: ProductStatsModalProps) => {
+export const ProductStatsModal = ({
+  product,
+  open,
+  onClose,
+  productEspecificationId,
+}: ProductStatsModalProps) => {
   const {
     period,
     handlePeriodChange,
@@ -36,6 +43,7 @@ export const ProductStatsModal = ({ product, open, onClose }: ProductStatsModalP
     getTransactionLabel,
     stats,
     productTransactionsData,
+    handleGoToEditProduct,
   } = useProductStatsModalController({ product });
 
   if (!product) return null;
@@ -100,7 +108,7 @@ export const ProductStatsModal = ({ product, open, onClose }: ProductStatsModalP
         <Descriptions.Item
           label={
             <Space>
-              <Calendar size={14} /> Data de Criacao
+              <Calendar size={14} /> Data de criação
             </Space>
           }
         >
@@ -162,16 +170,12 @@ export const ProductStatsModal = ({ product, open, onClose }: ProductStatsModalP
         </Row>
       </div>
 
-      {/* Custo no periodo */}
-      {/* <Card size="small" style={{ marginBottom: 16 }}>
-        <Statistic
-          title="Custo de Reposicao no Periodo"
-          value={filteredCost}
-          precision={2}
-          prefix={<TrendingDown size={14} />}
-          valueStyle={{ color: DANGER }}
-        />
-      </Card> */}
+      <Button
+        onClick={() => handleGoToEditProduct(product.id, productEspecificationId)}
+        icon={<Pencil size={14} />}
+      >
+        Editar produto
+      </Button>
 
       <Divider />
 

@@ -8,12 +8,15 @@ import { StatsDashboardService } from "@/services/statsDashboard.service";
 import { extractStockFormatByProduct } from "@/uperp/common/formulas/productFormulas";
 import dayjs from "dayjs";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { StockPaths } from "@/routes/AuthenticatedRoutes/Stock/routes";
 import { INFO, SUCCESS } from "@/theme/colors";
 import type { GeneralStatsByProduct, TransactionOverviewByProduct } from "./types";
 import { VariationTags } from "@/application-components/VariationTags/VariationTags";
 
 export function useProductStatsModalController({ product }: { product: ProductModel | null }) {
   const { period, setPreset, setCustomRange } = useDashboardPeriod("this_month");
+  const navigate = useNavigate();
 
   const productDashboardService = new StatsDashboardService(
     `product-dashboard/${product?.id}/overview-stats`,
@@ -66,7 +69,12 @@ export function useProductStatsModalController({ product }: { product: ProductMo
     transaction: TransactionOverviewByProduct,
   ): { label: string; color: string; description: string; variant?: any | null } => {
     if (!product)
-      return { label: "Movimentação", color: "#6B7280", description: "", variant: null };
+      return {
+        label: "Movimentação",
+        color: "#6B7280",
+        description: "",
+        variant: null,
+      };
     switch (transaction.type) {
       case ProductTransactionType.SUBTRACTION:
         return {
@@ -94,6 +102,11 @@ export function useProductStatsModalController({ product }: { product: ProductMo
     }
   };
 
+  const handleGoToEditProduct = (id: number, especificacaoId?: number) => {
+    const path = StockPaths.UPDATE_PRODUCT.replace(":id", String(id));
+    navigate(especificacaoId ? `${path}?especificacaoId=${especificacaoId}` : path);
+  };
+
   return {
     period,
     handlePeriodChange,
@@ -101,5 +114,6 @@ export function useProductStatsModalController({ product }: { product: ProductMo
     getTransactionLabel,
     stats: data ?? null,
     productTransactionsData,
+    handleGoToEditProduct,
   };
 }

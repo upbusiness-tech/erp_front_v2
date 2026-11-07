@@ -253,7 +253,6 @@ export function useCommonSaleController() {
   const [receiptVariant, setReceiptVariant] = useState<"success" | "view">("success");
 
   const handleViewRecentSale = (sale: SaleModel) => {
-    setRecentOpen(false);
     setReceiptVariant("view");
     setReceiptSale(createSaleReceipt(sale));
   };

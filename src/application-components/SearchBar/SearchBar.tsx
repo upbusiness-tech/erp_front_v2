@@ -1,7 +1,6 @@
-import { useDebounce } from "@/hooks/useDebounce";
 import { Input, Select, Space } from "antd";
 import { Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export type SearchBarOption = {
   value: string;
@@ -31,19 +30,30 @@ type SearchFieldProps = {
 const SearchField = ({ search }: SearchFieldProps) => {
   const { value, onChange, placeholder, debounceMs } = search;
   const delay = debounceMs ?? 500;
-  const inputValueStr = typeof value === "string" ? value : "";
-  const [inputValue, setInputValue] = useState(inputValueStr);
-  const debouncedValue = useDebounce(inputValue, delay);
+  const externalValue = typeof value === "string" ? value : "";
+  const [inputValue, setInputValue] = useState(externalValue);
+  const lastExternalValueRef = useRef(externalValue);
+  const onChangeRef = useRef(onChange);
+
+  onChangeRef.current = onChange;
 
   useEffect(() => {
-    setInputValue(inputValueStr);
-  }, [inputValueStr]);
+    if (externalValue === lastExternalValueRef.current) return;
+
+    lastExternalValueRef.current = externalValue;
+    setInputValue(externalValue);
+  }, [externalValue]);
 
   useEffect(() => {
-    if (debouncedValue !== inputValueStr) {
-      onChange(debouncedValue);
-    }
-  }, [debouncedValue, inputValueStr, onChange]);
+    if (inputValue === externalValue) return;
+
+    const timer = window.setTimeout(() => {
+      lastExternalValueRef.current = inputValue;
+      onChangeRef.current(inputValue);
+    }, delay);
+
+    return () => window.clearTimeout(timer);
+  }, [inputValue, externalValue, delay]);
 
   return (
     <Input
