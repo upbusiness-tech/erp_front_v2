@@ -15,7 +15,7 @@ const { Text } = Typography;
 type RecentSaleCardProps = {
   sale: SaleModel;
   onClick?: (sale: SaleModel) => void;
-  onView: (sale: SaleModel) => void;
+  onView?: (sale: SaleModel) => void;
   showItemCount?: boolean;
   showPayments?: boolean;
 };
@@ -115,17 +115,19 @@ export const RecentSaleCard = ({
         <Text strong style={{ color: BRAND, fontSize: 15 }}>
           {total}
         </Text>
-        <Button
-          size="small"
-          type="link"
-          icon={<Receipt size={14} />}
-          onClick={(e) => {
-            e.stopPropagation();
-            onView(sale);
-          }}
-        >
-          Ver
-        </Button>
+        {onView && (
+          <Button
+            size="small"
+            type="link"
+            icon={<Receipt size={14} />}
+            onClick={(e) => {
+              e.stopPropagation();
+              onView(sale);
+            }}
+          >
+            Ver
+          </Button>
+        )}
       </div>
     </Card>
   );

@@ -1,5 +1,12 @@
 import { SaleStatus, SaleType } from "@/enums/sale.enum";
 
+export const fmtBrl = new Intl.NumberFormat("pt-BR", {
+  style: "currency",
+  currency: "BRL",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
 export const mapSaleType: Record<SaleType, { label: string; color: string }> = {
   [SaleType.NORMAL]: { label: "Balcão", color: "orange" },
   [SaleType.SERVICE]: { label: "Serviço", color: "blue" },

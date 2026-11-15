@@ -2,6 +2,8 @@ import { Bootstrap } from "@/application-components/Bootstrap/Bootstrap";
 import { PermissionGuard } from "@/application-components/PermissionGuard/PermissionGuard";
 import { SideBar } from "@/application-components/SideBar/SideBar";
 import { AccessDenied } from "@/uperp/pages/AccessDenied/AccessDenied";
+import { Spin } from "antd";
+import { Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
 import { cashierBaseRoutes } from "./Cashier/routes";
 import { companyBaseRoutes } from "./Company/routes";
@@ -31,26 +33,34 @@ export const AuthenticatedRoutes = () => {
   return (
     <>
       <Bootstrap />
-      <Routes>
-        <Route element={<SideBar />}>
-          <Route path="/acesso-bloqueado" element={<AccessDenied />} />
-          {allRoutes.map((route) => (
-            <Route
-              key={route.path}
-              path={route.path}
-              element={
-                route.requiredPermission ? (
-                  <PermissionGuard permission={route.requiredPermission}>
-                    {route.element}
-                  </PermissionGuard>
-                ) : (
-                  route.element
-                )
-              }
-            />
-          ))}
-        </Route>
-      </Routes>
+      <Suspense
+        fallback={
+          <div style={{ display: "flex", justifyContent: "center", padding: 48 }}>
+            <Spin size="large" />
+          </div>
+        }
+      >
+        <Routes>
+          <Route element={<SideBar />}>
+            <Route path="/acesso-bloqueado" element={<AccessDenied />} />
+            {allRoutes.map((route) => (
+              <Route
+                key={route.path}
+                path={route.path}
+                element={
+                  route.requiredPermission ? (
+                    <PermissionGuard permission={route.requiredPermission}>
+                      {route.element}
+                    </PermissionGuard>
+                  ) : (
+                    route.element
+                  )
+                }
+              />
+            ))}
+          </Route>
+        </Routes>
+      </Suspense>
     </>
   );
 };

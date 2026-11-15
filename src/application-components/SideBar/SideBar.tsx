@@ -3,7 +3,7 @@ import { ChevronDown, LogOut, Menu as MenuIcon, Settings, Users } from "lucide-r
 import { Outlet, useNavigate } from "react-router-dom";
 import { BRAND } from "@/theme/colors";
 import { BrandHeader } from "./BrandHeader";
-import { pageKeyToPath, titles, PageKey } from "./SideBar.consts";
+import { getMenuPath, titles, type MenuKey } from "./SideBar.consts";
 import { useSideBarController } from "./useSideBar.controller";
 
 const { Header, Sider, Content } = Layout;
@@ -29,7 +29,9 @@ export function SideBar() {
     dark,
     isMobile,
     userName,
-    currentPage,
+    activeKey,
+    openKeys,
+    handleOpenChange,
     handleMenuClick,
     handleLogout,
     menuItems,
@@ -42,12 +44,14 @@ export function SideBar() {
     <Menu
       theme={dark ? "dark" : "light"}
       mode="inline"
-      selectedKeys={[currentPage]}
+      selectedKeys={[activeKey]}
+      openKeys={openKeys}
+      onOpenChange={handleOpenChange}
       onClick={(e) => {
-        const key = e.key as PageKey;
+        const key = e.key as MenuKey;
 
         if (e.domEvent.ctrlKey || e.domEvent.metaKey) {
-          openInNewTab(pageKeyToPath[key]);
+          openInNewTab(getMenuPath(key));
           return;
         }
 
@@ -120,7 +124,7 @@ export function SideBar() {
                 textOverflow: "ellipsis",
               }}
             >
-              {titles[currentPage]}
+              {titles[activeKey]}
             </Title>
           </Space>
           <Dropdown
