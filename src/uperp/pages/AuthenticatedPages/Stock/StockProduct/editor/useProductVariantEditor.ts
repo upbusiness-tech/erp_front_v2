@@ -34,6 +34,8 @@ const buildEmptyDraft = (partial: Partial<VariantDraft> = {}): VariantDraft => (
   costPrice: partial.costPrice ?? 0,
   isStockControlled: partial.isStockControlled ?? true,
   stockQuantity: partial.stockQuantity ?? 0,
+  maxStock: partial.maxStock ?? null,
+  minStock: partial.minStock ?? null,
   size: partial.size ?? null,
   color: partial.color ?? null,
   brand: partial.brand ?? null,

@@ -8,6 +8,8 @@ export interface ProductEspecificationModel extends DefaultIdModel {
   costPrice: number;
   isStockControlled: boolean;
   stockQuantity: number;
+  maxStock: number | null;
+  minStock: number | null;
   size: string | null;
   color: string | null;
   brand: string | null;

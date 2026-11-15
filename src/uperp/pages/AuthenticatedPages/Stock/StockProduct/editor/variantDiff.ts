@@ -26,6 +26,12 @@ const toNumber = (value: unknown) => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
+const toNullableNumber = (value: unknown): number | null => {
+  if (value === null || value === undefined || value === "") return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
 export const toVariantSnapshot = (
   variant: ProductEspecificationModel | IProductVariantField | VariantSnapshot,
 ): VariantSnapshot => ({
@@ -36,6 +42,8 @@ export const toVariantSnapshot = (
   costPrice: toNumber(variant.costPrice),
   isStockControlled: Boolean(variant.isStockControlled),
   stockQuantity: toNumber(variant.stockQuantity),
+  maxStock: toNullableNumber(variant.maxStock),
+  minStock: toNullableNumber(variant.minStock),
   size: toNullableText(variant.size),
   color: toNullableText(variant.color),
   brand: toNullableText(variant.brand),
@@ -61,6 +69,8 @@ export const variantToPayload = (variant: VariantDraft): VariantPayload => {
     costPrice,
     isStockControlled,
     stockQuantity,
+    maxStock,
+    minStock,
     size,
     color,
     brand,
@@ -75,6 +85,8 @@ export const variantToPayload = (variant: VariantDraft): VariantPayload => {
     costPrice: toNumber(costPrice),
     isStockControlled: Boolean(isStockControlled),
     stockQuantity: toNumber(stockQuantity),
+    maxStock,
+    minStock,
     size,
     color,
     brand,
