@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCacheManager } from "@/hooks/useCacheManager";
 import { useGetAllWithParams } from "@/hooks/useGetAllWithParams";
 import { useGetOneWithParams } from "@/hooks/useGetOneWithParams";
@@ -16,6 +17,8 @@ import { IProductCreateFields, ProductUnitOfMeasure } from "./types";
 import type { VariantDiff } from "./editor/types";
 import { CsosnEnum, OriginEnum, PisCofinsCstEnum } from "@/enums/productFiscal.enum";
 import { useAuthStore } from "@/stores/auth.store";
+import { AxiosError } from "axios";
+import { isArray } from "util";
 
 const formatEnumKey = (key: string) =>
   key
@@ -173,8 +176,12 @@ export function useStockProductController({ isEdit }: { isEdit?: boolean }) {
       invalidateQuery(productService);
       message.success(`Produto ${isEdit ? "atualizado" : "cadastrado"} com sucesso`);
       return { ok: true, product: saved ?? undefined };
-    } catch (error) {
-      message.error(`Erro ao ${isEdit ? "atualizar" : "cadastrar"} produto.`);
+    } catch (error: any) {
+      const axiosError = error?.response?.data?.message;
+      const errorMessage = axiosError ? axiosError[0] : axiosError;
+      message.error(
+        `Erro ao ${isEdit ? "atualizar" : "cadastrar"} produto. Causa: ${errorMessage}`,
+      );
       return { ok: false };
     } finally {
       setloading(false);

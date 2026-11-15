@@ -40,6 +40,7 @@ import { Form, message, Space, Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
 import { useMemo, useState } from "react";
 import { ICreateSaleForm, IPaymentMethodField, ISaleItemField } from "./types";
+import { AxiosError } from "axios";
 
 const { Text } = Typography;
 
@@ -431,8 +432,8 @@ export function useCommonSaleController() {
         await printSaleReceipt(createSaleReceipt(sale));
       }
       message.success("Venda realizada com sucesso!");
-    } catch (error) {
-      message.error("Ocorreu um erro ao realizar a venda");
+    } catch (error: AxiosError | any) {
+      message.warning(error?.response?.data?.message ?? "Ocorreu um erro ao realizar a venda");
     } finally {
       setsubmiting(false);
     }

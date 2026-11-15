@@ -32,15 +32,15 @@ export const StockTab = ({ onNewProduct }: StockTabProps) => {
           ),
           children: <StockProductTable />,
         },
-        {
-          key: EStockViewTab.STATS,
-          label: (
-            <Space size={SPACE_SIZE}>
-              <BarChart3 size={ICON_SIZE} /> Estatísticas
-            </Space>
-          ),
-          children: <StockStatsOverview />,
-        },
+        // {
+        //   key: EStockViewTab.STATS,
+        //   label: (
+        //     <Space size={SPACE_SIZE}>
+        //       <BarChart3 size={ICON_SIZE} /> Estatísticas
+        //     </Space>
+        //   ),
+        //   children: <StockStatsOverview />,
+        // },
         {
           key: EStockViewTab.CATEGORIES,
           label: (

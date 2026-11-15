@@ -1,4 +1,4 @@
-import { DatePicker, Segmented, Space, message } from "antd";
+import { DatePicker, Segmented, Space, Tag, message } from "antd";
 import dayjs, { type Dayjs } from "dayjs";
 import type { DashboardPeriod, PeriodPreset } from "@/types/dashboard";
 
@@ -18,9 +18,15 @@ interface PeriodSelectorProps {
   period: DashboardPeriod;
   onChange: (period: DashboardPeriod) => void;
   allowedPresets?: PeriodPreset[];
+  showRange?: boolean;
 }
 
-export function PeriodSelector({ period, onChange, allowedPresets }: PeriodSelectorProps) {
+export function PeriodSelector({
+  period,
+  onChange,
+  allowedPresets,
+  showRange = false,
+}: PeriodSelectorProps) {
   const options = allowedPresets
     ? PRESET_OPTIONS.filter((o) => allowedPresets.includes(o.value))
     : PRESET_OPTIONS;
@@ -55,6 +61,9 @@ export function PeriodSelector({ period, onChange, allowedPresets }: PeriodSelec
 
   const isCustom = period.preset === "custom";
 
+  const formatRangeLabel = () =>
+    `${dayjs(period.from).format("DD/MM/YYYY")} – ${dayjs(period.to).format("DD/MM/YYYY")}`;
+
   return (
     <Space wrap style={{ marginBottom: 16 }}>
       <Segmented options={options} value={period.preset} onChange={handlePresetChange} />
@@ -68,6 +77,7 @@ export function PeriodSelector({ period, onChange, allowedPresets }: PeriodSelec
           style={{ width: 280 }}
         />
       )}
+      {showRange && !isCustom && <Tag>{formatRangeLabel()}</Tag>}
     </Space>
   );
 }

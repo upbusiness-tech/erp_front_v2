@@ -34,6 +34,7 @@ import { VariantToolbar } from "./editor/VariantToolbar";
 import type { ProductDraft, VariantDraft } from "./editor/types";
 import { isEditorDirty, isProductDraftDirty } from "./editor/variantDiff";
 import { useProductVariantEditor, VARIANT_PAGE_SIZE } from "./editor/useProductVariantEditor";
+import { AxiosError } from "axios";
 
 const { Text, Title } = Typography;
 
@@ -60,7 +61,6 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
     handleDeleteProduct,
     loading,
     suppliers,
-    isLoadingSuppliers,
     currentCompany,
   } = useStockProductController({ isEdit });
 
@@ -238,7 +238,9 @@ export const StockProductForm = ({ isEdit = false }: StockProductFormProps) => {
     const productFields = form.getFieldsValue(true) as IProductCreateFields;
     const result = await saveProduct({ productFields, variantDiff: editor.diff });
 
-    if (!result.ok) return;
+    if (!result.ok) {
+      return;
+    }
 
     if (isEdit) {
       if (result.product) {

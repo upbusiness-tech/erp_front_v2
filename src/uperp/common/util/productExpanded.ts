@@ -29,6 +29,8 @@ export const toProductModelFromExpanded = (item: ProductExpandedViewModel): Prod
       costPrice: item.costPrice,
       isStockControlled: item.isStockControlled,
       stockQuantity: item.stockQuantity,
+      maxStock: null,
+      minStock: null,
       size: item.size,
       color: item.color,
       brand: item.brand,
