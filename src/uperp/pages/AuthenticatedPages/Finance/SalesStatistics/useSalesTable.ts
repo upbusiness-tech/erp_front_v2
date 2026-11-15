@@ -20,6 +20,7 @@ const SALE_JOIN = [
 export function useSalesTable(from: string, to: string) {
   const [code, setCode] = useState("");
   const [customerName, setCustomerName] = useState("");
+  const [isolatedCustomerName, setIsolatedCustomerName] = useState("");
   const [status, setStatus] = useState<string[]>([]);
   const [paymentMethod, setPaymentMethod] = useState<string[]>([]);
 
@@ -43,12 +44,21 @@ export function useSalesTable(from: string, to: string) {
             },
           ]
         : []),
+      ...(isolatedCustomerName.trim()
+        ? [
+            {
+              field: "isolatedCustomer",
+              operator: "$contJsonNameUL",
+              value: isolatedCustomerName.trim(),
+            },
+          ]
+        : []),
       ...(status.length ? [{ field: "status", operator: "$in", value: status }] : []),
       ...(paymentMethod.length
         ? [{ field: "payments.type", operator: "$in", value: paymentMethod }]
         : []),
     ],
-    [from, to, code, customerName, status, paymentMethod],
+    [from, to, code, customerName, isolatedCustomerName, status, paymentMethod],
   );
 
   const {
@@ -79,6 +89,11 @@ export function useSalesTable(from: string, to: string) {
     resetPage();
   };
 
+  const handleIsolatedCustomerNameChange = (value: string | string[]) => {
+    setIsolatedCustomerName(value as string);
+    resetPage();
+  };
+
   const handleStatusChange = (value: string | string[]) => {
     setStatus(value as string[]);
     resetPage();
@@ -105,5 +120,7 @@ export function useSalesTable(from: string, to: string) {
     handleStatusChange,
     paymentMethod,
     handlePaymentMethodChange,
+    handleIsolatedCustomerNameChange,
+    isolatedCustomerName,
   };
 }
