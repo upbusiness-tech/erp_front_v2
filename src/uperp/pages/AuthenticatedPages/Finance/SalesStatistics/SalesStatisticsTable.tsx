@@ -43,6 +43,8 @@ export function SalesStatisticsTable({ from, to, salesColumns }: SalesStatistics
     handleCodeChange,
     customerName,
     handleCustomerNameChange,
+    handleIsolatedCustomerNameChange,
+    isolatedCustomerName,
     status,
     handleStatusChange,
     paymentMethod,
@@ -59,6 +61,13 @@ export function SalesStatisticsTable({ from, to, salesColumns }: SalesStatistics
             onChange: handleCodeChange,
             placeholder: "Buscar por código",
             maxWidth: 200,
+          },
+          {
+            name: "isolatedCustomer.name",
+            value: isolatedCustomerName,
+            onChange: handleIsolatedCustomerNameChange,
+            placeholder: "Buscar por cliente avulso",
+            maxWidth: 300,
           },
           {
             name: "customerName",

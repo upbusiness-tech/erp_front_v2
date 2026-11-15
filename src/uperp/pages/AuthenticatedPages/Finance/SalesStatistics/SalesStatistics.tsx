@@ -195,7 +195,7 @@ export default function SalesStatistics() {
           </Card>
         </Col>
         <Col xs={24} lg={12}>
-          <Card title="Faturamento líquido por dia da semana">
+          <Card title="Faturamento por dia da semana">
             <div
               style={{
                 opacity: statsFetching ? 0.6 : 1,
@@ -207,10 +207,10 @@ export default function SalesStatistics() {
                   <BarChart
                     data={weekdayRevenue.map((w) => ({
                       label: w.label,
-                      "Faturamento líquido": w.revenue,
+                      Faturamento: w.revenue,
                     }))}
                     index="label"
-                    categories={["Faturamento líquido"]}
+                    categories={["Faturamento"]}
                     colors={["brand"]}
                     valueFormatter={(value) => fmtBrl.format(value)}
                     yAxisWidth={90}

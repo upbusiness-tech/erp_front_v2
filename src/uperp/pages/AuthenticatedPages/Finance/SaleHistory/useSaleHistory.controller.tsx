@@ -30,6 +30,7 @@ export function useSaleHistoryController() {
   const [typeFilter, setTypeFilter] = useState<string[]>([]);
   const [saleStatus, setSaleStatus] = useState<string[]>([]);
   const [methodFilter, setMethodFilter] = useState<string[]>([]);
+  const [isolatedCustomerName, setIsolatedCustomerName] = useState("");
 
   const handleSearchChange = (e: string | string[]) => {
     setSearch(e as string);
@@ -51,6 +52,10 @@ export function useSaleHistoryController() {
     setMethodFilter(values as string[]);
     resetPage();
   };
+  const handleIsolatedCustomerNameChange = (value: string | string[]) => {
+    setIsolatedCustomerName(value as string);
+    resetPage();
+  };
 
   const filter = useMemo(() => {
     return [
@@ -64,13 +69,22 @@ export function useSaleHistoryController() {
             },
           ]
         : []),
+      ...(isolatedCustomerName.trim()
+        ? [
+            {
+              field: "isolatedCustomer",
+              operator: "$contJsonNameUL",
+              value: isolatedCustomerName.trim(),
+            },
+          ]
+        : []),
       ...(typeFilter.length > 0 ? [{ field: "type", operator: "$in", value: typeFilter }] : []),
       ...(saleStatus.length > 0 ? [{ field: "status", operator: "$in", value: saleStatus }] : []),
       ...(methodFilter.length > 0
         ? [{ field: "payments.type", operator: "$in", value: methodFilter }]
         : []),
     ];
-  }, [methodFilter, search, searchCustomerName, typeFilter, saleStatus]);
+  }, [methodFilter, search, searchCustomerName, typeFilter, saleStatus, isolatedCustomerName]);
 
   const {
     data: sales,
@@ -97,23 +111,6 @@ export function useSaleHistoryController() {
       ],
     },
   });
-
-  // const {
-  //   data: saleDashboardData,
-  //   isLoading: loadingSaleDashboard,
-  //   isFetching,
-  //   isError,
-  //   error,
-  // } = useGetAllWithParams<SalesDashboardResponse>(saleDashboardService, undefined, {
-  //   queryParams: {
-  //     from: period.from,
-  //     to: period.to,
-  //     ...(methodFilter.length ? { paymentType: methodFilter.join(",") } : {}),
-  //     ...(typeFilter.length ? { saleType: typeFilter.join(",") } : {}),
-  //     ...(searchCustomerName ? { customerName: searchCustomerName } : {}),
-  //     ...(search ? { saleCode: search } : {}),
-  //   },
-  // });
 
   const salesColumns: ColumnsType<SaleModel> = [
     { title: "Código", dataIndex: "code" },
@@ -208,6 +205,8 @@ export function useSaleHistoryController() {
     handleViewRecentSale,
     handleCloseReceipt,
     handleSaleStatusFilterChange,
+    handleIsolatedCustomerNameChange,
     saleStatus,
+    isolatedCustomerName,
   };
 }
