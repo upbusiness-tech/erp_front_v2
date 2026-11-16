@@ -10,4 +10,5 @@ import type { CustomOperators } from "@dataui/crud-request";
  */
 export const CRUD_CUSTOM_OPERATORS = {
   $contUL: {},
+  $contJsonNameUL: {},
 } satisfies CustomOperators;

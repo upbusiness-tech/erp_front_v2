@@ -225,6 +225,44 @@ export function VariantDrawer({
             )}
           </Form.Item>
 
+          <Form.Item label="Estoque mínimo">
+            {stockFormat ? (
+              <InputNumberFormatted
+                value={local.minStock ?? undefined}
+                precision={stockFormat.precision}
+                suffix={stockFormat.suffix}
+                placeholder={stockFormat.placeholder}
+                onChange={(value) => update({ minStock: value })}
+              />
+            ) : (
+              <InputNumber
+                min={0}
+                value={local.minStock ?? undefined}
+                onChange={(value) => update({ minStock: value == null ? null : Number(value) })}
+                style={{ width: "100%" }}
+              />
+            )}
+          </Form.Item>
+
+          <Form.Item label="Estoque máximo">
+            {stockFormat ? (
+              <InputNumberFormatted
+                value={local.maxStock ?? undefined}
+                precision={stockFormat.precision}
+                suffix={stockFormat.suffix}
+                placeholder={stockFormat.placeholder}
+                onChange={(value) => update({ maxStock: value })}
+              />
+            ) : (
+              <InputNumber
+                min={0}
+                value={local.maxStock ?? undefined}
+                onChange={(value) => update({ maxStock: value == null ? null : Number(value) })}
+                style={{ width: "100%" }}
+              />
+            )}
+          </Form.Item>
+
           <Form.Item label="Controlar estoque">
             <Switch
               checked={local.isStockControlled}

@@ -11,9 +11,10 @@ type RecentSaleCardListProps = {
   onPageSizeChange: (pageSize: number) => void;
   isLoading: boolean;
   onRowClick?: (sale: SaleModel) => void;
-  onView: (sale: SaleModel) => void;
+  onView?: (sale: SaleModel) => void;
   showItemCount?: boolean;
   showPayments?: boolean;
+  pageSizeOptions?: string[];
 };
 
 export const RecentSaleCardList = ({
@@ -28,6 +29,7 @@ export const RecentSaleCardList = ({
   onView,
   showItemCount = false,
   showPayments = false,
+  pageSizeOptions = ["6", "12", "24"],
 }: RecentSaleCardListProps) => {
   if (isLoading) {
     return (
@@ -70,7 +72,7 @@ export const RecentSaleCardList = ({
           total={total ?? data.length}
           onChange={onPageChange}
           onShowSizeChange={(_, size) => onPageSizeChange(size)}
-          pageSizeOptions={["6", "12", "24"]}
+          pageSizeOptions={pageSizeOptions}
           showSizeChanger
           showTotal={(t) => `${t} venda${t !== 1 ? "s" : ""}`}
           size="small"

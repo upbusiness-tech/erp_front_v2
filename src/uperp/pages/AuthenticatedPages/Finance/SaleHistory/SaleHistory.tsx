@@ -6,8 +6,7 @@ import {
   SALE_STATUS_OPTIONS_ARRAY_FORMATED,
   SALE_TYPE_OPTIONS_ARRAY_FORMATED,
 } from "@/uperp/common/util/sale.util";
-import { Button, Card, Grid } from "antd";
-import { Download } from "lucide-react";
+import { Card, Grid } from "antd";
 import { SALE_PAYMENT_METHOD_OPTIONS, useSaleHistoryController } from "./useSaleHistory.controller";
 
 const { useBreakpoint } = Grid;
@@ -38,6 +37,8 @@ export const SaleHistory = () => {
     receiptSale,
     handleSaleStatusFilterChange,
     saleStatus,
+    handleIsolatedCustomerNameChange,
+    isolatedCustomerName,
   } = useSaleHistoryController();
 
   return (
@@ -101,6 +102,13 @@ export const SaleHistory = () => {
               value: searchCustomerName,
               onChange: handleSearchCustomerNameChange,
               placeholder: "Buscar por cliente",
+              maxWidth: 300,
+            },
+            {
+              name: "isolatedCustomer",
+              value: isolatedCustomerName,
+              onChange: handleIsolatedCustomerNameChange,
+              placeholder: "Buscar por cliente avulso",
               maxWidth: 300,
             },
             {

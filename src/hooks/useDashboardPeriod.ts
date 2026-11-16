@@ -60,10 +60,26 @@ export function useDashboardPeriod(defaultPreset: PeriodPreset = "this_month") {
     setCustomTo(to);
   };
 
+  /**
+   * Adopts a full period object (used by `PeriodSelector`'s onChange).
+   * Keeps the existing `setPreset`/`setCustomRange` API untouched.
+   */
+  const handlePeriodChange = (next: DashboardPeriod) => {
+    if (next.preset === "custom") {
+      setPreset("custom");
+      setCustomFrom(dayjs(next.from));
+      setCustomTo(dayjs(next.to));
+      return;
+    }
+
+    handleSetPreset(next.preset);
+  };
+
   return {
     preset,
     period,
     setPreset: handleSetPreset,
     setCustomRange: handleSetCustomRange,
+    handlePeriodChange,
   };
 }
