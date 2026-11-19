@@ -4,3 +4,10 @@ export const formatDateFromApi = (value: string) => {
   date.setHours(date.getHours() - 3);
   return date.toLocaleString("pt-BR");
 };
+
+export const formatDateFromApiObj = (value: string) => {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  date.setHours(date.getHours() - 3);
+  return date;
+};

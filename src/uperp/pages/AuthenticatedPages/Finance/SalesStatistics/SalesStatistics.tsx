@@ -50,7 +50,7 @@ export default function SalesStatistics() {
       key: "salesCount",
       label: "Nº de vendas",
       value: (summary?.salesCount ?? 0).toLocaleString("pt-BR"),
-      description: "Vendas realizadas no período",
+      description: "Vendas efetivas do período",
       icon: <ShoppingCart size={18} color={BRAND} />,
     },
     {
@@ -110,6 +110,38 @@ export default function SalesStatistics() {
                 categories={["Lucro bruto", "Lucro líquido"]}
                 colors={["brand", "success"]}
                 valueFormatter={(value) => fmtBrl.format(value)}
+                yAxisWidth={90}
+                className={isMobile ? "h-60" : "h-72"}
+              />
+            ) : (
+              <Empty
+                description="Nenhuma venda neste período"
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+              />
+            )}
+          </Skeleton>
+        </div>
+      </Card>
+
+      {/* Quantidade de vendas por período */}
+      <Card title="Frequência de vendas" style={{ marginBottom: 24 }}>
+        <div
+          style={{
+            opacity: statsFetching ? 0.6 : 1,
+            transition: "opacity 0.2s",
+          }}
+        >
+          <Skeleton loading={statsLoading} active paragraph={{ rows: 6 }}>
+            {timeline.length > 0 ? (
+              <LineChart
+                data={timeline.map((t) => ({
+                  label: t.label,
+                  "Vendas efetivadas": t.saleQuantity,
+                }))}
+                index="label"
+                categories={["Vendas efetivadas"]}
+                colors={["info", "success"]}
+                valueFormatter={(value) => String(value)}
                 yAxisWidth={90}
                 className={isMobile ? "h-60" : "h-72"}
               />
