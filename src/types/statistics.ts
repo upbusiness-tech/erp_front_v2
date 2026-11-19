@@ -60,6 +60,7 @@ export interface SalesTimelinePoint {
   label: string;
   revenue: number;
   grossProfit: number;
+  saleQuantity: number;
 }
 
 export interface SalesPaymentBreakdownItem {

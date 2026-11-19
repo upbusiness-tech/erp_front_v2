@@ -9,6 +9,7 @@ import { EOrder } from "@/types/statistics";
 import { SALE_PAYMENT_LABEL } from "@/uperp/common/formulas/saleReceipt";
 import { fmtBrl } from "@/uperp/common/util/sale.util";
 import { BaseService } from "./common/base.service";
+import { formatDateFromApiObj } from "@/uperp/common/dates";
 
 // ---- Backend response shapes (mirror do módulo statistic do backend) ----
 
@@ -109,7 +110,7 @@ function toSecondaryLabel(parts: {
 function formatTimelineLabel(saleDate: string): string {
   const date = dayjs(saleDate);
   const hasTime = date.hour() !== 0 || date.minute() !== 0;
-  return hasTime ? date.format("HH:mm") : date.format("DD/MM");
+  return hasTime ? dayjs(formatDateFromApiObj(saleDate)).format("HH:mm") : date.format("DD/MM");
 }
 
 export function mapStockOverview(
@@ -188,6 +189,7 @@ export function mapSalesStatistics(data: StatisticSaleHistoryResponse): SalesSta
       label: formatTimelineLabel(point.saleDate),
       revenue: point.grossRevenue,
       grossProfit: point.profitRevenue,
+      saleQuantity: point.saleQuantity,
     })),
     paymentBreakdown: PAYMENT_METHODS.map((method) => {
       const amount = amounts.get(method) ?? 0;
